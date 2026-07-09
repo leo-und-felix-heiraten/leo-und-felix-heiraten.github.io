@@ -620,6 +620,20 @@
             margin: 0;
         }
 
+        .logout-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .logout-link:hover {
+            color: var(--accent);
+        }
+
         /* --- 📊 STYLES FÜR DAS ADMIN-DASHBOARD (PIN: 1407) --- */
         #admin-dashboard {
             display: none;
@@ -1086,6 +1100,7 @@
         <footer>
             <p>Leo & Felix — 24.06.2028</p>
             <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.5;">Erstellt mit Liebe und GitHub Pages</p>
+            <span class="logout-link" onclick="window.logoutAdmin()">Abmelden & zur PIN-Eingabe</span>
         </footer>
 
     </div>
@@ -1118,7 +1133,6 @@
 
             // --- Globale Variablen ---
             let enteredPin = "";
-            let currentGuestName = "";
             let guestCount = 1;
 
             // --- Elemente des Sperrbildschirms ---
@@ -1181,11 +1195,14 @@
             }
             
             function unlockWebsite(pin) {
-                currentGuestName = guestDatabase[pin];
+                const guestName = guestDatabase[pin];
                 sessionStorage.setItem('wedding_pin', pin);
-                document.getElementById("personal-greeting").innerText = `Hallo ${currentGuestName}! Schön, dass ihr da seid.`;
-                document.getElementById("gast-1-input").value = currentGuestName;
+                sessionStorage.setItem('current_guest_name', guestName);
+                
+                document.getElementById("personal-greeting").innerText = `Hallo ${guestName}! Schön, dass ihr da seid.`;
+                document.getElementById("gast-1-input").value = guestName;
                 document.getElementById("hidden-guest-pin").value = pin;
+                
                 fadeOut(lockScreen);
                 fadeIn(document.getElementById("main-content"));
             }
@@ -1199,6 +1216,7 @@
 
             function logoutAdmin() {
                 sessionStorage.removeItem('wedding_pin');
+                sessionStorage.removeItem('current_guest_name');
                 window.location.reload();
             }
 
@@ -1277,8 +1295,10 @@
                         });
                     }
                     
+                    const savedGuestName = sessionStorage.getItem('current_guest_name') || "Unbekannter Gast";
+                    
                     const { error } = await _supabase.from('rsvps').insert([{ 
-                        name: currentGuestName, 
+                        name: savedGuestName, 
                         email: document.getElementById('guest-email').value, 
                         status: document.querySelector('input[name="teilnahme"]:checked').value, 
                         nachricht: document.getElementById('guest-message').value, 
