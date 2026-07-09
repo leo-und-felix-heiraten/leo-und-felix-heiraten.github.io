@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leo & Felix heiraten!</title>
+    
+    <!-- Google Fonts für elegante Typografie -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome für Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- DESIGN SYSTEM (FARBEN & SCHRIFTEN) --- */
+        :root {
+            --bg-color: #fbfcf9;         /* Warmes Off-White */
+            --primary: #606c38;          /* Elegantes Salbeigrün */
+            --primary-dark: #283618;     /* Dunkles Waldgrün */
+            --accent: #dda15e;           /* Warmes Gold/Champagner */
+            --text-dark: #2b2d42;        /* Dunkelgrau für Lesbarkeit */
+            --text-light: #ffffff;
+            --font-serif: 'Playfair Display', Georgia, serif;
+            --font-sans: 'Montserrat', Arial, sans-serif;
+        }
+
+        /* --- BASIC RESET --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        section {
+            padding: 80px 20px;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 2px;
+            background-color: var(--accent);
+            margin: 15px auto 0 auto;
+        }
+
+        p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 20px auto;
+            color: #555;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: var(--text-light);
+            padding: 12px 30px;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            border: 2px solid var(--primary);
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(96, 108, 56, 0.2);
+        }
+
+        .btn:hover {
+            background-color: transparent;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                        url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover;
+            color: var(--text-light);
+            padding: 20px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            font-style: italic;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p.subtitle {
+            font-size: 1.8rem;
+            font-family: var(--font-serif);
+            margin-bottom: 30px;
+            color: var(--text-light);
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero .date {
+            font-size: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 10px 30px;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+        /* --- COUNTDOWN --- */
+        .countdown-container {
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .countdown-container h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-family: var(--font-serif);
+            letter-spacing: 1px;
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            min-width: 100px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .countdown-item span {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .countdown-item label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- ABLAUFPLAN (TIMELINE) --- */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 50px auto 0 auto;
+            padding: 0 10px;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background-color: var(--accent);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -1px;
+        }
+
+        .container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+            text-align: left;
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            right: -8px;
+            background-color: var(--bg-color);
+            border: 4px solid var(--primary);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .left {
+            left: 0;
+        }
+
+        .right {
+            left: 50%;
+        }
+
+        .right::after {
+            left: -8px;
+        }
+
+        .content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .content h3 {
+            font-family: var(--font-serif);
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        .time {
+            font-weight: 600;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* --- LOCATION CARD --- */
+        .location-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .location-card {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary);
+        }
+
+        .location-card i {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .location-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+        }
+
+        /* --- RSVP SECTION --- */
+        .rsvp {
+            background-color: var(--primary);
+            color: var(--text-light);
+        }
+
+        .rsvp h2 {
+            color: var(--text-light);
+        }
+
+        .rsvp h2::after {
+            background-color: var(--accent);
+        }
+
+        .rsvp p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .rsvp-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 40px auto 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .rsvp-btn {
+            background-color: var(--accent);
+            color: var(--primary-dark);
+            border: 2px solid var(--accent);
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .rsvp-btn:hover {
+            background-color: transparent;
+            color: var(--text-light);
+        }
+
+        /* --- GIFTS --- */
+        .gifts i {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            background-color: var(--primary-dark);
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 0.9rem;
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.6);
+            margin: 0;
+        }
+
+        /* --- RESPONSIVE DESIGN --- */
+        @media screen and (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            .hero p.subtitle {
+                font-size: 1.4rem;
+            }
+            .timeline::after {
+                left: 31px;
+            }
+            .container {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .container::after {
+                left: 23px;
+                right: auto;
+            }
+            .left, .right {
+                left: 0;
+            }
+            .location-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <h1>Leo & Felix</h1>
+        <p class="subtitle">Wir sagen Ja!</p>
+        <div class="date">11. September 2027</div>
+        <a href="#rsvp" class="btn">Jetzt zusagen</a>
+    </header>
+
+    <!-- COUNTDOWN -->
+    <div class="countdown-container">
+        <h3>Wir können es kaum erwarten...</h3>
+        <div class="countdown" id="countdown">
+            <div class="countdown-item">
+                <span id="days">00</span>
+                <label>Tage</label>
+            </div>
+            <div class="countdown-item">
+                <span id="hours">00</span>
+                <label>Stunden</label>
+            </div>
+            <div class="countdown-item">
+                <span id="minutes">00</span>
+                <label>Minuten</label>
+            </div>
+            <div class="countdown-item">
+                <span id="seconds">00</span>
+                <label>Sekunden</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNSERE STORY / EINLADUNG -->
+    <section id="einladung">
+        <h2>Unsere Hochzeit</h2>
+        <p>Liebe Familie, liebe Freunde,</p>
+        <p>wir freuen uns riesig, den nächsten großen Schritt in unserem Leben gemeinsam zu gehen. Wir möchten diesen besonderen Tag mit den Menschen verbringen, die uns am Herzen liegen – mit euch!</p>
+        <p>Hier findet ihr alle wichtigen Details zu unserer Hochzeitsfeier. Bitte gebt uns bis zum <strong>01. Juli 2027</strong> Bescheid, ob ihr mit uns feiert.</p>
+    </section>
+
+    <!-- ABLAUFPLAN -->
+    <section id="ablauf" style="background-color: #f3f5f0;">
+        <h2>Der Ablaufplan</h2>
+        <p>So haben wir unseren großen Tag geplant:</p>
+        
+        <div class="timeline">
+            <div class="container left">
+                <div class="content">
+                    <span class="time">14:00 Uhr</span>
+                    <h3>Freie Trauung</h3>
+                    <p>Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.</p>
+                </div>
+            </div>
+            <div class="container right">
+                <div class="content">
+                    <span class="time">15:30 Uhr</span>
+                    <h3>Sektempfang & Torte</h3>
+                    <p>Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.</p>
+                </div>
+            </div>
+            <div class="container left">
+                <div class="content">
+                    <span class="time">18:30 Uhr</span>
+                    <h3>Festliches Dinner</h3>
+                    <p>Ein feines Buffet wartet auf uns im großen Saal.</p>
+                </div>
+            </div>
+            <div class="container right">
+                <div class="content">
+                    <span class="time">21:00 Uhr</span>
+                    <h3>Eröffnung der Tanzfläche</h3>
+                    <p>Wir starten die Party und tanzen bis in die frühen Morgenstunden!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LOCATION -->
+    <section id="location">
+        <h2>Die Locations</h2>
+        <p>Hier wird gelacht, gefeiert und getanzt:</p>
+        
+        <div class="location-grid">
+            <div class="location-card">
+                <i class="fa-solid fa-church"></i>
+                <h3>Die Trauung & Feier</h3>
+                <p><strong>Gutshof Sonnenschein</strong><br>
+                Musterstraße 42<br>
+                12345 Traumstadt</p>
+                <p>Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.</p>
+            </div>
+            <div class="location-card">
+                <i class="fa-solid fa-hotel"></i>
+                <h3>Unterkunftstipp</h3>
+                <p><strong>Hotel am Stadtpark</strong><br>
+                Bahnhofstraße 5<br>
+                12345 Traumstadt</p>
+                <p>Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RSVP -->
+    <section id="rsvp" class="rsvp">
+        <h2>Zusage & Rückmeldung</h2>
+        <p>Damit wir das Essen und die Getränke perfekt planen können, gebt uns bitte rechtzeitig Rückmeldung.</p>
+        
+        <div class="rsvp-box">
+            <p style="font-size: 1.2rem; margin-bottom: 10px;"><strong>Feiert ihr mit uns?</strong></p>
+            <p>Klickt einfach auf den Button, um uns direkt eine E-Mail mit eurer Zu- oder Absage (und eventuellen Essenswünschen wie vegetarisch/vegan) zu senden.</p>
+            <a href="mailto:eure-email@domain.com?subject=Rückmeldung%20Hochzeit%20Leo%20%26%20Felix&body=Hallo%20Leo%20und%20Felix%2C%0A%0Aich%2Fwir%20kommen%20sehr%20gerne!%20%5B%20%5D%0A%0ALeider%20müssen%20wir%20absagen%20%5B%20%5D%0A%0AAnzahl%20der%20Personen%3A%20%0A%0AEssenswünsche%20(z.B.%20vegetarisch%2C%20Allergien)%3A%20%0A%0ALiebe%20Grüße%0A%5BDein%20Name%5D" class="btn rsvp-btn">
+                <i class="fa-regular fa-envelope"></i> Jetzt per Mail antworten
+            </a>
+        </div>
+    </section>
+
+    <!-- GESCHENKE -->
+    <section id="geschenke">
+        <i class="fa-solid fa-gift"></i>
+        <h2>Flitterwochen & Geschenke</h2>
+        <p>Unser Haushalt ist komplett, vom Teller bis zum Besen,  
+        und auch sonst ist alles da gewesen.<br>
+        Wollt ihr uns eine Freude machen,  
+        dann lasst am liebsten unsere Reisekasse lachen!</p>
+        <p>Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>Leo & Felix — 11.09.2027</p>
+        <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.5;">Erstellt mit Liebe und GitHub Pages</p>
+    </footer>
+
+    <!-- JAVASCRIPT FÜR DEN LIVE-COUNTDOWN -->
+    <script>
+        // Setze das Hochzeitsdatum hier (Jahr, Monat - 1, Tag, Stunde, Minute)
+        // Hinweis: Monate fangen bei 0 an (0 = Januar, 8 = September)
+        const weddingDate = new Date(2027, 8, 11, 14, 0, 0).getTime();
+
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = weddingDate - now;
+
+            // Berechnungen für Tage, Stunden, Minuten und Sekunden
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Ausgabe in den Elementen
+            document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+            document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+            document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+
+            // Wenn der Countdown abgelaufen ist
+            if (distance < 0) {
+                clearInterval(timer);
+                document.getElementById("countdown").innerHTML = "<h3>Der große Tag ist da! 🎉</h3>";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
