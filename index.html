@@ -83,7 +83,8 @@
 
         .lock-container p {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.4;
             margin-bottom: 25px;
         }
 
@@ -808,7 +809,7 @@
         <div class="lock-container">
             <h2>Leo & Felix</h2>
             <p style="font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; color: var(--accent); margin-bottom: 10px;">Wir heiraten!</p>
-            <p>Bitte gib euren persönlichen 4-stelligen PIN von eurer Einladungskarte ein, um die Website zu öffnen:</p>
+            <p>Bitte gib den persönlichen 4-stelligen PIN von der Einladungskarte ein, um die Website zu öffnen:</p>
             
             <div class="pin-display">
                 <div class="pin-dot" id="dot-0"></div>
@@ -1049,7 +1050,7 @@
                         </div>
 
                         <!-- Button um neue Gäste hinzuzufügen -->
-                        <button type="button" class="add-guest-btn" onclick="addGuestField()">
+                        <button type="button" class="add-guest-btn" onclick="window.addGuestField()">
                             <i class="fa-solid fa-plus"></i> Weiteren Gast hinzufügen
                         </button>
                     </div>
@@ -1124,18 +1125,21 @@
             const lockScreen = document.getElementById("lock-screen");
             const errorDiv = document.getElementById("lock-error");
 
-            // --- Hauptfunktionen ---
+            // --- Hauptfunktionen beim Laden ---
             const savedPin = sessionStorage.getItem('wedding_pin');
             if (savedPin) {
                 if (savedPin === "1407") unlockAdminDashboard();
                 else if (guestDatabase[savedPin]) unlockWebsite(savedPin);
             }
 
+            // --- FUNKTIONEN FÜR DAS PIN-PAD (Global freigegeben) ---
             function pressKey(num) { 
                 if (enteredPin.length < 4) { 
                     enteredPin += num; 
                     updatePinDisplay(); 
-                    if (enteredPin.length === 4) setTimeout(checkPin, 250); 
+                    if (enteredPin.length === 4) {
+                        setTimeout(checkPin, 250); 
+                    }
                 } 
             }
             
@@ -1211,6 +1215,7 @@
                 }
             });
 
+            // --- ADMIN DATEN AUS SUPABASE LADEN ---
             async function loadSupabaseRsvps() {
                 const { data, error } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
                 if (error) { 
@@ -1254,6 +1259,7 @@
                 document.getElementById('stat-absagen').innerText = totalAbsagen;
             }
 
+            // --- FORMULAR-RSVP ABSENDEN ---
             const form = document.getElementById('wedding-rsvp-form');
             if (form) {
                 form.addEventListener('submit', async function(e) {
@@ -1324,7 +1330,7 @@
                 guestBlock.innerHTML = `
                     <h4>
                         <span>Gast ${guestCount}</span>
-                        <button type="button" class="remove-guest-btn" onclick="removeGuestField(${guestCount})">
+                        <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${guestCount})">
                             <i class="fa-solid fa-trash"></i> Entfernen
                         </button>
                     </h4>
@@ -1372,7 +1378,7 @@
                     } else {
                         h4.innerHTML = `
                             <span>Gast ${currentNum}</span>
-                            <button type="button" class="remove-guest-btn" onclick="removeGuestField(${currentNum})">
+                            <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${currentNum})">
                                 <i class="fa-solid fa-trash"></i> Entfernen
                             </button>
                         `;
@@ -1403,7 +1409,7 @@
                 }
             }
 
-            // Expose helper functions globally
+            // Expose helper functions globally for onclick attributes
             window.pressKey = pressKey; 
             window.deleteLast = deleteLast; 
             window.clearPin = clearPin; 
