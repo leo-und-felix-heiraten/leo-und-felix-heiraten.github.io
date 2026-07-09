@@ -772,7 +772,7 @@
                 <h1>Hochzeits-Zusagen & Planer</h1>
                 <p style="text-align: left; margin: 5px 0 0 0; font-size: 0.95rem; color: #666;">Willkommen im Admin-Bereich, Leo & Felix! ❤️</p>
             </div>
-            <button class="logout-btn" onclick="logoutAdmin()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
+            <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
         </div>
         <div class="admin-stats-grid">
             <div class="admin-card">
@@ -950,25 +950,7 @@
                         <label style="display: block; font-weight: 600; margin-bottom: 15px; color: var(--primary-dark); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Gästeliste & Essenswünsche</label>
                         
                         <div id="guest-list-container">
-                            <div class="guest-block" id="guest-block-1">
-                                <h4 id="guest-title-1">Gast 1 (Hauptkontakt)</h4>
-                                <div class="form-group" style="margin-bottom: 10px;">
-                                    <input type="text" id="gast-1-input" name="gast_1_name" class="form-control" placeholder="Name von Gast 1" required>
-                                </div>
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
-                                    <div class="radio-group">
-                                        <label class="radio-option">
-                                            <input type="radio" name="gast_1_essen" value="Fleisch" checked>
-                                            Fleisch 🥩
-                                        </label>
-                                        <label class="radio-option">
-                                            <input type="radio" name="gast_1_essen" value="Vegetarisch">
-                                            Vegetarisch 🥦
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Wird dynamisch befüllt -->
                         </div>
                         <!-- Button um neue Gäste hinzuzufügen -->
                         <button type="button" class="add-guest-btn" onclick="window.addGuestField()">
@@ -1004,12 +986,20 @@
         <footer>
             <p>Leo & Felix — 24.06.2028</p>
             <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.5;">Erstellt mit Liebe und GitHub Pages</p>
-            <span class="logout-link" onclick="window.logoutAdmin()">Abmelden & zur PIN-Eingabe</span>
+            <span class="logout-link" onclick="window.logout()">Abmelden & zur PIN-Eingabe</span>
         </footer>
     </div>
 
     <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
     <script>
+        // --- GLOBALE LOGOUT-FUNKTION (Garantiert sofort verfügbar für onclick) ---
+        window.logout = function() {
+            sessionStorage.removeItem('wedding_pin');
+            sessionStorage.removeItem('current_guest_name');
+            window.location.reload();
+        };
+        window.logoutAdmin = window.logout; // Fallback
+
         document.addEventListener('DOMContentLoaded', function() {
             // --- 1. GÄSTE-PIN-DATENBANK ---
             const guestDatabase = { 
@@ -1041,15 +1031,19 @@
             // --- Globale Variablen ---
             let enteredPin = "";
             let guestCount = 1;
+            let isExistingRsvp = false; // Flag für Update-Modus
+            
             // --- Elemente des Sperrbildschirms ---
             const lockScreen = document.getElementById("lock-screen");
             const errorDiv = document.getElementById("lock-error");
+            
             // --- Hauptfunktionen beim Laden ---
             const savedPin = sessionStorage.getItem('wedding_pin');
             if (savedPin) {
                 if (savedPin === "1407") unlockAdminDashboard();
                 else if (guestDatabase[savedPin]) unlockWebsite(savedPin);
             }
+            
             // --- FUNKTIONEN FÜR DAS PIN-PAD (Global freigegeben) ---
             function pressKey(num) { 
                 if (enteredPin.length < 4) { 
@@ -1079,6 +1073,7 @@
                     document.getElementById(`dot-${i}`).classList.toggle('active', i < enteredPin.length); 
                 } 
             }
+            
             function checkPin() {
                 if (enteredPin === "1407") { 
                     errorDiv.style.opacity = "0"; 
@@ -1097,30 +1092,68 @@
                 }
             }
             
-            function unlockWebsite(pin) {
+            async function unlockWebsite(pin) {
                 const guestName = guestDatabase[pin];
                 sessionStorage.setItem('wedding_pin', pin);
                 sessionStorage.setItem('current_guest_name', guestName);
                 
                 document.getElementById("personal-greeting").innerText = `Hallo ${guestName}! Schön, dass ihr da seid.`;
-                document.getElementById("gast-1-input").value = guestName;
                 document.getElementById("hidden-guest-pin").value = pin;
+                
+                // Prüfen, ob bereits eine RSVP für diesen PIN existiert
+                try {
+                    const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
+                    if (error) throw error;
+                    
+                    if (data) {
+                        // UPDATE MODUS aktivieren
+                        isExistingRsvp = true;
+                        document.getElementById('guest-email').value = data.email || '';
+                        document.getElementById('guest-message').value = data.nachricht || '';
+                        
+                        if (data.status === "Zusage") {
+                            document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
+                            toggleFormFields(true);
+                            if (data.gaeste && data.gaeste.length > 0) {
+                                rebuildGuestFields(data.gaeste);
+                            } else {
+                                resetGuestFields(guestName);
+                            }
+                        } else {
+                            document.querySelector('input[name="teilnahme"][value="Absage"]').checked = true;
+                            toggleFormFields(false);
+                            resetGuestFields(guestName);
+                        }
+                        
+                        document.getElementById('submit-btn').innerText = "Rückmeldung aktualisieren";
+                    } else {
+                        // NEUER EINTRAG MODUS
+                        isExistingRsvp = false;
+                        document.getElementById('guest-email').value = '';
+                        document.getElementById('guest-message').value = '';
+                        document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
+                        toggleFormFields(true);
+                        resetGuestFields(guestName);
+                        document.getElementById('submit-btn').innerText = "Rückmeldung absenden";
+                    }
+                } catch (e) {
+                    console.error("Fehler beim Abrufen bestehender RSVPs:", e);
+                    isExistingRsvp = false;
+                    resetGuestFields(guestName);
+                }
                 
                 fadeOut(lockScreen);
                 fadeIn(document.getElementById("main-content"));
             }
+            
             function unlockAdminDashboard() {
                 sessionStorage.setItem('wedding_pin', '1407');
                 loadSupabaseRsvps();
                 fadeOut(lockScreen);
                 fadeIn(document.getElementById("admin-dashboard"));
             }
-            function logoutAdmin() {
-                sessionStorage.removeItem('wedding_pin');
-                sessionStorage.removeItem('current_guest_name');
-                window.location.reload();
-            }
-            // Keyboard support for PC
+            
+            // Tastatur-Support für PCs
             document.addEventListener('keydown', function(event) {
                 if (lockScreen && lockScreen.style.display !== "none") {
                     if (event.key >= '0' && event.key <= '9') {
@@ -1132,6 +1165,7 @@
                     }
                 }
             });
+            
             // --- ADMIN DATEN AUS SUPABASE LADEN ---
             async function loadSupabaseRsvps() {
                 const { data, error } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
@@ -1142,6 +1176,7 @@
                 }
                 buildAdminStatsAndTable(data);
             }
+            
             function buildAdminStatsAndTable(rsvpsList) {
                 let totalGuests = 0, totalMeat = 0, totalVeggie = 0, totalAbsagen = 0;
                 const tableBody = document.getElementById('admin-table-body');
@@ -1174,12 +1209,14 @@
                 document.getElementById('stat-veggie').innerText = totalVeggie;
                 document.getElementById('stat-absagen').innerText = totalAbsagen;
             }
-            // --- FORMULAR-RSVP ABSENDEN ---
+            
+            // --- FORMULAR-RSVP ABSENDEN (SPEICHERN / UPDATEN) ---
             const form = document.getElementById('wedding-rsvp-form');
             if (form) {
                 form.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     const submitBtn = document.getElementById('submit-btn');
+                    const originalText = submitBtn.innerText;
                     submitBtn.innerText = "Wird gesendet...";
                     submitBtn.disabled = true;
                     
@@ -1193,29 +1230,41 @@
                     }
                     
                     const savedGuestName = sessionStorage.getItem('current_guest_name') || "Unbekannter Gast";
+                    const pin = sessionStorage.getItem('wedding_pin');
                     
-                    const { error } = await _supabase.from('rsvps').insert([{ 
+                    const rsvpData = { 
                         name: savedGuestName, 
                         email: document.getElementById('guest-email').value, 
                         status: document.querySelector('input[name="teilnahme"]:checked').value, 
                         nachricht: document.getElementById('guest-message').value, 
                         gaeste: gaesteArray, 
-                        pin: sessionStorage.getItem('wedding_pin')
-                    }]);
+                        pin: pin
+                    };
                     
-                    if (error) { 
-                        console.error("Fehler beim Senden:", error); 
-                        alert("Problem mit der Datenbank: " + error.message); 
-                        submitBtn.innerText = "Rückmeldung absenden"; 
+                    let result;
+                    if (isExistingRsvp) {
+                        // Bestehenden Datensatz aktualisieren
+                        result = await _supabase.from('rsvps').update(rsvpData).eq('pin', pin);
+                    } else {
+                        // Neuen Datensatz anlegen
+                        result = await _supabase.from('rsvps').insert([rsvpData]);
+                    }
+                    
+                    if (result.error) { 
+                        console.error("Fehler beim Speichern:", result.error); 
+                        alert("Problem mit der Datenbank: " + result.error.message); 
+                        submitBtn.innerText = originalText; 
                         submitBtn.disabled = false; 
                     } 
                     else { 
                         form.style.display = "none"; 
                         document.getElementById('form-status').style.display = "block"; 
+                        isExistingRsvp = true; // Jetzt ist eine Rückmeldung vorhanden
                     }
                 });
             }
-            // Countdown
+            
+            // Countdown-Timer
             const weddingDate = new Date(2028, 5, 24, 14, 0, 0).getTime();
             setInterval(() => {
                 const distance = weddingDate - new Date().getTime();
@@ -1229,7 +1278,55 @@
                     document.getElementById("countdown").innerHTML = "<h3>Der große Tag ist da! 🎉</h3>";
                 }
             }, 1000);
-            // --- Dynamische Gästeliste Logik ---
+            
+            // --- DYNAMISCHE GÄSTELISTE LOGIK ---
+            function rebuildGuestFields(gaeste) {
+                const container = document.getElementById('guest-list-container');
+                container.innerHTML = '';
+                guestCount = 0;
+                
+                gaeste.forEach((guest, index) => {
+                    guestCount++;
+                    const guestBlock = document.createElement('div');
+                    guestBlock.className = 'guest-block';
+                    guestBlock.id = `guest-block-${guestCount}`;
+                    
+                    const isMainContact = (guestCount === 1);
+                    
+                    guestBlock.innerHTML = `
+                        <h4>
+                            <span>${isMainContact ? 'Gast 1 (Hauptkontakt)' : 'Gast ' + guestCount}</span>
+                            ${isMainContact ? '' : `
+                            <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${guestCount})">
+                                <i class="fa-solid fa-trash"></i> Entfernen
+                            </button>
+                            `}
+                        </h4>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${guest.name}" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" ${guest.essen === 'Fleisch' ? 'checked' : ''}>
+                                    Fleisch 🥩
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch" ${guest.essen === 'Vegetarisch' ? 'checked' : ''}>
+                                    Vegetarisch 🥦
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(guestBlock);
+                });
+            }
+
+            function resetGuestFields(defaultName) {
+                rebuildGuestFields([{ name: defaultName, essen: 'Fleisch' }]);
+            }
+
             function addGuestField() {
                 if (guestCount >= 10) {
                     alert("Du kannst maximal 10 Gäste auf einmal eintragen.");
@@ -1250,7 +1347,7 @@
                         </button>
                     </h4>
                     <div class="form-group" style="margin-bottom: 10px;">
-                        <input type="text" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" required>
+                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" required>
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
@@ -1268,6 +1365,7 @@
                 `;
                 container.appendChild(guestBlock);
             }
+            
             function removeGuestField(id) {
                 const block = document.getElementById(`guest-block-${id}`);
                 if (block) {
@@ -1275,6 +1373,7 @@
                     reindexGuests();
                 }
             }
+            
             function reindexGuests() {
                 const container = document.getElementById('guest-list-container');
                 if (!container) return;
@@ -1298,6 +1397,7 @@
                     }
                     
                     const textInput = block.querySelector('input[type="text"]');
+                    textInput.id = `gast-${currentNum}-input`;
                     textInput.name = `gast_${currentNum}_name`;
                     textInput.placeholder = `Name von Gast ${currentNum}`;
                     
@@ -1307,6 +1407,7 @@
                     });
                 });
             }
+            
             function toggleFormFields(show) {
                 const dynamicFields = document.getElementById("dynamic-fields");
                 if (!dynamicFields) return;
@@ -1320,11 +1421,11 @@
                     inputs.forEach(input => input.required = false);
                 }
             }
-            // Expose helper functions globally for onclick attributes
+            
+            // Globale Freigabe für Inline-Events
             window.pressKey = pressKey; 
             window.deleteLast = deleteLast; 
             window.clearPin = clearPin; 
-            window.logoutAdmin = logoutAdmin; 
             window.addGuestField = addGuestField; 
             window.removeGuestField = removeGuestField; 
             window.toggleFormFields = toggleFormFields;
