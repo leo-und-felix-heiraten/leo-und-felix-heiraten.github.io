@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leo & Felix heiraten!</title>
-    
+
     <!-- Google Fonts für elegante Typografie -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
+
     <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Javascript Library -->
@@ -98,6 +98,7 @@
             text-align: center;
             padding: 20px;
             transition: opacity 0.5s ease, transform 0.5s ease;
+            background-size: cover !important;
         }
         .lock-container {
             background: rgba(255, 255, 255, 0.1);
@@ -193,16 +194,14 @@
             max-width: 1000px;
             margin: 0 auto;
         }
-        h1, h2, h3 {
-            font-family: var(--font-serif);
-            font-weight: 400;
-        }
         h2 {
             font-size: 2.5rem;
             color: var(--primary-dark);
             margin-bottom: 20px;
             position: relative;
             display: inline-block;
+            font-family: var(--font-serif);
+            font-weight: 400;
         }
         h2::after {
             content: "";
@@ -265,12 +264,15 @@
                         url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover;
             color: var(--text-light);
             padding: 20px;
+            background-size: cover !important;
         }
         .hero h1 {
             font-size: 4rem;
             margin-bottom: 10px;
             font-style: italic;
             text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+            font-family: var(--font-serif);
+            font-weight: 400;
         }
         .hero p.subtitle {
             font-size: 1.8rem;
@@ -395,6 +397,7 @@
             gap: 30px;
             margin-top: 40px;
             text-align: left;
+            transition: all 0.3s ease;
         }
         .location-card {
             background: white;
@@ -650,6 +653,7 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
         .admin-panel h2 {
             font-size: 1.5rem;
@@ -763,6 +767,15 @@
         .admin-btn:hover {
             background-color: var(--primary-dark);
         }
+        .admin-image-preview {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            margin-top: 8px;
+            display: block;
+        }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-8px); }
@@ -771,922 +784,1351 @@
     </style>
 </head>
 <body>
-    <div id="error-overlay"></div>
+<div id="error-overlay"></div>
+
+<!-- FLOATING GAST TOP BAR (Wird sichtbar wenn eingeloggt als Gast) -->
+<div id="guest-top-bar">
+    <div class="top-bar-content">
+        <span id="guest-top-greeting">Hallo Gast!</span>
+        <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
+    </div>
+</div>
+
+<!-- SPERRBILDSCHIRM (PIN PAD) -->
+<div id="lock-screen" style="display: flex;">
+    <div class="lock-container">
+        <h2>Leo & Felix</h2>
+        <p style="font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; color: var(--accent); margin-bottom: 10px;">Wir heiraten!</p>
+        <p>Bitte gib den persönlichen 4-stelligen PIN von der Einladungskarte ein, um die Website zu öffnen:</p>
+        
+        <div class="pin-display">
+            <div class="pin-dot" id="dot-0"></div>
+            <div class="pin-dot" id="dot-1"></div>
+            <div class="pin-dot" id="dot-2"></div>
+            <div class="pin-dot" id="dot-3"></div>
+        </div>
+        <div class="keypad">
+            <div class="key" onclick="pressKey('1')">1</div>
+            <div class="key" onclick="pressKey('2')">2</div>
+            <div class="key" onclick="pressKey('3')">3</div>
+            <div class="key" onclick="pressKey('4')">4</div>
+            <div class="key" onclick="pressKey('5')">5</div>
+            <div class="key" onclick="pressKey('6')">6</div>
+            <div class="key" onclick="pressKey('7')">7</div>
+            <div class="key" onclick="pressKey('8')">8</div>
+            <div class="key" onclick="pressKey('9')">9</div>
+            <div class="key action-key" onclick="clearPin()">Clear</div>
+            <div class="key" onclick="pressKey('0')">0</div>
+            <div class="key action-key" onclick="deleteLast()"><i class="fa-solid fa-delete-left"></i></div>
+        </div>
+        <div id="lock-error">Falscher PIN. Bitte versucht es noch einmal.</div>
+    </div>
+</div>
+
+<!-- 📊 ADMIN DASHBOARD (PIN: 1407) -->
+<div id="admin-dashboard">
+    <div class="admin-header">
+        <div>
+            <h1>Hochzeits-Zusagen & Planer</h1>
+            <p style="text-align: left; margin: 5px 0 0 0; font-size: 0.95rem; color: #666;">Willkommen im Admin-Bereich, Leo & Felix! ❤️</p>
+        </div>
+        <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
+    </div>
     
-    <!-- FLOATING GAST TOP BAR (Wird sichtbar wenn eingeloggt als Gast) -->
-    <div id="guest-top-bar">
-        <div class="top-bar-content">
-            <span id="guest-top-greeting">Hallo Gast!</span>
-            <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
+    <!-- STATS GRID -->
+    <div class="admin-stats-grid">
+        <div class="admin-card">
+            <h3>Gäste Zugesagt</h3>
+            <div class="stat-value" id="stat-total-guests">0 / 0</div>
+        </div>
+        <div class="admin-card accent-card">
+            <h3>Menü: Fleisch</h3>
+            <div class="stat-value" id="stat-meat">0</div>
+        </div>
+        <div class="admin-card accent-card">
+            <h3>Menü: Vegetarisch</h3>
+            <div class="stat-value" id="stat-veggie">0</div>
+        </div>
+        <div class="admin-card">
+            <h3>Rückmeldungs-Quote</h3>
+            <div class="stat-value" id="stat-quote">0%</div>
         </div>
     </div>
-
-    <!-- SPERRBILDSCHIRM (PIN PAD) -->
-    <div id="lock-screen" style="display: flex;">
-        <div class="lock-container">
-            <h2>Leo & Felix</h2>
-            <p style="font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; color: var(--accent); margin-bottom: 10px;">Wir heiraten!</p>
-            <p>Bitte gib den persönlichen 4-stelligen PIN von der Einladungskarte ein, um die Website zu öffnen:</p>
-            
-            <div class="pin-display">
-                <div class="pin-dot" id="dot-0"></div>
-                <div class="pin-dot" id="dot-1"></div>
-                <div class="pin-dot" id="dot-2"></div>
-                <div class="pin-dot" id="dot-3"></div>
-            </div>
-            <div class="keypad">
-                <div class="key" onclick="pressKey('1')">1</div>
-                <div class="key" onclick="pressKey('2')">2</div>
-                <div class="key" onclick="pressKey('3')">3</div>
-                <div class="key" onclick="pressKey('4')">4</div>
-                <div class="key" onclick="pressKey('5')">5</div>
-                <div class="key" onclick="pressKey('6')">6</div>
-                <div class="key" onclick="pressKey('7')">7</div>
-                <div class="key" onclick="pressKey('8')">8</div>
-                <div class="key" onclick="pressKey('9')">9</div>
-                <div class="key action-key" onclick="clearPin()">Clear</div>
-                <div class="key" onclick="pressKey('0')">0</div>
-                <div class="key action-key" onclick="deleteLast()"><i class="fa-solid fa-delete-left"></i></div>
-            </div>
-            <div id="lock-error">Falscher PIN. Bitte versucht es noch einmal.</div>
-        </div>
-    </div>
-
-    <!-- 📊 ADMIN DASHBOARD (PIN: 1407) -->
-    <div id="admin-dashboard">
-        <div class="admin-header">
-            <div>
-                <h1>Hochzeits-Zusagen & Planer</h1>
-                <p style="text-align: left; margin: 5px 0 0 0; font-size: 0.95rem; color: #666;">Willkommen im Admin-Bereich, Leo & Felix! ❤️</p>
-            </div>
-            <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
-        </div>
-        
-        <!-- STATS GRID -->
-        <div class="admin-stats-grid">
-            <div class="admin-card">
-                <h3>Gäste Zugesagt</h3>
-                <div class="stat-value" id="stat-total-guests">0 / 0</div>
-            </div>
-            <div class="admin-card accent-card">
-                <h3>Menü: Fleisch</h3>
-                <div class="stat-value" id="stat-meat">0</div>
-            </div>
-            <div class="admin-card accent-card">
-                <h3>Menü: Vegetarisch</h3>
-                <div class="stat-value" id="stat-veggie">0</div>
-            </div>
-            <div class="admin-card">
-                <h3>Rückmeldungs-Quote</h3>
-                <div class="stat-value" id="stat-quote">0%</div>
+    
+    <!-- GRID UNTEN (RUND UM GÄSTE & PIN-PLANER) -->
+    <div class="admin-grid-layout">
+        <!-- Linke Spalte: Gästeliste RSVPs -->
+        <div class="admin-panel">
+            <h2>Erhaltene Rückmeldungen (RSVPs)</h2>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Gruppe / Absender</th>
+                            <th>E-Mail</th>
+                            <th>Status</th>
+                            <th>Personen & Essen</th>
+                            <th>Nachricht</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body">
+                        <!-- Dynamisch -->
+                    </tbody>
+                </table>
             </div>
         </div>
         
-        <!-- GRID UNTEN -->
-        <div class="admin-grid-layout">
-            
-            <!-- Linke Spalte: Gästeliste RSVPs -->
-            <div class="admin-panel">
-                <h2>Erhaltene Rückmeldungen (RSVPs)</h2>
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Gruppe / Absender</th>
-                                <th>E-Mail</th>
-                                <th>Status</th>
-                                <th>Personen & Essen</th>
-                                <th>Nachricht</th>
-                                <th>Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-table-body">
-                            <!-- Dynamisch -->
-                        </tbody>
-                    </table>
+        <!-- Rechte Spalte: PIN-Planer Formular -->
+        <div class="admin-panel">
+            <h2>PIN & Einladungs-Planer</h2>
+            <form id="admin-invite-form" style="margin-bottom: 25px;">
+                <div class="admin-form-group">
+                    <label for="invite-names">Name(n) auf Einladung</label>
+                    <input type="text" id="invite-names" class="admin-form-control" placeholder="z.B. Familie Müller" required>
                 </div>
-            </div>
-            
-            <!-- Rechte Spalte: PIN-Planer Formular -->
-            <div class="admin-panel">
-                <h2>PIN & Einladungs-Planer</h2>
-                <form id="admin-invite-form" style="margin-bottom: 25px;">
-                    <div class="admin-form-group">
-                        <label for="invite-names">Name(n) auf Einladung</label>
-                        <input type="text" id="invite-names" class="admin-form-control" placeholder="z.B. Familie Müller" required>
-                    </div>
-                    <div class="admin-form-group">
-                        <label for="invite-count">Erwartete Personenanzahl</label>
-                        <input type="number" id="invite-count" class="admin-form-control" value="2" min="1" required>
-                    </div>
-                    <button type="submit" class="admin-btn">Speichern & PIN generieren</button>
-                </form>
-                
-                <h3>Erstellte Einladungen</h3>
-                <div style="overflow-y: auto; max-height: 400px; margin-top: 15px;">
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>PIN</th>
-                                <th>Name</th>
-                                <th>Gäste</th>
-                                <th>Status</th>
-                                <th>Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-invites-body">
-                            <!-- Dynamisch -->
-                        </tbody>
-                    </table>
+                <div class="admin-form-group">
+                    <label for="invite-count">Erwartete Personenanzahl</label>
+                    <input type="number" id="invite-count" class="admin-form-control" value="2" min="1" required>
                 </div>
-            </div>
+                <button type="submit" class="admin-btn">Speichern & PIN generieren</button>
+            </form>
             
+            <h3>Erstellte Einladungen</h3>
+            <div style="overflow-y: auto; max-height: 400px; margin-top: 15px;">
+                <table class="admin-table" id="admin-invites-table">
+                    <thead>
+                        <tr>
+                            <th>PIN</th>
+                            <th>Name</th>
+                            <th>Gäste</th>
+                            <th>Status</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-invites-body">
+                        <!-- Dynamisch -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <!-- HAUPTINHALT -->
-    <div id="main-content">
-        <!-- HERO SECTION -->
-        <header class="hero">
-            <div class="welcome-badge">
-                <h3 id="personal-greeting">Hallo ihr Lieben!</h3>
-            </div>
-            <h1>Leo & Felix</h1>
-            <p class="subtitle">Wir sagen Ja!</p>
-            <div class="date">24. Juni 2028</div>
-            <a href="#rsvp" class="btn" id="hero-rsvp-btn">Jetzt zusagen</a>
-        </header>
+    <!-- NEUES NEBEN-GRID FÜR TAGESABLAUF, LOCATIONS & DESIGN -->
+    <div class="admin-grid-layout">
+        <!-- Linke Spalte: Tagesablauf (Timeline) verwalten -->
+        <div class="admin-panel">
+            <h2>Tagesablauf (Timeline) verwalten</h2>
+            <form id="admin-timeline-form" style="margin-bottom: 25px;">
+                <input type="hidden" id="timeline-id" value="">
+                <div class="admin-form-group">
+                    <label for="timeline-time">Uhrzeit</label>
+                    <input type="text" id="timeline-time" class="admin-form-control" placeholder="z.B. 14:00 Uhr" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="timeline-title">Titel des Programmpunkts</label>
+                    <input type="text" id="timeline-title" class="admin-form-control" placeholder="z.B. Freie Trauung" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="timeline-desc">Kurze Beschreibung (optional)</label>
+                    <textarea id="timeline-desc" class="admin-form-control" placeholder="z.B. Wir geben uns das Ja-Wort..." rows="2"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="admin-btn" id="timeline-submit-btn">Termin hinzufügen</button>
+                    <button type="button" class="admin-btn" id="timeline-cancel-btn" style="background-color: #777; display: none;" onclick="window.cancelTimelineEdit()">Abbrechen</button>
+                </div>
+            </form>
 
-        <!-- COUNTDOWN -->
-        <div class="countdown-container">
-            <h3>Wir können es kaum erwarten...</h3>
-            <div class="countdown" id="countdown">
-                <div class="countdown-item">
-                    <span id="days">00</span>
-                    <label>Tage</label>
-                </div>
-                <div class="countdown-item">
-                    <span id="hours">00</span>
-                    <label>Stunden</label>
-                </div>
-                <div class="countdown-item">
-                    <span id="minutes">00</span>
-                    <label>Minuten</label>
-                </div>
-                <div class="countdown-item">
-                    <span id="seconds">00</span>
-                    <label>Sekunden</label>
-                </div>
+            <h3>Aktuelle Tagesordnungspunkte</h3>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Zeit</th>
+                            <th>Titel</th>
+                            <th>Beschreibung</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-timeline-body">
+                        <!-- Dynamisch -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- UNSERE STORY / EINLADUNG -->
-        <section id="einladung">
-            <h2>Unsere Hochzeit</h2>
-            <p>Liebe Familie, liebe Freunde,</p>
-            <p>wir freuen uns riesig, den nächsten großen Schritt in unserem Leben gemeinsam zu gehen. Wir möchten diesen besonderen Tag mit den Menschen verbringen, die uns am Herzen liegen – mit euch!</p>
-            <p>Hier findet ihr alle wichtigen Details zu unserer Hochzeitsfeier. Bitte gebt uns bis zum <strong>15. April 2028</strong> Bescheid, ob ihr mit uns feiert.</p>
-        </section>
+        <!-- Rechte Spalte: Locations, Unterkunft & Medien -->
+        <div class="admin-panel">
+            <h2>Locations & Unterkunft bearbeiten</h2>
+            <form id="admin-locations-form" style="margin-bottom: 25px;">
+                <h3>📍 Hauptlocation (Trauung & Feier)</h3>
+                <div class="admin-form-group">
+                    <label for="loc-title">Titel</label>
+                    <input type="text" id="loc-title" class="admin-form-control" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="loc-name">Name der Location</label>
+                    <input type="text" id="loc-name" class="admin-form-control" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="loc-address">Adresse (mehrzeilig möglich)</label>
+                    <textarea id="loc-address" class="admin-form-control" rows="2" required></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label for="loc-desc">Beschreibung / Parken</label>
+                    <textarea id="loc-desc" class="admin-form-control" rows="2"></textarea>
+                </div>
 
-        <!-- ABLAUFPLAN -->
-        <section id="ablauf" style="background-color: #f3f5f0;">
-            <h2>Der Ablaufplan</h2>
-            <p>So haben wir unseren großen Tag geplant:</p>
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+                <div class="admin-form-group" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="loc-show-acc" style="width: 18px; height: 18px;" onchange="window.toggleAccFormFields()">
+                    <label for="loc-show-acc" style="font-size: 1rem; margin: 0; cursor: pointer;">🏨 Unterkunftstipp anzeigen</label>
+                </div>
+
+                <div id="acc-form-fields" style="display: none;">
+                    <h3>🏨 Details Unterkunftstipp</h3>
+                    <div class="admin-form-group">
+                        <label for="acc-title">Titel</label>
+                        <input type="text" id="acc-title" class="admin-form-control">
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="acc-name">Hotel Name</label>
+                        <input type="text" id="acc-name" class="admin-form-control">
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="acc-address">Hotel Adresse</label>
+                        <textarea id="acc-address" class="admin-form-control" rows="2"></textarea>
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="acc-desc">Beschreibung / Zimmerkontingent</label>
+                        <textarea id="acc-desc" class="admin-form-control" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="admin-btn" id="save-locations-btn">Locations & Details speichern</button>
+            </form>
+
+            <hr style="margin: 20px 0; border: none; border-top: 2px solid var(--accent);">
+
+            <h2>🖼️ Eigene Bilder hochladen (Design)</h2>
+            <p style="font-size: 0.85rem; margin-bottom: 15px; color: #555;">Wählt eigene Bilder aus, um den Hintergrund anzupassen. Sie werden im Bucket 'website-images' gespeichert.</p>
             
-            <div class="timeline">
-                <div class="container left">
-                    <div class="content">
-                        <span class="time">14:00 Uhr</span>
-                        <h3>Freie Trauung</h3>
-                        <p>Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.</p>
-                    </div>
+            <div class="admin-form-group">
+                <label>Hero Hintergrundbild (Hauptseite)</label>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <input type="file" id="hero-img-file" accept="image/*" onchange="window.uploadImage('hero-img-file', 'hero_image_url', 'hero-preview')">
+                    <img id="hero-preview" class="admin-image-preview" src="" alt="Vorschau">
                 </div>
-                <div class="container right">
-                    <div class="content">
-                        <span class="time">15:30 Uhr</span>
-                        <h3>Sektempfang & Torte</h3>
-                        <p>Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.</p>
-                    </div>
-                </div>
-                <div class="container left">
-                    <div class="content">
-                        <span class="time">18:30 Uhr</span>
-                        <h3>Festliches Dinner</h3>
-                        <p>Ein feines Buffet wartet auf uns im großen Saal.</p>
-                    </div>
-                </div>
-                <div class="container right">
-                    <div class="content">
-                        <span class="time">21:00 Uhr</span>
-                        <h3>Eröffnung der Tanzfläche</h3>
-                        <p>Wir starten die Party und tanzen bis in die frühen Morgenstunden!</p>
-                    </div>
-                </div>
+                <span id="hero-img-file-status" style="font-size: 0.85rem; color: var(--primary);"></span>
             </div>
-        </section>
 
-        <!-- LOCATION -->
-        <section id="location">
-            <h2>Die Locations</h2>
-            <p>Hier wird gelacht, gefeiert und getanzt:</p>
-            
-            <div class="location-grid">
-                <div class="location-card">
-                    <i class="fa-solid fa-church"></i>
-                    <h3>Die Trauung & Feier</h3>
-                    <p><strong>Gutshof Sonnenschein</strong><br>
-                    Musterstraße 42<br>
-                    12345 Traumstadt</p>
-                    <p>Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.</p>
+            <div class="admin-form-group">
+                <label>Sperrbildschirm Hintergrundbild</label>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <input type="file" id="lock-img-file" accept="image/*" onchange="window.uploadImage('lock-img-file', 'lock_image_url', 'lock-preview')">
+                    <img id="lock-preview" class="admin-image-preview" src="" alt="Vorschau">
                 </div>
-                <div class="location-card">
-                    <i class="fa-solid fa-hotel"></i>
-                    <h3>Unterkunftstipp</h3>
-                    <p><strong>Hotel am Stadtpark</strong><br>
-                    Bahnhofstraße 5<br>
-                    12345 Traumstadt</p>
-                    <p>Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".</p>
-                </div>
+                <span id="lock-img-file-status" style="font-size: 0.85rem; color: var(--primary);"></span>
             </div>
-        </section>
+        </div>
+    </div>
+</div>
 
-        <!-- RSVP SECTION WITH DYNAMIC FORM -->
-        <section id="rsvp" class="rsvp">
-            <h2>Zusage & Rückmeldung</h2>
-            <p>Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!</p>
-            
-            <div class="rsvp-form-container">
-                <form id="wedding-rsvp-form">
-                    <!-- Automatisches Tracking des benutzten PINs -->
-                    <input type="hidden" name="benutzter_pin" id="hidden-guest-pin" value="">
-                    <!-- 1. Teilnahme-Status -->
-                    <div class="form-group">
-                        <label>Seid ihr dabei? *</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="teilnahme" value="Zusage" checked onclick="toggleFormFields(true)">
-                                Ja, ich/wir kommen! 🎉
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="teilnahme" value="Absage" onclick="toggleFormFields(false)">
-                                Nein, leider nicht. 😢
-                            </label>
-                        </div>
-                    </div>
-                    <!-- 2. Kontakt E-Mail -->
-                    <div class="form-group">
-                        <label for="guest-email">E-Mail-Adresse für Rückfragen *</label>
-                        <input type="email" id="guest-email" name="email" class="form-control" placeholder="name@beispiel.de" required>
-                    </div>
-                    <!-- Dynamischer Bereich für zusagende Gäste -->
-                    <div id="dynamic-fields">
-                        <label style="display: block; font-weight: 600; margin-bottom: 15px; color: var(--primary-dark); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Gästeliste & Essenswünsche</label>
-                        
-                        <div id="guest-list-container">
-                            <!-- Wird dynamisch befüllt -->
-                        </div>
-                        <!-- Button um neue Gäste hinzuzufügen -->
-                        <button type="button" class="add-guest-btn" onclick="window.addGuestField()">
-                            <i class="fa-solid fa-plus"></i> Weiteren Gast hinzufügen
-                        </button>
-                    </div>
-                    <!-- 3. Optionale Nachricht / Allergien -->
-                    <div class="form-group">
-                        <label for="guest-message">Anmerkungen (z.B. Allergien, Musikwünsche, etc.)</label>
-                        <textarea id="guest-message" name="nachricht" class="form-control" placeholder="Schreibt uns hier, falls jemand bestimmte Allergien hat oder ihr uns noch etwas mitteilen möchtet..."></textarea>
-                    </div>
-                    <!-- Absende-Button -->
-                    <button type="submit" class="submit-btn" id="submit-btn">Rückmeldung absenden</button>
-                </form>
-                <!-- Erfolgsmeldung nach dem Absenden -->
-                <div id="form-status">
-                    <h3>Vielen Dank für eure Rückmeldung! ❤️</h3>
-                    <p id="form-status-text" style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p>
-                </div>
+<!-- HAUPTINHALT -->
+<div id="main-content">
+    <!-- HERO SECTION -->
+    <header class="hero">
+        <div class="welcome-badge">
+            <h3 id="personal-greeting">Hallo ihr Lieben!</h3>
+        </div>
+        <h1>Leo & Felix</h1>
+        <p class="subtitle">Wir sagen Ja!</p>
+        <div class="date">24. Juni 2028</div>
+        <a href="#rsvp" class="btn" id="hero-rsvp-btn">Jetzt zusagen</a>
+    </header>
+
+    <!-- COUNTDOWN -->
+    <div class="countdown-container">
+        <h3>Wir können es kaum erwarten...</h3>
+        <div class="countdown" id="countdown">
+            <div class="countdown-item">
+                <span id="days">00</span>
+                <label>Tage</label>
             </div>
-        </section>
-
-        <!-- GESCHENKE -->
-        <section id="geschenke">
-            <i class="fa-solid fa-gift"></i>
-            <h2>Flitterwochen & Geschenke</h2>
-            <p>Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.<br>
-            Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!</p>
-            <p>Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</p>
-        </section>
+            <div class="countdown-item">
+                <span id="hours">00</span>
+                <label>Stunden</label>
+            </div>
+            <div class="countdown-item">
+                <span id="minutes">00</span>
+                <label>Minuten</label>
+            </div>
+            <div class="countdown-item">
+                <span id="seconds">00</span>
+                <label>Sekunden</label>
+            </div>
+        </div>
     </div>
 
-    <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
-    <script>
-        // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
-        window.logout = function() {
-            sessionStorage.removeItem('wedding_pin');
-            sessionStorage.removeItem('current_guest_name');
-            window.location.reload();
-        };
+    <!-- UNSERE STORY / EINLADUNG -->
+    <section id="einladung">
+        <h2>Unsere Hochzeit</h2>
+        <p>Liebe Familie, liebe Freunde,</p>
+        <p>wir freuen uns riesig, den nächsten großen Schritt in unserem Leben gemeinsam zu gehen. Wir möchten diesen besonderen Tag mit den Menschen verbringen, die uns am Herzen liegen – mit euch!</p>
+        <p>Hier findet ihr alle wichtigen Details zu unserer Hochzeitsfeier. Bitte gebt uns bis zum <strong>15. April 2028</strong> Bescheid, ob ihr mit uns feiert.</p>
+    </section>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // --- 1. DEINE ECHTEN SUPABASE SCHLÜSSEL ---
-            const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
-            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODExOTIsImV4cCI6MjA5OTE1NzE5Mn0.Z6-lhYbXxz1_fiCZivXfN-g1tShPdGVI5tPqT9W09wo";
+    <!-- ABLAUFPLAN -->
+    <section id="ablauf" style="background-color: #f3f5f0;">
+        <h2>Der Ablaufplan</h2>
+        <p>So haben wir unseren großen Tag geplant:</p>
+        
+        <div class="timeline">
+            <!-- Wird dynamisch aus Supabase geladen -->
+        </div>
+    </section>
 
-            let _supabase;
+    <!-- LOCATION -->
+    <section id="location">
+        <h2>Die Locations</h2>
+        <p>Hier wird gelacht, gefeiert und getanzt:</p>
+        
+        <div class="location-grid">
+            <!-- Wird dynamisch aus Settings geladen -->
+        </div>
+    </section>
+
+    <!-- RSVP SECTION WITH DYNAMIC FORM -->
+    <section id="rsvp" class="rsvp">
+        <h2>Zusage & Rückmeldung</h2>
+        <p>Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!</p>
+        
+        <div class="rsvp-form-container">
+            <form id="wedding-rsvp-form">
+                <!-- Automatisches Tracking des benutzten PINs -->
+                <input type="hidden" name="benutzter_pin" id="hidden-guest-pin" value="">
+                <!-- 1. Teilnahme-Status -->
+                <div class="form-group">
+                    <label>Seid ihr dabei? *</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="teilnahme" value="Zusage" checked onclick="toggleFormFields(true)">
+                            Ja, ich/wir kommen! 🎉
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="teilnahme" value="Absage" onclick="toggleFormFields(false)">
+                            Nein, leider nicht. 😢
+                        </label>
+                    </div>
+                </div>
+                <!-- 2. Kontakt E-Mail -->
+                <div class="form-group">
+                    <label for="guest-email">E-Mail-Adresse für Rückfragen *</label>
+                    <input type="email" id="guest-email" name="email" class="form-control" placeholder="name@beispiel.de" required>
+                </div>
+                <!-- Dynamischer Bereich für zusagende Gäste -->
+                <div id="dynamic-fields">
+                    <label style="display: block; font-weight: 600; margin-bottom: 15px; color: var(--primary-dark); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Gästeliste & Essenswünsche</label>
+                    
+                    <div id="guest-list-container">
+                        <!-- Wird dynamisch befüllt -->
+                    </div>
+                    <!-- Button um neue Gäste hinzuzufügen -->
+                    <button type="button" class="add-guest-btn" onclick="window.addGuestField()">
+                        <i class="fa-solid fa-plus"></i> Weiteren Gast hinzufügen
+                    </button>
+                </div>
+                <!-- 3. Optionale Nachricht / Allergien -->
+                <div class="form-group">
+                    <label for="guest-message">Anmerkungen (z.B. Allergien, Musikwünsche, etc.)</label>
+                    <textarea id="guest-message" name="nachricht" class="form-control" placeholder="Schreibt uns hier, falls jemand bestimmte Allergien hat oder ihr uns noch etwas mitteilen möchtet..."></textarea>
+                </div>
+                <!-- Absende-Button -->
+                <button type="submit" class="submit-btn" id="submit-btn">Rückmeldung absenden</button>
+            </form>
+            <!-- Erfolgsmeldung nach dem Absenden -->
+            <div id="form-status">
+                <h3>Vielen Dank für eure Rückmeldung! ❤️</h3>
+                <p id="form-status-text" style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- GESCHENKE -->
+    <section id="geschenke">
+        <i class="fa-solid fa-gift"></i>
+        <h2>Flitterwochen & Geschenke</h2>
+        <p>Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.<br>
+        Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!</p>
+        <p>Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</p>
+    </section>
+</div>
+
+<!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
+<script>
+    // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
+    window.logout = function() {
+        sessionStorage.removeItem('wedding_pin');
+        sessionStorage.removeItem('current_guest_name');
+        window.location.reload();
+    };
+
+    // Helfer zum Escapen von HTML-Tags
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 1. ECHTE SUPABASE SCHLÜSSEL ---
+        const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODExOTIsImV4cCI6MjA5OTE1NzE5Mn0.Z6-lhYbXxz1_fiCZivXfN-g1tShPdGVI5tPqT9W09wo";
+        let _supabase;
+        try {
+            if (!SUPABASE_URL || !SUPABASE_KEY) {
+                 throw new Error("Supabase URL oder Key fehlen im Skript.");
+            }
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window._supabase = _supabase; // Global verfügbar machen
+        } catch (e) {
+            console.error("KRITISCHER FEHLER bei Supabase-Initialisierung:", e.message);
+            const errorOverlay = document.getElementById('error-overlay');
+            errorOverlay.innerHTML = `<h1>DB-Verbindungsfehler</h1><p>${e.message}</p>`;
+            errorOverlay.style.display = 'flex';
+            return;
+        }
+
+        // --- Globale Variablen ---
+        let enteredPin = "";
+        let guestCount = 1;
+        let isExistingRsvp = false;
+        window.siteSettings = {};
+        
+        // --- Elemente des Sperrbildschirms ---
+        const lockScreen = document.getElementById("lock-screen");
+        const errorDiv = document.getElementById("lock-error");
+
+        // --- Standard-Fallbacks für Tagesablauf ---
+        function getDefaultTimeline() {
+            return [
+                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort." },
+                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen." },
+                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal." },
+                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!" }
+            ];
+        }
+
+        // --- EINSTELLUNGEN & LOCATIONS & TAGESABLAUF LADEN ---
+        async function loadSiteSettings() {
             try {
-                if (!SUPABASE_URL || !SUPABASE_KEY) {
-                     throw new Error("Supabase URL oder Key fehlen im Skript.");
-                }
-                _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            } catch (e) {
-                console.error("KRITISCHER FEHLER bei Supabase-Initialisierung:", e.message);
-                const errorOverlay = document.getElementById('error-overlay');
-                errorOverlay.innerHTML = `<h1>DB-Verbindungsfehler</h1><p>${e.message}</p>`;
-                errorOverlay.style.display = 'flex';
-                return;
+                const { data, error } = await _supabase.from('settings').select('*');
+                if (error) throw error;
+
+                // Daten mappen
+                const settings = {};
+                data.forEach(item => {
+                    settings[item.key] = item.value;
+                });
+                window.siteSettings = settings;
+
+                // 1. Bilder laden / setzen
+                const heroUrl = settings.hero_image_url || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
+                const lockUrl = settings.lock_image_url || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
+
+                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${heroUrl}')`;
+                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${lockUrl}')`;
+
+                document.getElementById('hero-preview').src = heroUrl;
+                document.getElementById('lock-preview').src = lockUrl;
+
+                // 2. Locations im Frontend aufbauen
+                renderLocations(settings);
+
+                // 3. Admin-Formular mit bestehenden Werten füllen
+                document.getElementById('loc-title').value = settings.location_title || 'Die Trauung & Feier';
+                document.getElementById('loc-name').value = settings.location_name || 'Gutshof Sonnenschein';
+                document.getElementById('loc-address').value = settings.location_address || 'Musterstraße 42\n12345 Traumstadt';
+                document.getElementById('loc-desc').value = settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.';
+
+                const showAcc = settings.show_accommodation === 'true';
+                document.getElementById('loc-show-acc').checked = showAcc;
+                window.toggleAccFormFields();
+
+                document.getElementById('acc-title').value = settings.accommodation_title || 'Unterkunftstipp';
+                document.getElementById('acc-name').value = settings.accommodation_name || 'Hotel am Stadtpark';
+                document.getElementById('acc-address').value = settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt';
+                document.getElementById('acc-desc').value = settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".';
+
+            } catch (err) {
+                console.error("Fehler beim Laden der Einstellungen:", err);
+            }
+        }
+
+        function renderLocations(settings) {
+            const grid = document.querySelector('.location-grid');
+            const showAcc = settings.show_accommodation === 'true';
+
+            let locationHtml = `
+                <div class="location-card" style="${!showAcc ? 'grid-column: 1 / -1; max-width: 600px; margin: 0 auto;' : ''}">
+                    <i class="fa-solid fa-church"></i>
+                    <h3>${escapeHtml(settings.location_title || 'Die Trauung & Feier')}</h3>
+                    <p><strong>${escapeHtml(settings.location_name || 'Gutshof Sonnenschein')}</strong><br>
+                    ${escapeHtml(settings.location_address || 'Musterstraße 42\n12345 Traumstadt').replace(/\n/g, '<br>')}</p>
+                    <p>${escapeHtml(settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.')}</p>
+                </div>
+            `;
+
+            if (showAcc) {
+                locationHtml += `
+                    <div class="location-card">
+                        <i class="fa-solid fa-hotel"></i>
+                        <h3>${escapeHtml(settings.accommodation_title || 'Unterkunftstipp')}</h3>
+                        <p><strong>${escapeHtml(settings.accommodation_name || 'Hotel am Stadtpark')}</strong><br>
+                        ${escapeHtml(settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt').replace(/\n/g, '<br>')}</p>
+                        <p>${escapeHtml(settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".')}</p>
+                    </div>
+                `;
+                grid.style.gridTemplateColumns = "1fr 1fr";
+            } else {
+                grid.style.gridTemplateColumns = "1fr";
             }
 
-            // --- Globale Variablen ---
-            let enteredPin = "";
-            let guestCount = 1;
-            let isExistingRsvp = false;
-            
-            // --- Elemente des Sperrbildschirms ---
-            const lockScreen = document.getElementById("lock-screen");
-            const errorDiv = document.getElementById("lock-error");
-            
-            // --- Hauptfunktionen beim Laden ---
-            const savedPin = sessionStorage.getItem('wedding_pin');
-            if (savedPin) {
-                if (savedPin === "1407") unlockAdminDashboard();
-                else unlockWebsite(savedPin); // Hole Namen live aus DB
-            }
-            
-            // --- FUNKTIONEN FÜR DAS PIN-PAD ---
-            function pressKey(num) { 
-                if (enteredPin.length < 4) { 
-                    enteredPin += num; 
-                    updatePinDisplay(); 
-                    if (enteredPin.length === 4) {
-                        setTimeout(checkPin, 250); 
-                    }
-                } 
-            }
-            
-            function deleteLast() { 
-                if (enteredPin.length > 0) { 
-                    enteredPin = enteredPin.slice(0, -1); 
-                    updatePinDisplay(); 
-                } 
-            }
-            
-            function clearPin() { 
-                enteredPin = ""; 
-                updatePinDisplay(); 
-                errorDiv.style.opacity = "0"; 
-            }
-            
-            function updatePinDisplay() { 
-                for (let i = 0; i < 4; i++) { 
-                    document.getElementById(`dot-${i}`).classList.toggle('active', i < enteredPin.length); 
-                } 
-            }
-            
-            async function checkPin() {
-                if (enteredPin === "1407") { 
-                    errorDiv.style.opacity = "0"; 
-                    unlockAdminDashboard(); 
-                } 
-                else {
-                    // Hole Einladung live aus Supabase
-                    const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', enteredPin).maybeSingle();
-                    
-                    if (invite) {
-                        errorDiv.style.opacity = "0";
-                        unlockWebsite(enteredPin, invite.names);
-                    } else {
-                        // Letzter Fallback für deine Test-Codes
-                        const fallbackDB = { "1111": "Test-Gast", "4821": "Luki & Meli" };
-                        if (fallbackDB[enteredPin]) {
-                            errorDiv.style.opacity = "0";
-                            unlockWebsite(enteredPin, fallbackDB[enteredPin]);
-                        } else {
-                            errorDiv.style.opacity = "1";
-                            const container = lockScreen.querySelector('.lock-container');
-                            container.style.animation = "shake 0.3s ease";
-                            setTimeout(() => { container.style.animation = ""; }, 300);
-                            clearPin();
-                        }
-                    }
-                }
-            }
-            
-            async function unlockWebsite(pin, dbGuestName) {
-                sessionStorage.setItem('wedding_pin', pin);
-                sessionStorage.setItem('current_guest_name', dbGuestName);
-                
-                // Greeting & Hidden fields
-                document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass ihr da seid.`;
-                document.getElementById("hidden-guest-pin").value = pin;
-                
-                // GAST FLOATING TOP BAR aktivieren & Abstand setzen
-                document.getElementById("guest-top-bar").style.display = "block";
-                document.getElementById("guest-top-greeting").innerText = `Angemeldet als: ${dbGuestName}`;
-                document.body.style.paddingTop = "50px";
-                
-                // RSVP-Prüfung im Hintergrund
-                try {
-                    const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
-                    if (error) throw error;
-                    
-                    const heroBtn = document.getElementById("hero-rsvp-btn");
-                    
-                    if (data) {
-                        isExistingRsvp = true;
-                        document.getElementById('guest-email').value = data.email || '';
-                        document.getElementById('guest-message').value = data.nachricht || '';
-                        
-                        // Hero Button anpassen
-                        heroBtn.innerText = "Rückmeldung ändern";
-                        
-                        if (data.status === "Zusage") {
-                            document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
-                            toggleFormFields(true);
-                            if (data.gaeste && data.gaeste.length > 0) {
-                                rebuildGuestFields(data.gaeste);
-                            } else {
-                                resetGuestFields(dbGuestName);
-                            }
-                        } else {
-                            document.querySelector('input[name="teilnahme"][value="Absage"]').checked = true;
-                            toggleFormFields(false);
-                            resetGuestFields(dbGuestName);
-                        }
-                        document.getElementById('submit-btn').innerText = "Rückmeldung aktualisieren";
-                    } else {
-                        isExistingRsvp = false;
-                        heroBtn.innerText = "Jetzt zusagen";
-                        document.getElementById('guest-email').value = '';
-                        document.getElementById('guest-message').value = '';
-                        document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
-                        toggleFormFields(true);
-                        resetGuestFields(dbGuestName);
-                        document.getElementById('submit-btn').innerText = "Rückmeldung absenden";
-                    }
-                } catch (e) {
-                    console.error("Fehler beim Abrufen bestehender RSVPs:", e);
-                    isExistingRsvp = false;
-                    resetGuestFields(dbGuestName);
-                }
-                
-                fadeOut(lockScreen);
-                fadeIn(document.getElementById("main-content"));
-            }
-            
-            function unlockAdminDashboard() {
-                sessionStorage.setItem('wedding_pin', '1407');
-                loadSupabaseRsvps();
-                loadSupabaseInvites();
-                fadeOut(lockScreen);
-                fadeIn(document.getElementById("admin-dashboard"));
-            }
-            
-            // Tastatur-Events
-            document.addEventListener('keydown', function(event) {
-                if (lockScreen && lockScreen.style.display !== "none") {
-                    if (event.key >= '0' && event.key <= '9') {
-                        pressKey(event.key);
-                    } else if (event.key === 'Backspace') {
-                        deleteLast();
-                    } else if (event.key === 'Escape') {
-                        clearPin();
-                    }
-                }
-            });
-            
-            // --- ADMIN DATEN: RSVPS LADEN ---
-            async function loadSupabaseRsvps() {
-                const { data, error } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
-                if (error) { 
-                    console.error("Fehler beim Laden der Gästeliste:", error); 
-                    return; 
-                }
-                buildAdminStatsAndTable(data);
-            }
-            
-            function buildAdminStatsAndTable(rsvpsList) {
-                let totalGuests = 0, totalMeat = 0, totalVeggie = 0;
-                const tableBody = document.getElementById('admin-table-body');
-                tableBody.innerHTML = "";
-                
-                // Speichere RSVPs global im DOM für den Invitations-Abgleich
-                window.allRsvps = rsvpsList;
-                
-                rsvpsList.forEach(rsvp => {
-                    let rsvpGuestsHtml = "";
-                    if (rsvp.status === "Zusage") {
-                        const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
-                        totalGuests += gaesteListe.length;
-                        gaesteListe.forEach(g => {
-                            if (g.essen === "Fleisch") totalMeat++;
-                            if (g.essen === "Vegetarisch") totalVeggie++;
-                            rsvpGuestsHtml += `<span class="food-item"><strong>${g.name}</strong> (${g.essen})</span>`;
-                        });
-                    } else { 
-                        rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
-                    }
-                    
-                    const row = tableBody.insertRow();
-                    row.innerHTML = `
-                        <td><strong>${rsvp.name}</strong></td>
-                        <td><a href="mailto:${rsvp.email}" style="color:var(--primary);">${rsvp.email}</a></td>
-                        <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
-                        <td>${rsvpGuestsHtml}</td>
-                        <td><small style="font-size:0.9rem; color:#555;">${rsvp.nachricht || '-'}</small></td>
-                        <td>
-                            <button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                });
-                
-                document.getElementById('stat-meat').innerText = totalMeat;
-                document.getElementById('stat-veggie').innerText = totalVeggie;
-                
-                // Berechne Statistiken neu
-                calculateGlobalStats();
-            }
-            
-            // --- RSVP LÖSCHEN ---
-            window.deleteRsvp = async function(pin) {
-                if (confirm("Möchtest du diese Rückmeldung wirklich löschen? Der Gast kann danach neu abstimmen.")) {
-                    const { error } = await _supabase.from('rsvps').delete().eq('pin', pin);
-                    if (error) {
-                        alert("Fehler beim Löschen: " + error.message);
-                    } else {
-                        loadSupabaseRsvps();
-                        loadSupabaseInvites(); // Aktualisiere Tabellen
-                    }
-                }
-            };
+            grid.innerHTML = locationHtml;
+        }
 
-            // --- ADMIN DATEN: EINLADUNGEN (INVITATIONS) LADEN ---
-            async function loadSupabaseInvites() {
-                const { data, error } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
-                if (error) {
-                    console.error("Fehler beim Laden der Einladungen:", error);
-                    return;
-                }
-                buildAdminInvitesTable(data);
-            }
-            
-            function buildAdminInvitesTable(invitesList) {
-                const invitesBody = document.getElementById('admin-invites-body');
-                invitesBody.innerHTML = "";
-                
-                window.allInvites = invitesList;
-                
-                invitesList.forEach(invite => {
-                    // Finde heraus, ob für diese PIN eine RSVP vorliegt
-                    const matchedRsvp = window.allRsvps ? window.allRsvps.find(r => r.pin === invite.pin) : null;
-                    
-                    let statusHtml = '<span class="badge badge-ausstehend">Ausstehend</span>';
-                    if (matchedRsvp) {
-                        if (matchedRsvp.status === "Zusage") {
-                            const count = matchedRsvp.gaeste ? matchedRsvp.gaeste.length : 0;
-                            statusHtml = `<span class="badge badge-zusage">Zusage (${count} Pers.)</span>`;
-                        } else {
-                            statusHtml = '<span class="badge badge-absage">Abgesagt</span>';
-                        }
-                    }
-                    
-                    const row = invitesBody.insertRow();
-                    row.innerHTML = `
-                        <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
-                        <td>${invite.names}</td>
-                        <td>${invite.expected_count}</td>
-                        <td>${statusHtml}</td>
-                        <td>
-                            <button class="delete-btn" onclick="window.deleteInvite('${invite.pin}')" title="Einladung löschen">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    `;
-                });
-                
-                calculateGlobalStats();
-            }
+        async function loadTimeline() {
+            try {
+                const { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
+                if (error) throw error;
 
-            // --- EINLADUNG LÖSCHEN ---
-            window.deleteInvite = async function(pin) {
-                if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig.")) {
-                    const { error } = await _supabase.from('invitations').delete().eq('pin', pin);
-                    if (error) {
-                        alert("Fehler beim Löschen: " + error.message);
-                    } else {
-                        loadSupabaseInvites();
-                    }
-                }
-            };
+                const timelineContainer = document.querySelector('.timeline');
+                timelineContainer.innerHTML = '';
 
-            // --- GLOBALE STATISTIKEN BERECHNEN ---
-            function calculateGlobalStats() {
-                const rsvps = window.allRsvps || [];
-                const invites = window.allInvites || [];
-                
-                // 1. Zugesagte Personen insgesamt
-                let guestsConfirmed = 0;
-                rsvps.forEach(rsvp => {
-                    if (rsvp.status === "Zusage" && rsvp.gaeste) {
-                        guestsConfirmed += rsvp.gaeste.length;
-                    }
-                });
-                
-                // 2. Erwartete Personen insgesamt (aus Einladungen)
-                let guestsExpectedTotal = 0;
-                invites.forEach(inv => {
-                    guestsExpectedTotal += (inv.expected_count || 0);
-                });
-                
-                document.getElementById('stat-total-guests').innerText = `${guestsConfirmed} / ${guestsExpectedTotal}`;
-                
-                // 3. Beantwortungsquote
-                const totalInvites = invites.length;
-                const answeredInvites = invites.filter(inv => rsvps.some(r => r.pin === inv.pin)).length;
-                
-                let quote = 0;
-                if (totalInvites > 0) {
-                    quote = Math.round((answeredInvites / totalInvites) * 100);
-                }
-                
-                document.getElementById('stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
-            }
+                const items = (data && data.length > 0) ? data : getDefaultTimeline();
 
-            // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN (PIN GENERIEREN) ---
-            const inviteForm = document.getElementById('admin-invite-form');
-            if (inviteForm) {
-                inviteForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    const names = document.getElementById('invite-names').value;
-                    const count = parseInt(document.getElementById('invite-count').value);
-                    
-                    // Einzigartige PIN generieren
-                    const existingInvites = window.allInvites || [];
-                    const existingPins = existingInvites.map(i => i.pin);
-                    
-                    let newPin = "";
-                    let isUnique = false;
-                    while (!isUnique) {
-                        newPin = Math.floor(1000 + Math.random() * 9000).toString();
-                        if (!existingPins.includes(newPin) && newPin !== "1407") {
-                            isUnique = true;
-                        }
-                    }
-                    
-                    const { error } = await _supabase.from('invitations').insert([{
-                        pin: newPin,
-                        names: names,
-                        expected_count: count
-                    }]);
-                    
-                    if (error) {
-                        alert("Fehler beim Erstellen der Einladung: " + error.message);
-                    } else {
-                        document.getElementById('invite-names').value = '';
-                        document.getElementById('invite-count').value = '2';
-                        loadSupabaseInvites(); // Tabelle neu laden
-                    }
-                });
-            }
-
-            // --- FORMULAR RSVP ABSENDEN (SPEICHERN / UPDATEN) ---
-            const form = document.getElementById('wedding-rsvp-form');
-            if (form) {
-                form.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    const submitBtn = document.getElementById('submit-btn');
-                    const originalText = submitBtn.innerText;
-                    submitBtn.innerText = "Wird gesendet...";
-                    submitBtn.disabled = true;
-                    
-                    let gaesteArray = [];
-                    const status = document.querySelector('input[name="teilnahme"]:checked').value;
-                    
-                    if (status === "Zusage") {
-                        document.querySelectorAll('.guest-block').forEach((block, index) => {
-                            const gName = block.querySelector(`input[name="gast_${index + 1}_name"]`).value;
-                            const gEssen = block.querySelector(`input[name="gast_${index + 1}_essen"]:checked`).value;
-                            gaesteArray.push({ name: gName, essen: gEssen });
-                        });
-                    }
-                    
-                    const savedGuestName = sessionStorage.getItem('current_guest_name') || "Unbekannter Gast";
-                    const pin = sessionStorage.getItem('wedding_pin');
-                    
-                    const rsvpData = { 
-                        name: savedGuestName, 
-                        email: document.getElementById('guest-email').value, 
-                        status: status, 
-                        nachricht: document.getElementById('guest-message').value, 
-                        gaeste: gaesteArray, 
-                        pin: pin
-                    };
-                    
-                    let result;
-                    if (isExistingRsvp) {
-                        result = await _supabase.from('rsvps').update(rsvpData).eq('pin', pin);
-                    } else {
-                        result = await _supabase.from('rsvps').insert([rsvpData]);
-                    }
-                    
-                    if (result.error) { 
-                        console.error("Fehler beim Speichern:", result.error); 
-                        alert("Problem mit der Datenbank: " + result.error.message); 
-                        submitBtn.innerText = originalText; 
-                        submitBtn.disabled = false; 
-                    } 
-                    else { 
-                        form.style.display = "none"; 
-                        document.getElementById('form-status').style.display = "block";
-                        
-                        if (status === "Zusage") {
-                            document.getElementById('form-status-text').innerText = "Wir haben eure Änderungen erhalten und freuen uns schon riesig auf euch!";
-                        } else {
-                            document.getElementById('form-status-text').innerText = "Schade, dass ihr nicht kommen könnt. Wir haben eure Absage vermerkt.";
-                        }
-                    }
-                });
-            }
-            
-            // Countdown-Timer
-            const weddingDate = new Date(2028, 5, 24, 14, 0, 0).getTime();
-            setInterval(() => {
-                const distance = weddingDate - new Date().getTime();
-                if (document.getElementById("days")) {
-                    document.getElementById("days").innerText = String(Math.floor(distance / 86400000)).padStart(2, '0');
-                    document.getElementById("hours").innerText = String(Math.floor((distance % 86400000) / 3600000)).padStart(2, '0');
-                    document.getElementById("minutes").innerText = String(Math.floor((distance % 3600000) / 60000)).padStart(2, '0');
-                    document.getElementById("seconds").innerText = String(Math.floor((distance % 60000) / 1000)).padStart(2, '0');
-                }
-                if (distance < 0 && document.getElementById("countdown")) {
-                    document.getElementById("countdown").innerHTML = "<h3>Der große Tag ist da! 🎉</h3>";
-                }
-            }, 1000);
-            
-            // --- DYNAMISCHE GÄSTELISTE LOGIK ---
-            function rebuildGuestFields(gaeste) {
-                const container = document.getElementById('guest-list-container');
-                container.innerHTML = '';
-                guestCount = 0;
-                
-                gaeste.forEach((guest, index) => {
-                    guestCount++;
-                    const guestBlock = document.createElement('div');
-                    guestBlock.className = 'guest-block';
-                    guestBlock.id = `guest-block-${guestCount}`;
-                    
-                    const isMainContact = (guestCount === 1);
-                    
-                    guestBlock.innerHTML = `
-                        <h4>
-                            <span>${isMainContact ? 'Gast 1 (Hauptkontakt)' : 'Gast ' + guestCount}</span>
-                            ${isMainContact ? '' : `
-                            <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${guestCount})">
-                                <i class="fa-solid fa-trash"></i> Entfernen
-                            </button>
-                            `}
-                        </h4>
-                        <div class="form-group" style="margin-bottom: 10px;">
-                            <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${guest.name}" required>
-                        </div>
-                        <div class="form-group" style="margin-bottom: 0;">
-                            <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
-                            <div class="radio-group">
-                                <label class="radio-option">
-                                    <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" ${guest.essen === 'Fleisch' ? 'checked' : ''}>
-                                    Fleisch 🥩
-                                </label>
-                                <label class="radio-option">
-                                    <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch" ${guest.essen === 'Vegetarisch' ? 'checked' : ''}>
-                                    Vegetarisch 🥦
-                                </label>
+                items.forEach((item, index) => {
+                    const sideClass = index % 2 === 0 ? 'left' : 'right';
+                    timelineContainer.innerHTML += `
+                        <div class="container ${sideClass}">
+                            <div class="content">
+                                <span class="time">${escapeHtml(item.time_text)}</span>
+                                <h3>${escapeHtml(item.title)}</h3>
+                                <p>${escapeHtml(item.description || '')}</p>
                             </div>
                         </div>
                     `;
-                    container.appendChild(guestBlock);
                 });
+            } catch (err) {
+                console.error("Fehler beim Laden des Tagesablaufs:", err);
             }
+        }
 
-            function resetGuestFields(defaultName) {
-                rebuildGuestFields([{ name: defaultName, essen: 'Fleisch' }]);
-            }
+        // --- HAUPTFUNKTIONEN BEIM LADEN ---
+        loadSiteSettings();
+        loadTimeline();
 
-            function addGuestField() {
-                if (guestCount >= 10) {
-                    alert("Du kannst maximal 10 Gäste auf einmal eintragen.");
-                    return;
+        const savedPin = sessionStorage.getItem('wedding_pin');
+        if (savedPin) {
+            if (savedPin === "1407") unlockAdminDashboard();
+            else unlockWebsite(savedPin);
+        }
+        
+        // --- FUNKTIONEN FÜR DAS PIN-PAD ---
+        function pressKey(num) { 
+            if (enteredPin.length < 4) { 
+                enteredPin += num; 
+                updatePinDisplay(); 
+                if (enteredPin.length === 4) {
+                    setTimeout(checkPin, 250); 
                 }
-                guestCount++;
+            } 
+        }
+        
+        function deleteLast() { 
+            if (enteredPin.length > 0) { 
+                enteredPin = enteredPin.slice(0, -1); 
+                updatePinDisplay(); 
+            } 
+        }
+        
+        function clearPin() { 
+            enteredPin = ""; 
+            updatePinDisplay(); 
+            errorDiv.style.opacity = "0"; 
+        }
+        
+        function updatePinDisplay() { 
+            for (let i = 0; i < 4; i++) { 
+                document.getElementById(`dot-${i}`).classList.toggle('active', i < enteredPin.length); 
+            } 
+        }
+        
+        async function checkPin() {
+            if (enteredPin === "1407") { 
+                errorDiv.style.opacity = "0"; 
+                unlockAdminDashboard(); 
+            } 
+            else {
+                // Hole Einladung live aus Supabase
+                const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', enteredPin).maybeSingle();
                 
-                const container = document.getElementById('guest-list-container');
+                if (invite) {
+                    errorDiv.style.opacity = "0";
+                    unlockWebsite(enteredPin, invite.names);
+                } else {
+                    // Letzter Fallback für deine Test-Codes
+                    const fallbackDB = { "1111": "Test-Gast", "4821": "Luki & Meli" };
+                    if (fallbackDB[enteredPin]) {
+                        errorDiv.style.opacity = "0";
+                        unlockWebsite(enteredPin, fallbackDB[enteredPin]);
+                    } else {
+                        errorDiv.style.opacity = "1";
+                        const container = lockScreen.querySelector('.lock-container');
+                        container.style.animation = "shake 0.3s ease";
+                        setTimeout(() => { container.style.animation = ""; }, 300);
+                        clearPin();
+                    }
+                }
+            }
+        }
+        
+        async function unlockWebsite(pin, dbGuestName) {
+            sessionStorage.setItem('wedding_pin', pin);
+            sessionStorage.setItem('current_guest_name', dbGuestName);
+            
+            // Greeting & Hidden fields
+            document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass ihr da seid.`;
+            document.getElementById("hidden-guest-pin").value = pin;
+            
+            // GAST FLOATING TOP BAR aktivieren & Abstand setzen
+            document.getElementById("guest-top-bar").style.display = "block";
+            document.getElementById("guest-top-greeting").innerText = `Angemeldet als: ${dbGuestName}`;
+            document.body.style.paddingTop = "50px";
+            
+            // RSVP-Prüfung im Hintergrund
+            try {
+                const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
+                if (error) throw error;
+                
+                const heroBtn = document.getElementById("hero-rsvp-btn");
+                
+                if (data) {
+                    isExistingRsvp = true;
+                    document.getElementById('guest-email').value = data.email || '';
+                    document.getElementById('guest-message').value = data.nachricht || '';
+                    
+                    // Hero Button anpassen
+                    heroBtn.innerText = "Rückmeldung ändern";
+                    
+                    if (data.status === "Zusage") {
+                        document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
+                        toggleFormFields(true);
+                        if (data.gaeste && data.gaeste.length > 0) {
+                            rebuildGuestFields(data.gaeste);
+                        } else {
+                            resetGuestFields(dbGuestName);
+                        }
+                    } else {
+                        document.querySelector('input[name="teilnahme"][value="Absage"]').checked = true;
+                        toggleFormFields(false);
+                        resetGuestFields(dbGuestName);
+                    }
+                    document.getElementById('submit-btn').innerText = "Rückmeldung aktualisieren";
+                } else {
+                    isExistingRsvp = false;
+                    heroBtn.innerText = "Jetzt zusagen";
+                    document.getElementById('guest-email').value = '';
+                    document.getElementById('guest-message').value = '';
+                    document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
+                    toggleFormFields(true);
+                    resetGuestFields(dbGuestName);
+                    document.getElementById('submit-btn').innerText = "Rückmeldung absenden";
+                }
+            } catch (e) {
+                console.error("Fehler beim Abrufen bestehender RSVPs:", e);
+                isExistingRsvp = false;
+                resetGuestFields(dbGuestName);
+            }
+            
+            fadeOut(lockScreen);
+            fadeIn(document.getElementById("main-content"));
+        }
+        
+        function unlockAdminDashboard() {
+            sessionStorage.setItem('wedding_pin', '1407');
+            loadSupabaseRsvps();
+            loadSupabaseInvites();
+            loadAdminTimelineTable();
+            fadeOut(lockScreen);
+            fadeIn(document.getElementById("admin-dashboard"));
+        }
+        
+        // Tastatur-Events
+        document.addEventListener('keydown', function(event) {
+            if (lockScreen && lockScreen.style.display !== "none") {
+                if (event.key >= '0' && event.key <= '9') {
+                    pressKey(event.key);
+                } else if (event.key === 'Backspace') {
+                    deleteLast();
+                } else if (event.key === 'Escape') {
+                    clearPin();
+                }
+            }
+        });
+        
+        // --- ADMIN DATEN: RSVPS LADEN ---
+        async function loadSupabaseRsvps() {
+            const { data, error } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
+            if (error) { 
+                console.error("Fehler beim Laden der Gästeliste:", error); 
+                return; 
+            }
+            buildAdminStatsAndTable(data);
+        }
+        
+        function buildAdminStatsAndTable(rsvpsList) {
+            let totalGuests = 0, totalMeat = 0, totalVeggie = 0;
+            const tableBody = document.getElementById('admin-table-body');
+            tableBody.innerHTML = "";
+            
+            // Speichere RSVPs global im DOM für den Invitations-Abgleich
+            window.allRsvps = rsvpsList;
+            
+            rsvpsList.forEach(rsvp => {
+                let rsvpGuestsHtml = "";
+                if (rsvp.status === "Zusage") {
+                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
+                    totalGuests += gaesteListe.length;
+                    gaesteListe.forEach(g => {
+                        if (g.essen === "Fleisch") totalMeat++;
+                        if (g.essen === "Vegetarisch") totalVeggie++;
+                        rsvpGuestsHtml += `<span class="food-item"><strong>${g.name}</strong> (${g.essen})</span>`;
+                    });
+                } else { 
+                    rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
+                }
+                
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${rsvp.name}</strong></td>
+                    <td><a href="mailto:${rsvp.email}" style="color:var(--primary);">${rsvp.email}</a></td>
+                    <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
+                    <td>${rsvpGuestsHtml}</td>
+                    <td><small style="font-size:0.9rem; color:#555;">${rsvp.nachricht || '-'}</small></td>
+                    <td>
+                        <button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+            });
+            
+            document.getElementById('stat-meat').innerText = totalMeat;
+            document.getElementById('stat-veggie').innerText = totalVeggie;
+            
+            // Berechne Statistiken neu
+            calculateGlobalStats();
+        }
+        
+        // --- RSVP LÖSCHEN ---
+        window.deleteRsvp = async function(pin) {
+            if (confirm("Möchtest du diese Rückmeldung wirklich löschen? Der Gast kann danach neu abstimmen.")) {
+                const { error } = await _supabase.from('rsvps').delete().eq('pin', pin);
+                if (error) {
+                    alert("Fehler beim Löschen: " + error.message);
+                } else {
+                    loadSupabaseRsvps();
+                    loadSupabaseInvites(); // Aktualisiere Tabellen
+                }
+            }
+        };
+
+        // --- ADMIN DATEN: EINLADUNGEN (INVITATIONS) LADEN ---
+        async function loadSupabaseInvites() {
+            const { data, error } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
+            if (error) {
+                console.error("Fehler beim Laden der Einladungen:", error);
+                return;
+            }
+            buildAdminInvitesTable(data);
+        }
+        
+        function buildAdminInvitesTable(invitesList) {
+            const invitesBody = document.getElementById('admin-invites-body');
+            invitesBody.innerHTML = "";
+            
+            window.allInvites = invitesList;
+
+            // Sortier-Logik: Einladungen MIT Rückmeldung rutschen nach UNTEN. 
+            // Einladungen OHNE Rückmeldung (Ausstehend) bleiben ganz OBEN.
+            invitesList.sort((a, b) => {
+                const hasRsvpA = window.allRsvps ? window.allRsvps.some(r => r.pin === a.pin) : false;
+                const hasRsvpB = window.allRsvps ? window.allRsvps.some(r => r.pin === b.pin) : false;
+                
+                if (hasRsvpA && !hasRsvpB) return 1;  // a rutscht nach unten
+                if (!hasRsvpA && hasRsvpB) return -1; // a bleibt oben
+                return 0;
+            });
+            
+            invitesList.forEach(invite => {
+                // Finde heraus, ob für diese PIN eine RSVP vorliegt
+                const matchedRsvp = window.allRsvps ? window.allRsvps.find(r => r.pin === invite.pin) : null;
+                
+                let statusHtml = '<span class="badge badge-ausstehend">Ausstehend</span>';
+                let rowStyle = 'style="background-color: #fff5f5; border-left: 4px solid #ff6b6b;"'; // Leicht rot hinterlegt
+
+                if (matchedRsvp) {
+                    rowStyle = 'style="background-color: #f3faf4; border-left: 4px solid #2e7d32;"'; // Leicht grün hinterlegt
+                    if (matchedRsvp.status === "Zusage") {
+                        const count = matchedRsvp.gaeste ? matchedRsvp.gaeste.length : 0;
+                        statusHtml = `<span class="badge badge-zusage">Zusage (${count} Pers.)</span>`;
+                    } else {
+                        statusHtml = '<span class="badge badge-absage">Abgesagt</span>';
+                    }
+                }
+                
+                const row = invitesBody.insertRow();
+                row.setAttribute('style', rowStyle.slice(7, -1)); // Style-Inhalt extrahieren und anwenden
+                
+                row.innerHTML = `
+                    <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
+                    <td>${invite.names}</td>
+                    <td>${invite.expected_count}</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <button class="delete-btn" onclick="window.deleteInvite('${invite.pin}')" title="Einladung löschen">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+            });
+            
+            calculateGlobalStats();
+        }
+
+        // --- EINLADUNG LÖSCHEN ---
+        window.deleteInvite = async function(pin) {
+            if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig.")) {
+                const { error } = await _supabase.from('invitations').delete().eq('pin', pin);
+                if (error) {
+                    alert("Fehler beim Löschen: " + error.message);
+                } else {
+                    loadSupabaseInvites();
+                }
+            }
+        };
+
+        // --- GLOBALE STATISTIKEN BERECHNEN ---
+        function calculateGlobalStats() {
+            const rsvps = window.allRsvps || [];
+            const invites = window.allInvites || [];
+            
+            // 1. Zugesagte Personen insgesamt
+            let guestsConfirmed = 0;
+            rsvps.forEach(rsvp => {
+                if (rsvp.status === "Zusage" && rsvp.gaeste) {
+                    guestsConfirmed += rsvp.gaeste.length;
+                }
+            });
+            
+            // 2. Erwartete Personen insgesamt (aus Einladungen)
+            let guestsExpectedTotal = 0;
+            invites.forEach(inv => {
+                guestsExpectedTotal += (inv.expected_count || 0);
+            });
+            
+            document.getElementById('stat-total-guests').innerText = `${guestsConfirmed} / ${guestsExpectedTotal}`;
+            
+            // 3. Beantwortungsquote
+            const totalInvites = invites.length;
+            const answeredInvites = invites.filter(inv => rsvps.some(r => r.pin === inv.pin)).length;
+            
+            let quote = 0;
+            if (totalInvites > 0) {
+                quote = Math.round((answeredInvites / totalInvites) * 100);
+            }
+            
+            document.getElementById('stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
+        }
+
+        // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN (PIN GENERIEREN) ---
+        const inviteForm = document.getElementById('admin-invite-form');
+        if (inviteForm) {
+            inviteForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const names = document.getElementById('invite-names').value;
+                const count = parseInt(document.getElementById('invite-count').value);
+                
+                // Einzigartige PIN generieren
+                const existingInvites = window.allInvites || [];
+                const existingPins = existingInvites.map(i => i.pin);
+                
+                let newPin = "";
+                let isUnique = false;
+                while (!isUnique) {
+                    newPin = Math.floor(1000 + Math.random() * 9000).toString();
+                    if (!existingPins.includes(newPin) && newPin !== "1407") {
+                        isUnique = true;
+                    }
+                }
+                
+                const { error } = await _supabase.from('invitations').insert([{
+                    pin: newPin,
+                    names: names,
+                    expected_count: count
+                }]);
+                
+                if (error) {
+                    alert("Fehler beim Erstellen der Einladung: " + error.message);
+                } else {
+                    document.getElementById('invite-names').value = '';
+                    document.getElementById('invite-count').value = '2';
+                    loadSupabaseInvites(); // Tabelle neu laden
+                }
+            });
+        }
+
+        // --- FORMULAR RSVP ABSENDEN (SPEICHERN / UPDATEN) ---
+        const form = document.getElementById('wedding-rsvp-form');
+        if (form) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submit-btn');
+                const originalText = submitBtn.innerText;
+                submitBtn.innerText = "Wird gesendet...";
+                submitBtn.disabled = true;
+                
+                let gaesteArray = [];
+                const status = document.querySelector('input[name="teilnahme"]:checked').value;
+                
+                if (status === "Zusage") {
+                    document.querySelectorAll('.guest-block').forEach((block, index) => {
+                        const gName = block.querySelector(`input[name="gast_${index + 1}_name"]`).value;
+                        const gEssen = block.querySelector(`input[name="gast_${index + 1}_essen"]:checked`).value;
+                        gaesteArray.push({ name: gName, essen: gEssen });
+                    });
+                }
+                
+                const savedGuestName = sessionStorage.getItem('current_guest_name') || "Unbekannter Gast";
+                const pin = sessionStorage.getItem('wedding_pin');
+                
+                const rsvpData = { 
+                    name: savedGuestName, 
+                    email: document.getElementById('guest-email').value, 
+                    status: status, 
+                    nachricht: document.getElementById('guest-message').value, 
+                    gaeste: gaesteArray, 
+                    pin: pin
+                };
+                
+                let result;
+                if (isExistingRsvp) {
+                    result = await _supabase.from('rsvps').update(rsvpData).eq('pin', pin);
+                } else {
+                    result = await _supabase.from('rsvps').insert([rsvpData]);
+                }
+                
+                if (result.error) { 
+                    console.error("Fehler beim Speichern:", result.error); 
+                    alert("Problem mit der Datenbank: " + result.error.message); 
+                    submitBtn.innerText = originalText; 
+                    submitBtn.disabled = false; 
+                } 
+                else { 
+                    form.style.display = "none"; 
+                    document.getElementById('form-status').style.display = "block";
+                    
+                    if (status === "Zusage") {
+                        document.getElementById('form-status-text').innerText = "Wir haben eure Änderungen erhalten und freuen uns schon riesig auf euch!";
+                    } else {
+                        document.getElementById('form-status-text').innerText = "Schade, dass ihr nicht kommen könnt. Wir haben eure Absage vermerkt.";
+                    }
+                }
+            });
+        }
+
+        // Countdown-Timer
+        const weddingDate = new Date(2028, 5, 24, 14, 0, 0).getTime();
+        setInterval(() => {
+            const distance = weddingDate - new Date().getTime();
+            if (document.getElementById("days")) {
+                document.getElementById("days").innerText = String(Math.floor(distance / 86400000)).padStart(2, '0');
+                document.getElementById("hours").innerText = String(Math.floor((distance % 86400000) / 3600000)).padStart(2, '0');
+                document.getElementById("minutes").innerText = String(Math.floor((distance % 3600000) / 60000)).padStart(2, '0');
+                document.getElementById("seconds").innerText = String(Math.floor((distance % 60000) / 1000)).padStart(2, '0');
+            }
+            if (distance < 0 && document.getElementById("countdown")) {
+                document.getElementById("countdown").innerHTML = "<h3>Der große Tag ist da! 🎉</h3>";
+            }
+        }, 1000);
+
+        // --- DYNAMISCHE GÄSTELISTE LOGIK ---
+        function rebuildGuestFields(gaeste) {
+            const container = document.getElementById('guest-list-container');
+            container.innerHTML = '';
+            guestCount = 0;
+            
+            gaeste.forEach((guest, index) => {
+                guestCount++;
                 const guestBlock = document.createElement('div');
                 guestBlock.className = 'guest-block';
                 guestBlock.id = `guest-block-${guestCount}`;
                 
+                const isMainContact = (guestCount === 1);
+                
                 guestBlock.innerHTML = `
                     <h4>
-                        <span>Gast ${guestCount}</span>
+                        <span>${isMainContact ? 'Gast 1 (Hauptkontakt)' : 'Gast ' + guestCount}</span>
+                        ${isMainContact ? '' : `
                         <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${guestCount})">
                             <i class="fa-solid fa-trash"></i> Entfernen
                         </button>
+                        `}
                     </h4>
                     <div class="form-group" style="margin-bottom: 10px;">
-                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" required>
+                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${guest.name}" required>
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
                         <div class="radio-group">
                             <label class="radio-option">
-                                <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" checked>
+                                <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" ${guest.essen === 'Fleisch' ? 'checked' : ''}>
                                 Fleisch 🥩
                             </label>
                             <label class="radio-option">
-                                <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch">
+                                <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch" ${guest.essen === 'Vegetarisch' ? 'checked' : ''}>
                                 Vegetarisch 🥦
                             </label>
                         </div>
                     </div>
                 `;
                 container.appendChild(guestBlock);
+            });
+        }
+
+        function resetGuestFields(defaultName) {
+            rebuildGuestFields([{ name: defaultName, essen: 'Fleisch' }]);
+        }
+
+        function addGuestField() {
+            if (guestCount >= 10) {
+                alert("Du kannst maximal 10 Gäste auf einmal eintragen.");
+                return;
             }
+            guestCount++;
             
-            function removeGuestField(id) {
-                const block = document.getElementById(`guest-block-${id}`);
-                if (block) {
-                    block.remove();
-                    reindexGuests();
-                }
+            const container = document.getElementById('guest-list-container');
+            const guestBlock = document.createElement('div');
+            guestBlock.className = 'guest-block';
+            guestBlock.id = `guest-block-${guestCount}`;
+            
+            guestBlock.innerHTML = `
+                <h4>
+                    <span>Gast ${guestCount}</span>
+                    <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${guestCount})">
+                        <i class="fa-solid fa-trash"></i> Entfernen
+                    </button>
+                </h4>
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" checked>
+                            Fleisch 🥩
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch">
+                            Vegetarisch 🥦
+                        </label>
+                    </div>
+                </div>
+            `;
+            container.appendChild(guestBlock);
+        }
+        
+        function removeGuestField(id) {
+            const block = document.getElementById(`guest-block-${id}`);
+            if (block) {
+                block.remove();
+                reindexGuests();
             }
+        }
+        
+        function reindexGuests() {
+            const container = document.getElementById('guest-list-container');
+            if (!container) return;
+            const blocks = container.getElementsByClassName('guest-block');
+            guestCount = blocks.length;
             
-            function reindexGuests() {
-                const container = document.getElementById('guest-list-container');
-                if (!container) return;
-                const blocks = container.getElementsByClassName('guest-block');
-                guestCount = blocks.length;
+            Array.from(blocks).forEach((block, index) => {
+                const currentNum = index + 1;
+                block.id = `guest-block-${currentNum}`;
                 
-                Array.from(blocks).forEach((block, index) => {
-                    const currentNum = index + 1;
-                    block.id = `guest-block-${currentNum}`;
-                    
-                    const h4 = block.querySelector('h4');
-                    if (currentNum === 1) {
-                        h4.innerHTML = `Gast 1 (Hauptkontakt)`;
-                    } else {
-                        h4.innerHTML = `
-                            <span>Gast ${currentNum}</span>
-                            <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${currentNum})">
-                                <i class="fa-solid fa-trash"></i> Entfernen
-                            </button>
-                        `;
-                    }
-                    
-                    const textInput = block.querySelector('input[type="text"]');
-                    textInput.id = `gast-${currentNum}-input`;
-                    textInput.name = `gast_${currentNum}_name`;
-                    textInput.placeholder = `Name von Gast ${currentNum}`;
-                    
-                    const radios = block.querySelectorAll('input[type="radio"]');
-                    radios.forEach(radio => {
-                        radio.name = `gast_${currentNum}_essen`;
-                    });
-                });
-            }
-            
-            function toggleFormFields(show) {
-                const dynamicFields = document.getElementById("dynamic-fields");
-                if (!dynamicFields) return;
-                const inputs = dynamicFields.querySelectorAll('input[type="text"]');
-                
-                if (show) {
-                    dynamicFields.style.display = "block";
-                    inputs.forEach(input => input.required = true);
+                const h4 = block.querySelector('h4');
+                if (currentNum === 1) {
+                    h4.innerHTML = `Gast 1 (Hauptkontakt)`;
                 } else {
-                    dynamicFields.style.display = "none";
-                    inputs.forEach(input => input.required = false);
+                    h4.innerHTML = `
+                        <span>Gast ${currentNum}</span>
+                        <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${currentNum})">
+                            <i class="fa-solid fa-trash"></i> Entfernen
+                        </button>
+                    `;
+                }
+                
+                const textInput = block.querySelector('input[type="text"]');
+                textInput.id = `gast-${currentNum}-input`;
+                textInput.name = `gast_${currentNum}_name`;
+                textInput.placeholder = `Name von Gast ${currentNum}`;
+                
+                const radios = block.querySelectorAll('input[type="radio"]');
+                radios.forEach(radio => {
+                    radio.name = `gast_${currentNum}_essen`;
+                });
+            });
+        }
+        
+        function toggleFormFields(show) {
+            const dynamicFields = document.getElementById("dynamic-fields");
+            if (!dynamicFields) return;
+            const inputs = dynamicFields.querySelectorAll('input[type="text"]');
+            
+            if (show) {
+                dynamicFields.style.display = "block";
+                inputs.forEach(input => input.required = true);
+            } else {
+                dynamicFields.style.display = "none";
+                inputs.forEach(input => input.required = false);
+            }
+        }
+
+        // --- ADMIN: TAGESABLAUF TABLE LADEN ---
+        async function loadAdminTimelineTable() {
+            try {
+                const { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
+                if (error) throw error;
+
+                const tbody = document.getElementById('admin-timeline-body');
+                tbody.innerHTML = '';
+
+                const items = (data && data.length > 0) ? data : getDefaultTimeline();
+
+                items.forEach(item => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td><strong>${escapeHtml(item.time_text)}</strong></td>
+                        <td>${escapeHtml(item.title)}</td>
+                        <td><small>${escapeHtml(item.description || '-')}</small></td>
+                        <td>
+                            <button class="delete-btn" onclick="window.editTimelineItem('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
+                                <i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
+                            </button>
+                            ${item.id ? `
+                            <button class="delete-btn" onclick="window.deleteTimelineItem('${item.id}')" title="Löschen">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            ` : `<small style="color: #999; font-style: italic;">Standard</small>`}
+                        </td>
+                    `;
+                });
+            } catch (err) {
+                console.error("Fehler beim Laden des Admin-Tagesablaufs:", err);
+            }
+        }
+
+        // Formular-Submit für Tagesablauf
+        const timelineForm = document.getElementById('admin-timeline-form');
+        if (timelineForm) {
+            timelineForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('timeline-submit-btn');
+                submitBtn.disabled = true;
+
+                const itemId = document.getElementById('timeline-id').value;
+                const timeText = document.getElementById('timeline-time').value;
+                const title = document.getElementById('timeline-title').value;
+                const desc = document.getElementById('timeline-desc').value;
+
+                const itemData = {
+                    time_text: timeText,
+                    title: title,
+                    description: desc
+                };
+
+                try {
+                    let result;
+                    if (itemId) {
+                        result = await _supabase.from('timeline_items').update(itemData).eq('id', itemId);
+                    } else {
+                        result = await _supabase.from('timeline_items').insert([itemData]);
+                    }
+
+                    if (result.error) throw result.error;
+
+                    // Formular zurücksetzen
+                    window.cancelTimelineEdit();
+                    loadTimeline();
+                    loadAdminTimelineTable();
+
+                } catch (err) {
+                    alert("Fehler beim Speichern: " + err.message);
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        window.editTimelineItem = function(id, time, title, desc) {
+            document.getElementById('timeline-id').value = id;
+            document.getElementById('timeline-time').value = time;
+            document.getElementById('timeline-title').value = title;
+            document.getElementById('timeline-desc').value = desc;
+
+            document.getElementById('timeline-submit-btn').innerText = "Änderung speichern";
+            document.getElementById('timeline-cancel-btn').style.display = "inline-block";
+        };
+
+        window.cancelTimelineEdit = function() {
+            document.getElementById('timeline-id').value = "";
+            document.getElementById('timeline-time').value = "";
+            document.getElementById('timeline-title').value = "";
+            document.getElementById('timeline-desc').value = "";
+
+            document.getElementById('timeline-submit-btn').innerText = "Termin hinzufügen";
+            document.getElementById('timeline-cancel-btn').style.display = "none";
+        };
+
+        window.deleteTimelineItem = async function(id) {
+            if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
+                const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
+                if (error) {
+                    alert("Fehler beim Löschen: " + error.message);
+                } else {
+                    loadTimeline();
+                    loadAdminTimelineTable();
                 }
             }
+        };
+
+        // --- ADMIN: LOCATIONS SPEICHERN ---
+        const locationsForm = document.getElementById('admin-locations-form');
+        if (locationsForm) {
+            locationsForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const saveBtn = document.getElementById('save-locations-btn');
+                saveBtn.disabled = true;
+                saveBtn.innerText = "Wird gespeichert...";
+
+                const settingsToSave = {
+                    'location_title': document.getElementById('loc-title').value,
+                    'location_name': document.getElementById('loc-name').value,
+                    'location_address': document.getElementById('loc-address').value,
+                    'location_desc': document.getElementById('loc-desc').value,
+                    'show_accommodation': document.getElementById('loc-show-acc').checked ? 'true' : 'false',
+                    'accommodation_title': document.getElementById('acc-title').value,
+                    'accommodation_name': document.getElementById('acc-name').value,
+                    'accommodation_address': document.getElementById('acc-address').value,
+                    'accommodation_desc': document.getElementById('acc-desc').value
+                };
+
+                try {
+                    for (const [key, value] of Object.entries(settingsToSave)) {
+                        const { error } = await _supabase.from('settings').upsert({ key: key, value: value });
+                        if (error) throw error;
+                        window.siteSettings[key] = value;
+                    }
+                    alert("Locations erfolgreich gespeichert!");
+                    renderLocations(window.siteSettings);
+                } catch (err) {
+                    console.error(err);
+                    alert("Fehler beim Speichern der Locations: " + err.message);
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "Locations & Details speichern";
+                }
+            });
+        }
+
+        window.toggleAccFormFields = function() {
+            const isChecked = document.getElementById('loc-show-acc').checked;
+            document.getElementById('acc-form-fields').style.display = isChecked ? 'block' : 'none';
+        };
+
+        // --- ADMIN: BILD-UPLOAD SYSTEM (STORAGE BUCKET) ---
+        window.uploadImage = async function(fileInputId, settingKey, previewImgId) {
+            const fileInput = document.getElementById(fileInputId);
+            const statusSpan = document.getElementById(fileInputId + '-status');
             
-            // Globale Freigabe für Inline-Events
-            window.pressKey = pressKey; 
-            window.deleteLast = deleteLast; 
-            window.clearPin = clearPin; 
-            window.addGuestField = addGuestField; 
-            window.removeGuestField = removeGuestField; 
-            window.toggleFormFields = toggleFormFields;
-            
-            function fadeOut(el) { el.style.opacity = "0"; setTimeout(() => el.style.display = "none", 500); }
-            function fadeIn(el) { el.style.display = "block"; setTimeout(() => el.style.opacity = "1", 50); }
-        });
-    </script>
+            if (!fileInput.files || fileInput.files.length === 0) return;
+            const file = fileInput.files[0];
+
+            statusSpan.style.color = "var(--primary)";
+            statusSpan.innerText = "Bild wird hochgeladen...";
+
+            try {
+                // Einzigartigen Dateinamen generieren
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${settingKey}_${Date.now()}.${fileExt}`;
+
+                // In das Bucket 'website-images' hochladen
+                const { data, error } = await _supabase.storage
+                    .from('website-images')
+                    .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+                if (error) throw error;
+
+                // Öffentliche URL generieren
+                const { data: publicData } = _supabase.storage
+                    .from('website-images')
+                    .getPublicUrl(fileName);
+
+                const publicUrl = publicData.publicUrl;
+
+                // In der Settings-Tabelle registrieren
+                const { error: dbError } = await _supabase.from('settings').upsert({ key: settingKey, value: publicUrl });
+                if (dbError) throw dbError;
+
+                // Live-Vorschau aktualisieren
+                window.siteSettings[settingKey] = publicUrl;
+                document.getElementById(previewImgId).src = publicUrl;
+                
+                // Hintergrund direkt anpassen
+                if (settingKey === 'hero_image_url') {
+                    document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${publicUrl}')`;
+                } else if (settingKey === 'lock_image_url') {
+                    document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${publicUrl}')`;
+                }
+
+                statusSpan.style.color = "#2e7d32";
+                statusSpan.innerText = "Erfolgreich hochgeladen & gespeichert!";
+            } catch (err) {
+                console.error("Upload fehlgeschlagen:", err);
+                statusSpan.style.color = "#c62828";
+                statusSpan.innerText = "Fehler: " + err.message;
+            }
+        };
+        
+        // Globale Freigabe für Inline-Events
+        window.pressKey = pressKey; 
+        window.deleteLast = deleteLast; 
+        window.clearPin = clearPin; 
+        window.addGuestField = addGuestField; 
+        window.removeGuestField = removeGuestField; 
+        window.toggleFormFields = toggleFormFields;
+        
+        function fadeOut(el) { el.style.opacity = "0"; setTimeout(() => el.style.display = "none", 500); }
+        function fadeIn(el) { el.style.display = "block"; setTimeout(() => el.style.opacity = "1", 50); }
+    });
+</script>
 </body>
 </html>
