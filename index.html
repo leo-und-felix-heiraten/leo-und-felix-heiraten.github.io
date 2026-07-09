@@ -1005,13 +1005,16 @@
             };
             // --- 2. DEINE ECHTEN, FERTIG EINGETRAGENEN SUPABASE SCHLÜSSEL ---
             const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
-            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5OTg5ODIsImV4cCI6MjAxNTU3NDk4Mn0.sb_publishable_Gy9evz7CvcAqjBZmLCPlQQ_3npevOki";
+            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODExOTIsImV4cCI6MjA5OTE1NzE5Mn0.Z6-lhYbXxz1_fiCZivXfN-g1tShPdGVI5tPqT9W09wo";
+
             let _supabase;
             try {
                 _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             } catch (e) {
-                console.error("Supabase-Verbindung konnte nicht initialisiert werden:", e);
-                document.body.innerHTML = '<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #c0392b;"><h1>Fehler</h1><p>Die Datenbankverbindung konnte nicht hergestellt werden. Bitte prüfen Sie die Supabase-Schlüssel im Code.</p></div>';
+                console.error("Supabase-Verbindung konnte nicht initialisiert werden:", e.message);
+                if (!document.getElementById("lock-screen") || document.getElementById("lock-screen").style.display === 'none') {
+                    document.body.innerHTML = `<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #c0392b;"><h1>Fehler</h1><p>Die Datenbankverbindung konnte nicht hergestellt werden. Bitte prüfen: ${e.message}</p></div>`;
+                }
                 return;
             }
             // --- Globale Variablen ---
