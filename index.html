@@ -47,13 +47,38 @@
             height: 100%;
             background: #fbeae5;
             color: #c0392b;
-            display: none; /* Standardmäßig versteckt */
+            display: none;
             justify-content: center;
             align-items: center;
             text-align: center;
             z-index: 10000;
             padding: 20px;
             font-family: monospace;
+        }
+        /* --- FLOATING GAST TOP BAR --- */
+        #guest-top-bar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 12px 20px;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .top-bar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .top-bar-content span {
+            font-weight: 600;
+            font-family: var(--font-serif);
+            font-style: italic;
         }
         /* --- SPERRBILDSCHIRM (PIN PAD) --- */
         #lock-screen {
@@ -559,18 +584,6 @@
             color: rgba(255, 255, 255, 0.6);
             margin: 0;
         }
-        .logout-link {
-            display: inline-block;
-            margin-top: 15px;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.8rem;
-            text-decoration: underline;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        .logout-link:hover {
-            color: var(--accent);
-        }
         /* --- 📊 STYLES FÜR DAS ADMIN-DASHBOARD (PIN: 1407) --- */
         #admin-dashboard {
             display: none;
@@ -616,23 +629,35 @@
             margin-bottom: 10px;
         }
         .admin-card .stat-value {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
             color: var(--primary-dark);
+            margin-top: 5px;
         }
-        .admin-table-container {
+        .admin-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        @media (min-width: 992px) {
+            .admin-grid-layout {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+        .admin-panel {
             background: white;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            overflow-x: auto;
-            margin-bottom: 40px;
         }
-        .admin-table-container h2 {
+        .admin-panel h2 {
             font-size: 1.5rem;
             color: var(--primary-dark);
             margin-bottom: 20px;
             font-family: var(--font-serif);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
         }
         table.admin-table {
             width: 100%;
@@ -640,24 +665,22 @@
             text-align: left;
         }
         table.admin-table th, table.admin-table td {
-            padding: 15px;
+            padding: 12px 10px;
             border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
         }
         table.admin-table th {
             background-color: #f4f6f0;
             color: var(--primary-dark);
             font-weight: 600;
-            font-size: 0.95rem;
-        }
-        table.admin-table tbody tr:hover {
-            background-color: #fafbfa;
         }
         .badge {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 5px 10px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
+            text-align: center;
         }
         .badge.badge-zusage {
             background-color: #e8f5e9;
@@ -666,6 +689,10 @@
         .badge.badge-absage {
             background-color: #ffebee;
             color: #c62828;
+        }
+        .badge.badge-ausstehend {
+            background-color: #eceff1;
+            color: #455a64;
         }
         .food-item {
             display: inline-block;
@@ -676,64 +703,84 @@
             margin-right: 5px;
             margin-bottom: 5px;
         }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #c0392b;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+        .delete-btn:hover {
+            transform: scale(1.2);
+        }
         .logout-btn {
             background-color: #c0392b;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             transition: background 0.3s;
         }
         .logout-btn:hover {
             background-color: #a0281b;
+        }
+        /* Admin Form */
+        .admin-form-group {
+            margin-bottom: 15px;
+        }
+        .admin-form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-dark);
+        }
+        .admin-form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+        }
+        .admin-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+        .admin-btn:hover {
+            background-color: var(--primary-dark);
         }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-8px); }
             40%, 80% { transform: translateX(8px); }
         }
-        /* --- RESPONSIVE DESIGN --- */
-        @media screen and (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.8rem;
-            }
-            .hero p.subtitle {
-                font-size: 1.4rem;
-            }
-            .timeline::after {
-                left: 31px;
-            }
-            .container {
-                width: 100%;
-                padding-left: 70px;
-                padding-right: 25px;
-            }
-            .container::after {
-                left: 23px;
-                right: auto;
-            }
-            .left, .right {
-                left: 0;
-            }
-            .location-grid {
-                grid-template-columns: 1fr;
-            }
-            .rsvp-form-container {
-                padding: 25px 20px;
-            }
-            .admin-header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-        }
     </style>
 </head>
 <body>
     <div id="error-overlay"></div>
+    
+    <!-- FLOATING GAST TOP BAR (Wird sichtbar wenn eingeloggt als Gast) -->
+    <div id="guest-top-bar">
+        <div class="top-bar-content">
+            <span id="guest-top-greeting">Hallo Gast!</span>
+            <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
+        </div>
+    </div>
+
     <!-- SPERRBILDSCHIRM (PIN PAD) -->
     <div id="lock-screen" style="display: flex;">
         <div class="lock-container">
@@ -774,10 +821,12 @@
             </div>
             <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
         </div>
+        
+        <!-- STATS GRID -->
         <div class="admin-stats-grid">
             <div class="admin-card">
                 <h3>Gäste Zugesagt</h3>
-                <div class="stat-value" id="stat-total-guests">0</div>
+                <div class="stat-value" id="stat-total-guests">0 / 0</div>
             </div>
             <div class="admin-card accent-card">
                 <h3>Menü: Fleisch</h3>
@@ -788,26 +837,70 @@
                 <div class="stat-value" id="stat-veggie">0</div>
             </div>
             <div class="admin-card">
-                <h3>Absagen (Gruppen)</h3>
-                <div class="stat-value" id="stat-absagen">0</div>
+                <h3>Rückmeldungs-Quote</h3>
+                <div class="stat-value" id="stat-quote">0%</div>
             </div>
         </div>
-        <div class="admin-table-container">
-            <h2>Detaillierte Gästeliste</h2>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Gruppe / Absender</th>
-                        <th>E-Mail</th>
-                        <th>Status</th>
-                        <th>Gäste & Essenswünsche</th>
-                        <th>Anmerkungen / Allergien</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-table-body">
-                    <!-- Wird dynamisch aus Supabase befüllt -->
-                </tbody>
-            </table>
+        
+        <!-- GRID UNTEN -->
+        <div class="admin-grid-layout">
+            
+            <!-- Linke Spalte: Gästeliste RSVPs -->
+            <div class="admin-panel">
+                <h2>Erhaltene Rückmeldungen (RSVPs)</h2>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Gruppe / Absender</th>
+                                <th>E-Mail</th>
+                                <th>Status</th>
+                                <th>Personen & Essen</th>
+                                <th>Nachricht</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body">
+                            <!-- Dynamisch -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Rechte Spalte: PIN-Planer Formular -->
+            <div class="admin-panel">
+                <h2>PIN & Einladungs-Planer</h2>
+                <form id="admin-invite-form" style="margin-bottom: 25px;">
+                    <div class="admin-form-group">
+                        <label for="invite-names">Name(n) auf Einladung</label>
+                        <input type="text" id="invite-names" class="admin-form-control" placeholder="z.B. Familie Müller" required>
+                    </div>
+                    <div class="admin-form-group">
+                        <label for="invite-count">Erwartete Personenanzahl</label>
+                        <input type="number" id="invite-count" class="admin-form-control" value="2" min="1" required>
+                    </div>
+                    <button type="submit" class="admin-btn">Speichern & PIN generieren</button>
+                </form>
+                
+                <h3>Erstellte Einladungen</h3>
+                <div style="overflow-y: auto; max-height: 400px; margin-top: 15px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>PIN</th>
+                                <th>Name</th>
+                                <th>Gäste</th>
+                                <th>Status</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-invites-body">
+                            <!-- Dynamisch -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -821,7 +914,7 @@
             <h1>Leo & Felix</h1>
             <p class="subtitle">Wir sagen Ja!</p>
             <div class="date">24. Juni 2028</div>
-            <a href="#rsvp" class="btn">Jetzt zusagen</a>
+            <a href="#rsvp" class="btn" id="hero-rsvp-btn">Jetzt zusagen</a>
         </header>
 
         <!-- COUNTDOWN -->
@@ -968,7 +1061,7 @@
                 <!-- Erfolgsmeldung nach dem Absenden -->
                 <div id="form-status">
                     <h3>Vielen Dank für eure Rückmeldung! ❤️</h3>
-                    <p style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p>
+                    <p id="form-status-text" style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p>
                 </div>
             </div>
         </section>
@@ -981,36 +1074,19 @@
             Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!</p>
             <p>Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</p>
         </section>
-
-        <!-- FOOTER -->
-        <footer>
-            <p>Leo & Felix — 24.06.2028</p>
-            <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.5;">Erstellt mit Liebe und GitHub Pages</p>
-            <span class="logout-link" onclick="window.logout()">Abmelden & zur PIN-Eingabe</span>
-        </footer>
     </div>
 
     <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
     <script>
-        // --- GLOBALE LOGOUT-FUNKTION (Garantiert sofort verfügbar für onclick) ---
+        // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
         window.logout = function() {
             sessionStorage.removeItem('wedding_pin');
             sessionStorage.removeItem('current_guest_name');
             window.location.reload();
         };
-        window.logoutAdmin = window.logout; // Fallback
 
         document.addEventListener('DOMContentLoaded', function() {
-            // --- 1. GÄSTE-PIN-DATENBANK ---
-            const guestDatabase = { 
-                "4821": "Luki & Meli", 
-                "1234": "Mama & Papa", 
-                "5678": "Oma & Opa", 
-                "9012": "Julia & Thomas", 
-                "7777": "Unsere Trauzeugen", 
-                "1111": "Test-Gast" 
-            };
-            // --- 2. DEINE ECHTEN, FERTIG EINGETRAGENEN SUPABASE SCHLÜSSEL ---
+            // --- 1. DEINE ECHTEN SUPABASE SCHLÜSSEL ---
             const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
             const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODExOTIsImV4cCI6MjA5OTE1NzE5Mn0.Z6-lhYbXxz1_fiCZivXfN-g1tShPdGVI5tPqT9W09wo";
 
@@ -1022,16 +1098,16 @@
                 _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             } catch (e) {
                 console.error("KRITISCHER FEHLER bei Supabase-Initialisierung:", e.message);
-                const errorDiv = document.getElementById('error-overlay');
-                errorDiv.innerHTML = `<h1>DB-Verbindungsfehler</h1><p style="max-width: 600px;">${e.message}</p>`;
-                errorDiv.style.display = 'flex';
-                return; // Skriptausführung stoppen
+                const errorOverlay = document.getElementById('error-overlay');
+                errorOverlay.innerHTML = `<h1>DB-Verbindungsfehler</h1><p>${e.message}</p>`;
+                errorOverlay.style.display = 'flex';
+                return;
             }
 
             // --- Globale Variablen ---
             let enteredPin = "";
             let guestCount = 1;
-            let isExistingRsvp = false; // Flag für Update-Modus
+            let isExistingRsvp = false;
             
             // --- Elemente des Sperrbildschirms ---
             const lockScreen = document.getElementById("lock-screen");
@@ -1041,10 +1117,10 @@
             const savedPin = sessionStorage.getItem('wedding_pin');
             if (savedPin) {
                 if (savedPin === "1407") unlockAdminDashboard();
-                else if (guestDatabase[savedPin]) unlockWebsite(savedPin);
+                else unlockWebsite(savedPin); // Hole Namen live aus DB
             }
             
-            // --- FUNKTIONEN FÜR DAS PIN-PAD (Global freigegeben) ---
+            // --- FUNKTIONEN FÜR DAS PIN-PAD ---
             function pressKey(num) { 
                 if (enteredPin.length < 4) { 
                     enteredPin += num; 
@@ -1074,42 +1150,62 @@
                 } 
             }
             
-            function checkPin() {
+            async function checkPin() {
                 if (enteredPin === "1407") { 
                     errorDiv.style.opacity = "0"; 
                     unlockAdminDashboard(); 
                 } 
-                else if (guestDatabase[enteredPin]) { 
-                    errorDiv.style.opacity = "0"; 
-                    unlockWebsite(enteredPin); 
-                } 
-                else { 
-                    errorDiv.style.opacity = "1";
-                    const container = lockScreen.querySelector('.lock-container');
-                    container.style.animation = "shake 0.3s ease";
-                    setTimeout(() => { container.style.animation = ""; }, 300);
-                    clearPin();
+                else {
+                    // Hole Einladung live aus Supabase
+                    const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', enteredPin).maybeSingle();
+                    
+                    if (invite) {
+                        errorDiv.style.opacity = "0";
+                        unlockWebsite(enteredPin, invite.names);
+                    } else {
+                        // Letzter Fallback für deine Test-Codes
+                        const fallbackDB = { "1111": "Test-Gast", "4821": "Luki & Meli" };
+                        if (fallbackDB[enteredPin]) {
+                            errorDiv.style.opacity = "0";
+                            unlockWebsite(enteredPin, fallbackDB[enteredPin]);
+                        } else {
+                            errorDiv.style.opacity = "1";
+                            const container = lockScreen.querySelector('.lock-container');
+                            container.style.animation = "shake 0.3s ease";
+                            setTimeout(() => { container.style.animation = ""; }, 300);
+                            clearPin();
+                        }
+                    }
                 }
             }
             
-            async function unlockWebsite(pin) {
-                const guestName = guestDatabase[pin];
+            async function unlockWebsite(pin, dbGuestName) {
                 sessionStorage.setItem('wedding_pin', pin);
-                sessionStorage.setItem('current_guest_name', guestName);
+                sessionStorage.setItem('current_guest_name', dbGuestName);
                 
-                document.getElementById("personal-greeting").innerText = `Hallo ${guestName}! Schön, dass ihr da seid.`;
+                // Greeting & Hidden fields
+                document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass ihr da seid.`;
                 document.getElementById("hidden-guest-pin").value = pin;
                 
-                // Prüfen, ob bereits eine RSVP für diesen PIN existiert
+                // GAST FLOATING TOP BAR aktivieren & Abstand setzen
+                document.getElementById("guest-top-bar").style.display = "block";
+                document.getElementById("guest-top-greeting").innerText = `Angemeldet als: ${dbGuestName}`;
+                document.body.style.paddingTop = "50px";
+                
+                // RSVP-Prüfung im Hintergrund
                 try {
                     const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
                     if (error) throw error;
                     
+                    const heroBtn = document.getElementById("hero-rsvp-btn");
+                    
                     if (data) {
-                        // UPDATE MODUS aktivieren
                         isExistingRsvp = true;
                         document.getElementById('guest-email').value = data.email || '';
                         document.getElementById('guest-message').value = data.nachricht || '';
+                        
+                        // Hero Button anpassen
+                        heroBtn.innerText = "Rückmeldung ändern";
                         
                         if (data.status === "Zusage") {
                             document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
@@ -1117,29 +1213,28 @@
                             if (data.gaeste && data.gaeste.length > 0) {
                                 rebuildGuestFields(data.gaeste);
                             } else {
-                                resetGuestFields(guestName);
+                                resetGuestFields(dbGuestName);
                             }
                         } else {
                             document.querySelector('input[name="teilnahme"][value="Absage"]').checked = true;
                             toggleFormFields(false);
-                            resetGuestFields(guestName);
+                            resetGuestFields(dbGuestName);
                         }
-                        
                         document.getElementById('submit-btn').innerText = "Rückmeldung aktualisieren";
                     } else {
-                        // NEUER EINTRAG MODUS
                         isExistingRsvp = false;
+                        heroBtn.innerText = "Jetzt zusagen";
                         document.getElementById('guest-email').value = '';
                         document.getElementById('guest-message').value = '';
                         document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
                         toggleFormFields(true);
-                        resetGuestFields(guestName);
+                        resetGuestFields(dbGuestName);
                         document.getElementById('submit-btn').innerText = "Rückmeldung absenden";
                     }
                 } catch (e) {
                     console.error("Fehler beim Abrufen bestehender RSVPs:", e);
                     isExistingRsvp = false;
-                    resetGuestFields(guestName);
+                    resetGuestFields(dbGuestName);
                 }
                 
                 fadeOut(lockScreen);
@@ -1149,11 +1244,12 @@
             function unlockAdminDashboard() {
                 sessionStorage.setItem('wedding_pin', '1407');
                 loadSupabaseRsvps();
+                loadSupabaseInvites();
                 fadeOut(lockScreen);
                 fadeIn(document.getElementById("admin-dashboard"));
             }
             
-            // Tastatur-Support für PCs
+            // Tastatur-Events
             document.addEventListener('keydown', function(event) {
                 if (lockScreen && lockScreen.style.display !== "none") {
                     if (event.key >= '0' && event.key <= '9') {
@@ -1166,21 +1262,24 @@
                 }
             });
             
-            // --- ADMIN DATEN AUS SUPABASE LADEN ---
+            // --- ADMIN DATEN: RSVPS LADEN ---
             async function loadSupabaseRsvps() {
                 const { data, error } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
                 if (error) { 
                     console.error("Fehler beim Laden der Gästeliste:", error); 
-                    alert("Fehler beim Laden der Gästedaten: " + error.message); 
                     return; 
                 }
                 buildAdminStatsAndTable(data);
             }
             
             function buildAdminStatsAndTable(rsvpsList) {
-                let totalGuests = 0, totalMeat = 0, totalVeggie = 0, totalAbsagen = 0;
+                let totalGuests = 0, totalMeat = 0, totalVeggie = 0;
                 const tableBody = document.getElementById('admin-table-body');
                 tableBody.innerHTML = "";
+                
+                // Speichere RSVPs global im DOM für den Invitations-Abgleich
+                window.allRsvps = rsvpsList;
+                
                 rsvpsList.forEach(rsvp => {
                     let rsvpGuestsHtml = "";
                     if (rsvp.status === "Zusage") {
@@ -1192,9 +1291,9 @@
                             rsvpGuestsHtml += `<span class="food-item"><strong>${g.name}</strong> (${g.essen})</span>`;
                         });
                     } else { 
-                        totalAbsagen++; 
                         rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
                     }
+                    
                     const row = tableBody.insertRow();
                     row.innerHTML = `
                         <td><strong>${rsvp.name}</strong></td>
@@ -1202,15 +1301,165 @@
                         <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
                         <td>${rsvpGuestsHtml}</td>
                         <td><small style="font-size:0.9rem; color:#555;">${rsvp.nachricht || '-'}</small></td>
+                        <td>
+                            <button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
                     `;
                 });
-                document.getElementById('stat-total-guests').innerText = totalGuests;
+                
                 document.getElementById('stat-meat').innerText = totalMeat;
                 document.getElementById('stat-veggie').innerText = totalVeggie;
-                document.getElementById('stat-absagen').innerText = totalAbsagen;
+                
+                // Berechne Statistiken neu
+                calculateGlobalStats();
             }
             
-            // --- FORMULAR-RSVP ABSENDEN (SPEICHERN / UPDATEN) ---
+            // --- RSVP LÖSCHEN ---
+            window.deleteRsvp = async function(pin) {
+                if (confirm("Möchtest du diese Rückmeldung wirklich löschen? Der Gast kann danach neu abstimmen.")) {
+                    const { error } = await _supabase.from('rsvps').delete().eq('pin', pin);
+                    if (error) {
+                        alert("Fehler beim Löschen: " + error.message);
+                    } else {
+                        loadSupabaseRsvps();
+                        loadSupabaseInvites(); // Aktualisiere Tabellen
+                    }
+                }
+            };
+
+            // --- ADMIN DATEN: EINLADUNGEN (INVITATIONS) LADEN ---
+            async function loadSupabaseInvites() {
+                const { data, error } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
+                if (error) {
+                    console.error("Fehler beim Laden der Einladungen:", error);
+                    return;
+                }
+                buildAdminInvitesTable(data);
+            }
+            
+            function buildAdminInvitesTable(invitesList) {
+                const invitesBody = document.getElementById('admin-invites-body');
+                invitesBody.innerHTML = "";
+                
+                window.allInvites = invitesList;
+                
+                invitesList.forEach(invite => {
+                    // Finde heraus, ob für diese PIN eine RSVP vorliegt
+                    const matchedRsvp = window.allRsvps ? window.allRsvps.find(r => r.pin === invite.pin) : null;
+                    
+                    let statusHtml = '<span class="badge badge-ausstehend">Ausstehend</span>';
+                    if (matchedRsvp) {
+                        if (matchedRsvp.status === "Zusage") {
+                            const count = matchedRsvp.gaeste ? matchedRsvp.gaeste.length : 0;
+                            statusHtml = `<span class="badge badge-zusage">Zusage (${count} Pers.)</span>`;
+                        } else {
+                            statusHtml = '<span class="badge badge-absage">Abgesagt</span>';
+                        }
+                    }
+                    
+                    const row = invitesBody.insertRow();
+                    row.innerHTML = `
+                        <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
+                        <td>${invite.names}</td>
+                        <td>${invite.expected_count}</td>
+                        <td>${statusHtml}</td>
+                        <td>
+                            <button class="delete-btn" onclick="window.deleteInvite('${invite.pin}')" title="Einladung löschen">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                });
+                
+                calculateGlobalStats();
+            }
+
+            // --- EINLADUNG LÖSCHEN ---
+            window.deleteInvite = async function(pin) {
+                if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig.")) {
+                    const { error } = await _supabase.from('invitations').delete().eq('pin', pin);
+                    if (error) {
+                        alert("Fehler beim Löschen: " + error.message);
+                    } else {
+                        loadSupabaseInvites();
+                    }
+                }
+            };
+
+            // --- GLOBALE STATISTIKEN BERECHNEN ---
+            function calculateGlobalStats() {
+                const rsvps = window.allRsvps || [];
+                const invites = window.allInvites || [];
+                
+                // 1. Zugesagte Personen insgesamt
+                let guestsConfirmed = 0;
+                rsvps.forEach(rsvp => {
+                    if (rsvp.status === "Zusage" && rsvp.gaeste) {
+                        guestsConfirmed += rsvp.gaeste.length;
+                    }
+                });
+                
+                // 2. Erwartete Personen insgesamt (aus Einladungen)
+                let guestsExpectedTotal = 0;
+                invites.forEach(inv => {
+                    guestsExpectedTotal += (inv.expected_count || 0);
+                });
+                
+                document.getElementById('stat-total-guests').innerText = `${guestsConfirmed} / ${guestsExpectedTotal}`;
+                
+                // 3. Beantwortungsquote
+                const totalInvites = invites.length;
+                const answeredInvites = invites.filter(inv => rsvps.some(r => r.pin === inv.pin)).length;
+                
+                let quote = 0;
+                if (totalInvites > 0) {
+                    quote = Math.round((answeredInvites / totalInvites) * 100);
+                }
+                
+                document.getElementById('stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
+            }
+
+            // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN (PIN GENERIEREN) ---
+            const inviteForm = document.getElementById('admin-invite-form');
+            if (inviteForm) {
+                inviteForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const names = document.getElementById('invite-names').value;
+                    const count = parseInt(document.getElementById('invite-count').value);
+                    
+                    // Einzigartige PIN generieren
+                    const existingInvites = window.allInvites || [];
+                    const existingPins = existingInvites.map(i => i.pin);
+                    
+                    let newPin = "";
+                    let isUnique = false;
+                    while (!isUnique) {
+                        newPin = Math.floor(1000 + Math.random() * 9000).toString();
+                        if (!existingPins.includes(newPin) && newPin !== "1407") {
+                            isUnique = true;
+                        }
+                    }
+                    
+                    const { error } = await _supabase.from('invitations').insert([{
+                        pin: newPin,
+                        names: names,
+                        expected_count: count
+                    }]);
+                    
+                    if (error) {
+                        alert("Fehler beim Erstellen der Einladung: " + error.message);
+                    } else {
+                        document.getElementById('invite-names').value = '';
+                        document.getElementById('invite-count').value = '2';
+                        loadSupabaseInvites(); // Tabelle neu laden
+                    }
+                });
+            }
+
+            // --- FORMULAR RSVP ABSENDEN (SPEICHERN / UPDATEN) ---
             const form = document.getElementById('wedding-rsvp-form');
             if (form) {
                 form.addEventListener('submit', async function(e) {
@@ -1221,7 +1470,9 @@
                     submitBtn.disabled = true;
                     
                     let gaesteArray = [];
-                    if (document.querySelector('input[name="teilnahme"]:checked').value === "Zusage") {
+                    const status = document.querySelector('input[name="teilnahme"]:checked').value;
+                    
+                    if (status === "Zusage") {
                         document.querySelectorAll('.guest-block').forEach((block, index) => {
                             const gName = block.querySelector(`input[name="gast_${index + 1}_name"]`).value;
                             const gEssen = block.querySelector(`input[name="gast_${index + 1}_essen"]:checked`).value;
@@ -1235,7 +1486,7 @@
                     const rsvpData = { 
                         name: savedGuestName, 
                         email: document.getElementById('guest-email').value, 
-                        status: document.querySelector('input[name="teilnahme"]:checked').value, 
+                        status: status, 
                         nachricht: document.getElementById('guest-message').value, 
                         gaeste: gaesteArray, 
                         pin: pin
@@ -1243,10 +1494,8 @@
                     
                     let result;
                     if (isExistingRsvp) {
-                        // Bestehenden Datensatz aktualisieren
                         result = await _supabase.from('rsvps').update(rsvpData).eq('pin', pin);
                     } else {
-                        // Neuen Datensatz anlegen
                         result = await _supabase.from('rsvps').insert([rsvpData]);
                     }
                     
@@ -1258,8 +1507,13 @@
                     } 
                     else { 
                         form.style.display = "none"; 
-                        document.getElementById('form-status').style.display = "block"; 
-                        isExistingRsvp = true; // Jetzt ist eine Rückmeldung vorhanden
+                        document.getElementById('form-status').style.display = "block";
+                        
+                        if (status === "Zusage") {
+                            document.getElementById('form-status-text').innerText = "Wir haben eure Änderungen erhalten und freuen uns schon riesig auf euch!";
+                        } else {
+                            document.getElementById('form-status-text').innerText = "Schade, dass ihr nicht kommen könnt. Wir haben eure Absage vermerkt.";
+                        }
                     }
                 });
             }
