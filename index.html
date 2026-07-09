@@ -47,7 +47,7 @@
             height: 100%;
             background: #fbeae5;
             color: #c0392b;
-            display: flex;
+            display: none; /* Standardmäßig versteckt */
             justify-content: center;
             align-items: center;
             text-align: center;
@@ -733,7 +733,7 @@
     </style>
 </head>
 <body>
-    <div id="error-overlay" style="display: none;"></div>
+    <div id="error-overlay"></div>
     <!-- SPERRBILDSCHIRM (PIN PAD) -->
     <div id="lock-screen" style="display: flex;">
         <div class="lock-container">
@@ -1023,13 +1023,11 @@
             // --- 2. DEINE ECHTEN, FERTIG EINGETRAGENEN SUPABASE SCHLÜSSEL ---
             const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
             const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODExOTIsImV4cCI6MjA5OTE1NzE5Mn0.Z6-lhYbXxz1_fiCZivXfN-g1tShPdGVI5tPqT9W09wo";
-            const PLACEHOLDER_KEY = "DEIN_NEUER_SUPABASE_ANON_KEY";
 
             let _supabase;
             try {
-                // SICHERHEITSPRÜFUNG: Verhindert das Ausführen mit einem Platzhalter-Schlüssel
-                if (SUPABASE_KEY === PLACEHOLDER_KEY || !SUPABASE_KEY) {
-                    throw new Error("Der Supabase API-Schlüssel wurde im HTML-Code nicht ersetzt. Bitte füge den korrekten 'anon key' ein.");
+                if (!SUPABASE_URL || !SUPABASE_KEY) {
+                     throw new Error("Supabase URL oder Key fehlen im Skript.");
                 }
                 _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             } catch (e) {
@@ -1039,6 +1037,7 @@
                 errorDiv.style.display = 'flex';
                 return; // Skriptausführung stoppen
             }
+
             // --- Globale Variablen ---
             let enteredPin = "";
             let guestCount = 1;
