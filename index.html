@@ -39,6 +39,22 @@
             line-height: 1.6;
             overflow-x: hidden;
         }
+        #error-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fbeae5;
+            color: #c0392b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10000;
+            padding: 20px;
+            font-family: monospace;
+        }
         /* --- SPERRBILDSCHIRM (PIN PAD) --- */
         #lock-screen {
             position: fixed;
@@ -717,6 +733,7 @@
     </style>
 </head>
 <body>
+    <div id="error-overlay" style="display: none;"></div>
     <!-- SPERRBILDSCHIRM (PIN PAD) -->
     <div id="lock-screen" style="display: flex;">
         <div class="lock-container">
@@ -1006,16 +1023,21 @@
             // --- 2. DEINE ECHTEN, FERTIG EINGETRAGENEN SUPABASE SCHLÜSSEL ---
             const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
             const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1ODExOTIsImV4cCI6MjA5OTE1NzE5Mn0.Z6-lhYbXxz1_fiCZivXfN-g1tShPdGVI5tPqT9W09wo";
+            const PLACEHOLDER_KEY = "DEIN_NEUER_SUPABASE_ANON_KEY";
 
             let _supabase;
             try {
+                // SICHERHEITSPRÜFUNG: Verhindert das Ausführen mit einem Platzhalter-Schlüssel
+                if (SUPABASE_KEY === PLACEHOLDER_KEY || !SUPABASE_KEY) {
+                    throw new Error("Der Supabase API-Schlüssel wurde im HTML-Code nicht ersetzt. Bitte füge den korrekten 'anon key' ein.");
+                }
                 _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             } catch (e) {
-                console.error("Supabase-Verbindung konnte nicht initialisiert werden:", e.message);
-                if (!document.getElementById("lock-screen") || document.getElementById("lock-screen").style.display === 'none') {
-                    document.body.innerHTML = `<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #c0392b;"><h1>Fehler</h1><p>Die Datenbankverbindung konnte nicht hergestellt werden. Bitte prüfen: ${e.message}</p></div>`;
-                }
-                return;
+                console.error("KRITISCHER FEHLER bei Supabase-Initialisierung:", e.message);
+                const errorDiv = document.getElementById('error-overlay');
+                errorDiv.innerHTML = `<h1>DB-Verbindungsfehler</h1><p style="max-width: 600px;">${e.message}</p>`;
+                errorDiv.style.display = 'flex';
+                return; // Skriptausführung stoppen
             }
             // --- Globale Variablen ---
             let enteredPin = "";
