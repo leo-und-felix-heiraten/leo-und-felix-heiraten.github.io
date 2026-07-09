@@ -5,251 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leo & Felix heiraten!</title>
     
-    <!-- Google Fonts für elegante Typografie -->
+    <!-- Google Fonts & FontAwesome Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Supabase Javascript Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* --- DESIGN SYSTEM (FARBEN & SCHRIFTEN) --- */
-        :root {
-            --bg-color: #fbfcf9;         /* Warmes Off-White */
-            --primary: #606c38;          /* Elegantes Salbeigrün */
-            --primary-dark: #283618;     /* Dunkles Waldgrün */
-            --accent: #dda15e;           /* Warmes Gold/Champagner */
-            --text-dark: #2b2d42;        /* Dunkelgrau für Lesbarkeit */
-            --text-light: #ffffff;
-            --font-serif: 'Playfair Display', Georgia, serif;
-            --font-sans: 'Montserrat', Arial, sans-serif;
-        }
-
-        /* --- BASIC RESET --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: var(--font-sans);
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* --- SPERRBILDSCHIRM (PIN PAD) --- */
-        #lock-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--primary-dark);
-            background: linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), 
-                        url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            color: var(--text-light);
-            text-align: center;
-            padding: 20px;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .lock-container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px 25px;
-            border-radius: 16px;
-            max-width: 400px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-        }
-
-        .lock-container h2 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-            font-style: italic;
-        }
-
-        .lock-container p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-        }
-
-        /* PIN Display (Sterne) */
-        .pin-display {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .pin-dot {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            transition: all 0.2s ease;
-        }
-
-        .pin-dot.active {
-            background-color: var(--accent);
-            border-color: var(--accent);
-            box-shadow: 0 0 10px var(--accent);
-        }
-
-        /* Keypad Gitter */
-        .keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            max-width: 280px;
-            margin: 0 auto;
-        }
-
-        .key {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 400;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            margin: 0 auto;
-            transition: all 0.2s;
-            user-select: none;
-        }
-
-        .key:active, .key:hover {
-            background: var(--accent);
-            color: var(--primary-dark);
-            transform: scale(1.05);
-        }
-
-        .key.action-key {
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        #lock-error {
-            color: #ff6b6b;
-            font-size: 0.9rem;
-            margin-top: 25px;
-            font-weight: 600;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        /* --- HAUPTINHALT (Versteckt bis Freigabe) --- */
-        #main-content, #admin-dashboard {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-
-        section {
-            padding: 80px 20px;
-            text-align: center;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        h1, h2, h3 {
-            font-family: var(--font-serif);
-            font-weight: 400;
-        }
-
-        h2 {
-            font-size: 2.5rem;
-            color: var(--primary-dark);
-            margin-bottom: 20px;
-            position: relative;
-            display: inline-block;
-        }
-
-        h2::after {
-            content: "";
-            display: block;
-            width: 60px;
-            height: 2px;
-            background-color: var(--accent);
-            margin: 15px auto 0 auto;
-        }
-
-        p {
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto 20px auto;
-            color: #555;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: var(--primary);
-            color: var(--text-light);
-            padding: 12px 30px;
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            border: 2px solid var(--primary);
-            font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(96, 108, 56, 0.2);
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background-color: transparent;
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .welcome-badge {
-            background-color: rgba(221, 161, 94, 0.15);
-            border: 1px solid var(--accent);
-            padding: 15px 30px;
-            border-radius: 50px;
-            display: inline-block;
-            margin-bottom: 25px;
-            animation: fadeIn 1s ease;
-        }
-
-        .welcome-badge h3 {
-            color: var(--primary-dark);
-            font-size: 1.3rem;
-            font-family: var(--font-serif);
-            font-style: italic;
-        }
-
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
-                        url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover;
-            color: var(--text-light);
-            padding: 20px;
-        }
-
+        :root { --bg-color: #fbfcf9; --primary: #606c38; --primary-dark: #283618; --accent: #dda15e; --text-dark: #2b2d42; --text-light: #ffffff; --font-serif: 'Playfair Display', Georgia, serif; --font-sans: 'Montserrat', Arial, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-sans); background-color: var(--bg-color); color: var(--text-dark); line-height: 1.6; overflow-x: hidden; }
+        
+        #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover; display: flex; justify-content: center; align-items: center; z-index: 9999; color: var(--text-light); text-align: center; padding: 20px; transition: opacity 0.5s ease; }
+        .lock-container { background: rgba(255, 255, 255, 0.1); padding: 40px 25px; border-radius: 16px; max-width: 400px; width: 100%; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
+        .lock-container h2 { font-size: 2.2rem; margin-bottom: 10px; font-style: italic; }
+        .lock-container p { color: rgba(255, 255, 255, 0.8); font-size: 0.9rem; margin-bottom: 25px; }
+        .pin-display { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .pin-dot { width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.5); border-radius: 50%; transition: all 0.2s ease; }
+        .pin-dot.active { background-color: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 280px; margin: 0 auto; }
+        .key { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.15); color: white; font-size: 1.5rem; font-weight: 400; width: 70px; height: 70px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; margin: 0 auto; transition: all 0.2s; user-select: none; }
+        .key:active, .key:hover { background: var(--accent); color: var(--primary-dark); transform: scale(1.05); }
+        .key.action-key { font-size: 1rem; background: rgba(255, 255, 255, 0.05); }
+        #lock-error { color: #ff6b6b; font-size: 0.9rem; margin-top: 25px; font-weight: 600; opacity: 0; transition: opacity 0.3s; }
+        
+        #main-content, #admin-dashboard { display: none; opacity: 0; transition: opacity 0.8s ease; }
+        section { padding: 80px 20px; text-align: center; max-width: 1000px; margin: 0 auto; }
+        h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; }
+        h2 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 20px; position: relative; display: inline-block; }
+        h2::after { content: ""; display: block; width: 60px; height: 2px; background-color: var(--accent); margin: 15px auto 0 auto; }
+        p { font-size: 1.1rem; max-width: 700px; margin: 0 auto 20px auto; color: #555; }
+        .btn { display: inline-block; background-color: var(--primary); color: var(--text-light); padding: 12px 30px; text-decoration: none; font-weight: 600; border-radius: 30px; transition: all 0.3s ease; border: 2px solid var(--primary); font-size: 1rem; box-shadow: 0 4px 15px rgba(96, 108, 56, 0.2); cursor: pointer; }
+        .btn:hover { background-color: transparent; color: var(--primary); transform: translateY(-2px); }
+        .welcome-badge { background-color: rgba(221, 161, 94, 0.15); border: 1px solid var(--accent); padding: 15px 30px; border-radius: 50px; display: inline-block; margin-bottom: 25px; animation: fadeIn 1s ease; }
+        .welcome-badge h3 { color: var(--primary-dark); font-size: 1.3rem; font-family: var(--font-serif); font-style: italic; }
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover; color: var(--text-light); padding: 20px; }
         .hero h1 { font-size: 4rem; margin-bottom: 10px; font-style: italic; text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); }
         .hero p.subtitle { font-size: 1.8rem; font-family: var(--font-serif); margin-bottom: 30px; color: var(--text-light); text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5); }
         .hero .date { font-size: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.5); border-bottom: 1px solid rgba(255, 255, 255, 0.5); padding: 10px 30px; letter-spacing: 2px; margin-bottom: 40px; }
@@ -259,9 +52,43 @@
         .countdown-item { background: rgba(255, 255, 255, 0.1); padding: 15px 25px; border-radius: 10px; min-width: 100px; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.2); }
         .countdown-item span { display: block; font-size: 2.5rem; font-weight: 600; color: var(--accent); }
         .countdown-item label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* Other styles for brevity... all the other CSS from before is here */
-        
+        .timeline { position: relative; max-width: 800px; margin: 50px auto 0 auto; padding: 0 10px; }
+        .timeline::after { content: ''; position: absolute; width: 2px; background-color: var(--accent); top: 0; bottom: 0; left: 50%; margin-left: -1px; }
+        .container { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; text-align: left; }
+        .container::after { content: ''; position: absolute; width: 16px; height: 16px; right: -8px; background-color: var(--bg-color); border: 4px solid var(--primary); top: 15px; border-radius: 50%; z-index: 1; }
+        .left { left: 0; } .right { left: 50%; } .right::after { left: -8px; }
+        .content { padding: 20px 30px; background-color: white; position: relative; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .content h3 { font-family: var(--font-serif); color: var(--primary-dark); margin-bottom: 5px; }
+        .time { font-weight: 600; color: var(--accent); display: block; margin-bottom: 10px; }
+        .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; text-align: left; }
+        .location-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 5px solid var(--primary); }
+        .location-card i { font-size: 2rem; color: var(--accent); margin-bottom: 20px; }
+        .location-card h3 { margin-bottom: 15px; font-size: 1.5rem; color: var(--primary-dark); }
+        .rsvp { background-color: var(--primary-dark); color: var(--text-light); }
+        .rsvp h2 { color: var(--text-light); } .rsvp h2::after { background-color: var(--accent); }
+        .rsvp p { color: rgba(255, 255, 255, 0.9); }
+        .rsvp-form-container { background: white; color: var(--text-dark); padding: 40px; border-radius: 12px; max-width: 600px; margin: 40px auto 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: left; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--primary-dark); font-size: 0.95rem; }
+        .form-control { width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: var(--font-sans); font-size: 1rem; transition: border-color 0.3s; }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+        textarea.form-control { resize: vertical; min-height: 100px; }
+        .radio-group { display: flex; gap: 20px; margin-top: 5px; }
+        .radio-option { display: flex; align-items: center; cursor: pointer; font-weight: 500; }
+        .radio-option input { margin-right: 8px; accent-color: var(--primary); width: 18px; height: 18px; }
+        .guest-block { background: #f4f6f0; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--accent); position: relative; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .guest-block h4 { font-family: var(--font-sans); font-size: 0.95rem; color: var(--primary-dark); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(96, 108, 56, 0.2); padding-bottom: 8px; }
+        .remove-guest-btn { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .remove-guest-btn:hover { text-decoration: underline; }
+        .add-guest-btn { display: block; width: 100%; background-color: transparent; color: var(--primary); border: 2px dashed var(--primary); padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-bottom: 25px; transition: all 0.3s; text-align: center; font-size: 0.95rem; }
+        .add-guest-btn:hover { background-color: rgba(96, 108, 56, 0.05); border-style: solid; }
+        .submit-btn { width: 100%; padding: 14px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: background-color 0.3s; }
+        .submit-btn:hover { background-color: var(--primary-dark); }
+        #form-status { display: none; text-align: center; padding: 20px; background-color: #e8f5e9; color: #2e7d32; border-radius: 8px; margin-top: 20px; font-weight: 600; }
+        .gifts i { font-size: 3rem; color: var(--accent); margin-bottom: 20px; }
+        footer { background-color: var(--primary-dark); color: rgba(255, 255, 255, 0.6); text-align: center; padding: 40px 20px; font-size: 0.9rem; }
+        footer p { color: rgba(255, 255, 255, 0.6); margin: 0; }
         #admin-dashboard { padding: 40px 20px; max-width: 1200px; margin: 0 auto; }
         .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); padding-bottom: 20px; margin-bottom: 40px; }
         .admin-header h1 { font-family: var(--font-serif); color: var(--primary-dark); font-size: 2.2rem; }
@@ -281,8 +108,162 @@
         .food-item { display: inline-block; background: #eee; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; margin-bottom: 5px; }
         .logout-btn { background-color: #c0392b; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.3s; }
         .logout-btn:hover { background-color: #a0281b; }
-
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+        @media screen and (max-width: 768px) { .hero h1 { font-size: 2.8rem; } .hero p.subtitle { font-size: 1.4rem; } .timeline::after { left: 31px; } .container { width: 100%; padding-left: 70px; padding-right: 25px; } .container::after { left: 23px; right: auto; } .left, .right { left: 0; } .location-grid { grid-template-columns: 1fr; } .rsvp-form-container { padding: 25px 20px; } .admin-header { flex-direction: column; gap: 15px; text-align: center; } }
+    </style>
+</head>
+<body>
 
-        /* All other CSS styles from the previous version are here */
-        .timeline, .container, .content, .location-grid, .location-card, .rsvp, .rsvp-form-container, .form-group, .form-control, .radio-group, .guest-block, .gifts, footer, .submit-btn, #form-status, .add-guest-btn, .remove-guest-btn {
+    <!-- SPERRBILDSCHIRM (PIN PAD) -->
+    <div id="lock-screen" style="display: flex;">
+        <div class="lock-container">
+            <h2>Leo & Felix</h2>
+            <p style="font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; color: var(--accent); margin-bottom: 10px;">Wir heiraten!</p>
+            <p>Bitte gib euren persönlichen 4-stelligen PIN von eurer Einladungskarte ein, um die Website zu öffnen:</p>
+            <div class="pin-display">
+                <div class="pin-dot" id="dot-0"></div><div class="pin-dot" id="dot-1"></div><div class="pin-dot" id="dot-2"></div><div class="pin-dot" id="dot-3"></div>
+            </div>
+            <div class="keypad">
+                <div class="key" onclick="pressKey('1')">1</div><div class="key" onclick="pressKey('2')">2</div><div class="key" onclick="pressKey('3')">3</div>
+                <div class="key" onclick="pressKey('4')">4</div><div class="key" onclick="pressKey('5')">5</div><div class="key" onclick="pressKey('6')">6</div>
+                <div class="key" onclick="pressKey('7')">7</div><div class="key" onclick="pressKey('8')">8</div><div class="key" onclick="pressKey('9')">9</div>
+                <div class="key action-key" onclick="clearPin()">Clear</div><div class="key" onclick="pressKey('0')">0</div><div class="key action-key" onclick="deleteLast()"><i class="fa-solid fa-delete-left"></i></div>
+            </div>
+            <div id="lock-error">Falscher PIN. Bitte versucht es noch einmal.</div>
+        </div>
+    </div>
+
+    <!-- 📊 ADMIN DASHBOARD -->
+    <div id="admin-dashboard">
+        <div class="admin-header">
+            <div>
+                <h1>Hochzeits-Zusagen & Planer</h1>
+                <p style="text-align: left; margin: 5px 0 0 0; font-size: 0.95rem; color: #666;">Willkommen im Admin-Bereich, Leo & Felix! ❤️</p>
+            </div>
+            <button class="logout-btn" onclick="logoutAdmin()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
+        </div>
+        <div class="admin-stats-grid">
+            <div class="admin-card"><h3 >Gäste Zugesagt</h3><div class="stat-value" id="stat-total-guests">0</div></div>
+            <div class="admin-card accent-card"><h3 >Menü: Fleisch</h3><div class="stat-value" id="stat-meat">0</div></div>
+            <div class="admin-card accent-card"><h3 >Menü: Vegetarisch</h3><div class="stat-value" id="stat-veggie">0</div></div>
+            <div class="admin-card"><h3 >Absagen (Gruppen)</h3><div class="stat-value" id="stat-absagen">0</div></div>
+        </div>
+        <div class="admin-table-container">
+            <h2>Detaillierte Gästeliste</h2>
+            <table class="admin-table">
+                <thead><tr><th>Gruppe / Absender</th><th>E-Mail</th><th>Status</th><th>Gäste & Essenswünsche</th><th>Anmerkungen / Allergien</th></tr></thead>
+                <tbody id="admin-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- HAUPTINHALT -->
+    <div id="main-content">
+        <header class="hero">
+            <div class="welcome-badge"><h3 id="personal-greeting">Hallo ihr Lieben!</h3></div>
+            <h1>Leo & Felix</h1>
+            <p class="subtitle">Wir sagen Ja!</p>
+            <div class="date">24. Juni 2028</div>
+            <a href="#rsvp" class="btn">Jetzt zusagen</a>
+        </header>
+        <div class="countdown-container">
+            <h3>Wir können es kaum erwarten...</h3>
+            <div class="countdown" id="countdown">
+                <div class="countdown-item"><span id="days">00</span><label>Tage</label></div>
+                <div class="countdown-item"><span id="hours">00</span><label>Stunden</label></div>
+                <div class="countdown-item"><span id="minutes">00</span><label>Minuten</label></div>
+                <div class="countdown-item"><span id="seconds">00</span><label>Sekunden</label></div>
+            </div>
+        </div>
+        <section id="einladung">
+            <h2>Unsere Hochzeit</h2>
+            <p>Liebe Familie, liebe Freunde,</p>
+            <p>wir freuen uns riesig, den nächsten großen Schritt in unserem Leben gemeinsam zu gehen. Wir möchten diesen besonderen Tag mit den Menschen verbringen, die uns am Herzen liegen – mit euch!</p>
+            <p>Hier findet ihr alle wichtigen Details zu unserer Hochzeitsfeier. Bitte gebt uns bis zum <strong>15. April 2028</strong> Bescheid, ob ihr mit uns feiert.</p>
+        </section>
+        <section id="ablauf" style="background-color: #f3f5f0;">
+            <h2>Der Ablaufplan</h2>
+            <p>So haben wir unseren großen Tag geplant:</p>
+            <div class="timeline">
+                <div class="container left"><div class="content"><span class="time">14:00 Uhr</span><h3>Freie Trauung</h3><p>Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.</p></div></div>
+                <div class="container right"><div class="content"><span class="time">15:30 Uhr</span><h3>Sektempfang & Torte</h3><p>Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.</p></div></div>
+                <div class="container left"><div class="content"><span class="time">18:30 Uhr</span><h3>Festliches Dinner</h3><p>Ein feines Buffet wartet auf uns im großen Saal.</p></div></div>
+                <div class="container right"><div class="content"><span class="time">21:00 Uhr</span><h3>Eröffnung der Tanzfläche</h3><p>Wir starten die Party und tanzen bis in die frühen Morgenstunden!</p></div></div>
+            </div>
+        </section>
+        <section id="location">
+            <h2>Die Locations</h2>
+            <p>Hier wird gelacht, gefeiert und getanzt:</p>
+            <div class="location-grid">
+                <div class="location-card"><i class="fa-solid fa-church"></i><h3>Die Trauung & Feier</h3><p><strong>Gutshof Sonnenschein</strong><br>Musterstraße 42<br>12345 Traumstadt</p><p>Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.</p></div>
+                <div class="location-card"><i class="fa-solid fa-hotel"></i><h3>Unterkunftstipp</h3><p><strong>Hotel am Stadtpark</strong><br>Bahnhofstraße 5<br>12345 Traumstadt</p><p>Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".</p></div>
+            </div>
+        </section>
+        <section id="rsvp" class="rsvp">
+            <h2>Zusage & Rückmeldung</h2>
+            <p>Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!</p>
+            <div class="rsvp-form-container">
+                <form id="wedding-rsvp-form">
+                    <input type="hidden" name="benutzter_pin" id="hidden-guest-pin" value="">
+                    <div class="form-group"><label>Seid ihr dabei? *</label><div class="radio-group"><label class="radio-option"><input type="radio" name="teilnahme" value="Zusage" checked onclick="toggleFormFields(true)"> Ja, ich/wir kommen! 🎉</label><label class="radio-option"><input type="radio" name="teilnahme" value="Absage" onclick="toggleFormFields(false)"> Nein, leider nicht. 😢</label></div></div>
+                    <div class="form-group"><label for="guest-email">E-Mail-Adresse für Rückfragen *</label><input type="email" id="guest-email" name="email" class="form-control" placeholder="name@beispiel.de" required></div>
+                    <div id="dynamic-fields">
+                        <label style="display: block; font-weight: 600; margin-bottom: 15px; color: var(--primary-dark); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Gästeliste & Essenswünsche</label>
+                        <div id="guest-list-container"><div class="guest-block" id="guest-block-1"><h4 id="guest-title-1">Gast 1 (Hauptkontakt)</h4><div class="form-group" style="margin-bottom: 10px;"><input type="text" id="gast-1-input" name="gast_1_name" class="form-control" placeholder="Name von Gast 1" required></div><div class="form-group" style="margin-bottom: 0;"><label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label><div class="radio-group"><label class="radio-option"><input type="radio" name="gast_1_essen" value="Fleisch" checked> Fleisch 🥩</label><label class="radio-option"><input type="radio" name="gast_1_essen" value="Vegetarisch"> Vegetarisch 🥦</label></div></div></div></div>
+                        <button type="button" class="add-guest-btn" onclick="addGuestField()"><i class="fa-solid fa-plus"></i> Weiteren Gast hinzufügen</button>
+                    </div>
+                    <div class="form-group"><label for="guest-message">Anmerkungen (z.B. Allergien, Musikwünsche, etc.)</label><textarea id="guest-message" name="nachricht" class="form-control" placeholder="Schreibt uns hier, falls jemand bestimmte Allergien hat oder ihr uns noch etwas mitteilen möchtet..."></textarea></div>
+                    <button type="submit" class="submit-btn" id="submit-btn">Rückmeldung absenden</button>
+                </form>
+                <div id="form-status" style="display: none;"><h3>Vielen Dank für eure Rückmeldung! ❤️</h3><p style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p></div>
+            </div>
+        </section>
+        <section id="geschenke">
+            <i class="fa-solid fa-gift"></i>
+            <h2>Flitterwochen & Geschenke</h2>
+            <p>Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.<br>Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!</p>
+            <p>Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</p>
+        </section>
+        <footer>
+            <p>Leo & Felix — 24.06.2028</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.5;">Erstellt mit Liebe und GitHub Pages</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- 1. GÄSTE-PIN-DATENBANK ---
+            const guestDatabase = { "4821": "Luki & Meli", "1234": "Mama & Papa", "5678": "Oma & Opa", "9012": "Julia & Thomas", "7777": "Unsere Trauzeugen", "1111": "Test-Gast" };
+
+            // --- 2. DEINE ECHTEN, FERTIG EINGETRAGENEN SUPABASE SCHLÜSSEL ---
+            const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
+            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlhcXJ2dWdoYnppb2JkdXhqcGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5OTg5ODIsImV4cCI6MjAxNTU3NDk4Mn0.sb_publishable_Gy9evz7CvcAqjBZmLCPlQQ_3npevOki";
+
+            let _supabase;
+            try {
+                _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            } catch (e) {
+                console.error("Supabase-Verbindung konnte nicht initialisiert werden:", e);
+                document.body.innerHTML = '<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #c0392b;"><h1>Fehler</h1><p>Die Datenbankverbindung konnte nicht hergestellt werden. Bitte prüfen Sie die Supabase-Schlüssel im Code.</p></div>';
+                return;
+            }
+
+            // --- Globale Variablen ---
+            let enteredPin = "";
+            let currentGuestName = "";
+            let guestCount = 1;
+
+            // --- Elemente des Sperrbildschirms ---
+            const lockScreen = document.getElementById("lock-screen");
+            const errorDiv = document.getElementById("lock-error");
+
+            // --- Hauptfunktionen ---
+            const savedPin = sessionStorage.getItem('wedding_pin');
+            if (savedPin) {
+                if (savedPin === "1407") unlockAdminDashboard();
+                else if (guestDatabase[savedPin]) unlockWebsite(savedPin);
+            }
+
+            function pressKey(num) { if (enteredPin.length < 4) { enteredPin += num; updatePinDisplay(); if (enteredPin.length === 4) setTimeout(checkPin, 250); } }
+            function deleteLast() { if (enteredPin.length > 0) { enteredPin = enteredPin.slice(0, -1); updatePinDisplay(); } }
+            functio
