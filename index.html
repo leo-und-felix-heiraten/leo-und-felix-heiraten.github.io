@@ -41,6 +41,125 @@
             overflow-x: hidden;
         }
 
+        /* --- SPERRBILDSCHIRM (PIN PAD) --- */
+        #lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-dark);
+            background: linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), 
+                        url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: var(--text-light);
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .lock-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px 25px;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+
+        .lock-container h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .lock-container p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        /* PIN Display (Sterne) */
+        .pin-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .pin-dot {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .pin-dot.active {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Keypad Gitter */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+
+        .key {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 400;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin: 0 auto;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .key:active, .key:hover {
+            background: var(--accent);
+            color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .key.action-key {
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        #lock-error {
+            color: #ff6b6b;
+            font-size: 0.9rem;
+            margin-top: 25px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* --- HAUPTINHALT (Versteckt bis Freigabe) --- */
+        #main-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
         section {
             padding: 80px 20px;
             text-align: center;
@@ -96,6 +215,24 @@
             background-color: transparent;
             color: var(--primary);
             transform: translateY(-2px);
+        }
+
+        /* --- PERSÖNLICHE BEGRÜSSUNGS-BOX --- */
+        .welcome-badge {
+            background-color: rgba(221, 161, 94, 0.15);
+            border: 1px solid var(--accent);
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 25px;
+            animation: fadeIn 1s ease;
+        }
+
+        .welcome-badge h3 {
+            color: var(--primary-dark);
+            font-size: 1.3rem;
+            font-family: var(--font-serif);
+            font-style: italic;
         }
 
         /* --- HERO SECTION --- */
@@ -282,7 +419,7 @@
             color: var(--primary-dark);
         }
 
-        /* --- RSVP SECTION WITH MODERN FORM --- */
+        /* --- RSVP SECTION WITH DYNAMIC GUEST CARDS --- */
         .rsvp {
             background-color: var(--primary-dark);
             color: var(--text-light);
@@ -312,7 +449,7 @@
         }
 
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -343,7 +480,7 @@
             min-height: 100px;
         }
 
-        /* Radio Buttons Styling */
+        /* Radio Buttons */
         .radio-group {
             display: flex;
             gap: 20px;
@@ -362,6 +499,71 @@
             accent-color: var(--primary);
             width: 18px;
             height: 18px;
+        }
+
+        /* Dynamische Gästekarten */
+        .guest-block {
+            background: #f4f6f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent);
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .guest-block h4 {
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed rgba(96, 108, 56, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .remove-guest-btn {
+            background: none;
+            border: none;
+            color: #c0392b;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .remove-guest-btn:hover {
+            text-decoration: underline;
+        }
+
+        .add-guest-btn {
+            display: block;
+            width: 100%;
+            background-color: transparent;
+            color: var(--primary);
+            border: 2px dashed var(--primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .add-guest-btn:hover {
+            background-color: rgba(96, 108, 56, 0.05);
+            border-style: solid;
         }
 
         .submit-btn {
@@ -414,327 +616,52 @@
             margin: 0;
         }
 
-        /* --- RESPONSIVE DESIGN --- */
-        @media screen and (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.8rem;
-            }
-            .hero p.subtitle {
-                font-size: 1.4rem;
-            }
-            .timeline::after {
-                left: 31px;
-            }
-            .container {
-                width: 100%;
-                padding-left: 70px;
-                padding-right: 25px;
-            }
-            .container::after {
-                left: 23px;
-                right: auto;
-            }
-            .left, .right {
-                left: 0;
-            }
-            .location-grid {
-                grid-template-columns: 1fr;
-            }
-            .rsvp-form-container {
-                padding: 25px 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- HERO SECTION -->
-    <header class="hero">
-        <h1>Leo & Felix</h1>
-        <p class="subtitle">Wir sagen Ja!</p>
-        <div class="date">11. September 2027</div>
-        <a href="#rsvp" class="btn">Jetzt zusagen</a>
-    </header>
-
-    <!-- COUNTDOWN -->
-    <div class="countdown-container">
-        <h3>Wir können es kaum erwarten...</h3>
-        <div class="countdown" id="countdown">
-            <div class="countdown-item">
-                <span id="days">00</span>
-                <label>Tage</label>
-            </div>
-            <div class="countdown-item">
-                <span id="hours">00</span>
-                <label>Stunden</label>
-            </div>
-            <div class="countdown-item">
-                <span id="minutes">00</span>
-                <label>Minuten</label>
-            </div>
-            <div class="countdown-item">
-                <span id="seconds">00</span>
-                <label>Sekunden</label>
-            </div>
-        </div>
-    </div>
-
-    <!-- UNSERE STORY / EINLADUNG -->
-    <section id="einladung">
-        <h2>Unsere Hochzeit</h2>
-        <p>Liebe Familie, liebe Freunde,</p>
-        <p>wir freuen uns riesig, den nächsten großen Schritt in unserem Leben gemeinsam zu gehen. Wir möchten diesen besonderen Tag mit den Menschen verbringen, die uns am Herzen liegen – mit euch!</p>
-        <p>Hier findet ihr alle wichtigen Details zu unserer Hochzeitsfeier. Bitte gebt uns bis zum <strong>01. Juli 2027</strong> Bescheid, ob ihr mit uns feiert.</p>
-    </section>
-
-    <!-- ABLAUFPLAN -->
-    <section id="ablauf" style="background-color: #f3f5f0;">
-        <h2>Der Ablaufplan</h2>
-        <p>So haben wir unseren großen Tag geplant:</p>
-        
-        <div class="timeline">
-            <div class="container left">
-                <div class="content">
-                    <span class="time">14:00 Uhr</span>
-                    <h3>Freie Trauung</h3>
-                    <p>Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.</p>
-                </div>
-            </div>
-            <div class="container right">
-                <div class="content">
-                    <span class="time">15:30 Uhr</span>
-                    <h3>Sektempfang & Torte</h3>
-                    <p>Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.</p>
-                </div>
-            </div>
-            <div class="container left">
-                <div class="content">
-                    <span class="time">18:30 Uhr</span>
-                    <h3>Festliches Dinner</h3>
-                    <p>Ein feines Buffet wartet auf uns im großen Saal.</p>
-                </div>
-            </div>
-            <div class="container right">
-                <div class="content">
-                    <span class="time">21:00 Uhr</span>
-                    <h3>Eröffnung der Tanzfläche</h3>
-                    <p>Wir starten die Party und tanzen bis in die frühen Morgenstunden!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- LOCATION -->
-    <section id="location">
-        <h2>Die Locations</h2>
-        <p>Hier wird gelacht, gefeiert und getanzt:</p>
-        
-        <div class="location-grid">
-            <div class="location-card">
-                <i class="fa-solid fa-church"></i>
-                <h3>Die Trauung & Feier</h3>
-                <p><strong>Gutshof Sonnenschein</strong><br>
-                Musterstraße 42<br>
-                12345 Traumstadt</p>
-                <p>Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.</p>
-            </div>
-            <div class="location-card">
-                <i class="fa-solid fa-hotel"></i>
-                <h3>Unterkunftstipp</h3>
-                <p><strong>Hotel am Stadtpark</strong><br>
-                Bahnhofstraße 5<br>
-                12345 Traumstadt</p>
-                <p>Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- RSVP SECTION WITH SMART INTERACTIVE FORM -->
-    <section id="rsvp" class="rsvp">
-        <h2>Zusage & Rückmeldung</h2>
-        <p>Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!</p>
-        
-        <div class="rsvp-form-container">
-            <form action="https://api.web3forms.com/submit" method="POST" id="wedding-rsvp-form">
-                
-                <!-- Hier ist euer persönlicher Web3Forms Schlüssel fest integriert -->
-                <input type="hidden" name="access_key" value="5c69d57a-5911-44a3-a57e-4c039318e07f">
-                <input type="hidden" name="subject" value="Neue Hochzeits-Zusage von der Website!">
-                <!-- Spamschutz -->
-                <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
-
-                <!-- 1. Teilnahme-Status -->
-                <div class="form-group">
-                    <label>Seid ihr dabei? *</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="teilnahme" value="Zusage" checked onclick="toggleFormFields(true)">
-                            Ja, ich/wir kommen! 🎉
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="teilnahme" value="Absage" onclick="toggleFormFields(false)">
-                            Nein, leider nicht. 😢
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 2. Name(n) -->
-                <div class="form-group">
-                    <label for="guest-names">Name(n) der Gäste *</label>
-                    <input type="text" id="guest-names" name="gaeste_namen" class="form-control" placeholder="z.B. Julia & Thomas Schmidt" required>
-                </div>
-
-                <!-- 3. E-Mail -->
-                <div class="form-group">
-                    <label for="guest-email">E-Mail-Adresse für Rückfragen *</label>
-                    <input type="email" id="guest-email" name="email" class="form-control" placeholder="name@beispiel.de" required>
-                </div>
-
-                <!-- Dynamischer Teil: Wird bei Absage ausgeblendet -->
-                <div id="dynamic-fields">
-                    <!-- 4. Anzahl der Personen -->
-                    <div class="form-group">
-                        <label for="guest-count">Mit wie vielen Personen kommt ihr insgesamt? *</label>
-                        <select id="guest-count" name="personen_anzahl" class="form-control">
-                            <option value="1">1 Person</option>
-                            <option value="2" selected>2 Personen</option>
-                            <option value="3">3 Personen</option>
-                            <option value="4">4 Personen</option>
-                            <option value="5+">Mehr als 4 (Bitte unten in die Anmerkung schreiben)</option>
-                        </select>
-                    </div>
-
-                    <!-- 5. Essenswünsche -->
-                    <div class="form-group">
-                        <label>Eure Essenswünsche *</label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="essenswunsch" value="Fleisch" checked>
-                                Fleisch 🥩
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="essenswunsch" value="Vegetarisch">
-                                Vegetarisch 🥦
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 6. Optionale Nachricht / Allergien -->
-                <div class="form-group">
-                    <label for="guest-message">Anmerkungen (z.B. Allergien, Musikwünsche, etc.)</label>
-                    <textarea id="guest-message" name="nachricht" class="form-control" placeholder="Schreibt uns hier, falls ihr Allergien habt oder uns noch etwas mitteilen möchtet..."></textarea>
-                </div>
-
-                <!-- Absende-Button -->
-                <button type="submit" class="submit-btn" id="submit-btn">Rückmeldung absenden</button>
-            </form>
-
-            <!-- Erfolgsmeldung nach dem Absenden -->
-            <div id="form-status">
-                <h3>Vielen Dank für eure Rückmeldung! ❤️</h3>
-                <p style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- GESCHENKE -->
-    <section id="geschenke">
-        <i class="fa-solid fa-gift"></i>
-        <h2>Flitterwochen & Geschenke</h2>
-        <p>Unser Haushalt ist komplett, vom Teller bis zum Besen,  
-        und auch sonst ist alles da gewesen.<br>
-        Wollt ihr uns eine Freude machen,  
-        dann lasst am liebsten unsere Reisekasse lachen!</p>
-        <p>Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</p>
-    </section>
-
-    <!-- FOOTER -->
-    <footer>
-        <p>Leo & Felix — 11.09.2027</p>
-        <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.5;">Erstellt mit Liebe und GitHub Pages</p>
-    </footer>
-
-    <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN -->
-    <script>
-        // --- 1. COUNTDOWN SCRIPT ---
-        const weddingDate = new Date(2027, 8, 11, 14, 0, 0).getTime();
-
-        const timer = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = weddingDate - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById("days").innerText = days < 10 ? "0" + days : days;
-            document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
-            document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
-            document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
-
-            if (distance < 0) {
-                clearInterval(timer);
-                document.getElementById("countdown").innerHTML = "<h3>Der große Tag ist da! 🎉</h3>";
-            }
-        }, 1000);
-
-
-        // --- 2. FORMULAR-LOGIK: EIN-/AUSBLENDEN BEI ABSAGE ---
-        function toggleFormFields(show) {
-            const dynamicFields = document.getElementById("dynamic-fields");
-            if (show) {
-                dynamicFields.style.display = "block";
-                document.getElementById("guest-count").required = true;
-            } else {
-                dynamicFields.style.display = "none";
-                document.getElementById("guest-count").required = false;
-            }
+        /* ==========================================
+           📊 STYLES FÜR DAS ADMIN-DASHBOARD (PIN: 1407)
+           ========================================== */
+        #admin-dashboard {
+            display: none;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
 
-        // --- 3. FORMULAR ABSENDEN OHNE SEITEN-RELOAD (AJAX) ---
-        const form = document.getElementById('wedding-rsvp-form');
-        const formStatus = document.getElementById('form-status');
-        const submitBtn = document.getElementById('submit-btn');
+        .admin-header h1 {
+            font-family: var(--font-serif);
+            color: var(--primary-dark);
+            font-size: 2.2rem;
+        }
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            submitBtn.innerText = "Wird gesendet...";
-            submitBtn.disabled = true;
+        /* Stats Cards */
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
 
-            const formData = new FormData(form);
-            const object = Object.fromEntries(formData);
-            const json = JSON.stringify(object);
+        .admin-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary);
+            text-align: center;
+        }
 
-            fetch('https://api.web3forms.com/submit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: json
-            })
-            .then(async (response) => {
-                let json = await response.json();
-                if (response.status == 200) {
-                    form.style.display = "none";
-                    formStatus.style.display = "block";
-                } else {
-                    console.log(response);
-                    alert("Es gab ein Problem. Bitte versuche es noch einmal.");
-                    submitBtn.innerText = "Rückmeldung absenden";
-                    submitBtn.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.log(error);
-                alert("Ein Fehler ist aufgetreten. Bitte überprüfe deine Internetverbindung.");
-                submitBtn.innerText = "Rückmeldung absenden";
-                submitBtn.disabled = false;
-            });
-        });
-    </script>
-</body>
-</html>
+        .admin-card.accent-card {
+            border-top-color: var(--accent);
+        }
+
+        .admin-card h3 {
+            font-size: 0.9rem;
+            text-transf
