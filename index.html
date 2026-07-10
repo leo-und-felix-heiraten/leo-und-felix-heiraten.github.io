@@ -1288,25 +1288,28 @@
     <div class="admin-stats-grid">
         <div class="admin-card">
             <h3>Gäste Zugesagt</h3>
-            <div class="stat-value" id="tz-stat-total-guests">0 / 0</div>
+            <div class="stat-value" id="tz-total-guests">0 / 0</div>
         </div>
         <div class="admin-card accent-card">
             <h3>Menü: Fleisch</h3>
-            <div class="stat-value" id="tz-stat-meat">0</div>
+            <div class="stat-value" id="tz-meat">0</div>
         </div>
         <div class="admin-card accent-card">
             <h3>Menü: Vegetarisch</h3>
-            <div class="stat-value" id="tz-stat-veggie">0</div>
+            <div class="stat-value" id="tz-veggie">0</div>
         </div>
         <div class="admin-card">
             <h3>Rückmeldungs-Quote</h3>
-            <div class="stat-value" id="tz-stat-quote">0%</div>
+            <div class="stat-value" id="tz-quote">0%</div>
         </div>
     </div>
 
     <!-- TRAUZEUGE RSVPS -->
     <div class="admin-panel">
-        <h2>Erhaltene Rückmeldungen (Gästeliste)</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+             <h2 style="margin: 0; padding: 0; border: none; display: inline-block;">Erhaltene Rückmeldungen (Gästeliste)</h2>
+             <button class="btn" onclick="window.exportRsvpsToCsv()" style="background: var(--primary); font-size: 0.85rem; padding: 8px 15px;"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> Gästeliste exportieren (CSV)</button>
+        </div>
         <div style="overflow-x: auto;">
             <table class="admin-table">
                 <thead>
@@ -1327,7 +1330,10 @@
 
     <!-- TRAUZEUGE PLAYLIST -->
     <div class="admin-panel" style="margin-top: 20px;">
-        <h2>Die Wunsch-Playlist 🎵</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin:0; padding:0; border:none;">Die Wunsch-Playlist 🎵</h2>
+            <button class="btn" onclick="window.exportSongsToCsv()" style="background: var(--primary); font-size: 0.85rem; padding: 8px 15px;"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> Wunschliste exportieren (CSV)</button>
+        </div>
         <div style="overflow-x: auto;">
             <table class="admin-table">
                 <thead>
@@ -1640,8 +1646,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         let guestCount = 1;
         let isExistingRsvp = false;
         window.siteSettings = {};
-        window.allSongs = []; // Für Song-Vorschläge
-        
+        window.allRsvps = []; // Globale RSVP-Liste
+        window.allInvites = []; // Globale Invite-Liste
+
         // --- Elemente des Sperrbildschirms ---
         const lockScreen = document.getElementById("lock-screen");
         const errorDiv = document.getElementById("lock-error");
@@ -2325,78 +2332,50 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             fadeIn(document.getElementById("main-content"));
         }
         
-        function unlockAdminDashboard() {
+        async function unlockAdminDashboard() {
             sessionStorage.setItem('wedding_pin', '1407');
-            loadAdminData(); // Zentrale Funktion für Admin
-        }
-        
-        // Tastatur-Events
-        document.addEventListener('keydown', function(event) {
-            if (lockScreen && lockScreen.style.display !== "none") {
-                if (event.key >= '0' && event.key <= '9') {
-                    pressKey(event.key);
-                } else if (event.key === 'Backspace') {
-                    deleteLast();
-                } else if (event.key === 'Escape') {
-                    clearPin();
-                }
-            }
-        });
-        
-        // --- ZENTRALE DATENLADE- & RENDER-FUNKTIONEN ---
-
-        async function loadAdminData() {
-            const { data: rsvps, error: rsvpsErr } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
-            const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
-            
-            if (rsvpsErr || invitesErr) {
-                console.error("Fehler beim Laden der Admin-Daten:", rsvpsErr || invitesErr);
-                return;
-            }
-            
-            window.allRsvps = rsvps;
-            window.allInvites = invites;
-
-            buildAdminStatsAndTable(rsvps, invites);
-            buildAdminPlaylistTable(rsvps);
-            buildAdminInvitesTable(invites, rsvps);
-            loadAdminTimelineTable();
-
+            await loadAdminData(); // Zentrale Funktion für Admin
             fadeOut(lockScreen);
             document.getElementById("admin-top-bar").style.display = "block";
             document.body.classList.add('admin-bar-active');
             window.toggleAdminView('dashboard');
         }
+        
+        
+        // --- ZENTRALE DATENLADE- & RENDER-FUNKTIONEN ---
 
-        async function loadTrauzeugeData() {
+        async function loadGlobalData() {
             const { data: rsvps, error: rsvpsErr } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
-            const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*');
+            const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
             
             if (rsvpsErr || invitesErr) {
-                console.error("Fehler beim Laden der Trauzeuge-Daten:", rsvpsErr || invitesErr);
+                console.error("Fehler beim Laden der globalen Daten:", rsvpsErr || invitesErr);
                 return;
             }
-            
-            buildTrauzeugeStatsAndTable(rsvps, invites);
-            buildTrauzeugePlaylistTable(rsvps); // Eigene Funktion für TZ-Playlist
+            window.allRsvps = rsvps || [];
+            window.allInvites = invites || [];
         }
 
-        function buildTrauzeugeStatsAndTable(rsvpsList, invitesList) {
-            buildRsvpTable(rsvpsList, 'trauzeuge-table-body');
-            calculateAndRenderStats(rsvpsList, invitesList, 'tz-');
+        async function loadAdminData() {
+            await loadGlobalData();
+            buildAdminStatsAndTable(window.allRsvps, window.allInvites);
+            buildAdminPlaylistTable(window.allRsvps);
+            buildAdminInvitesTable(window.allInvites, window.allRsvps);
+            loadAdminTimelineTable();
         }
-        
-        function buildTrauzeugePlaylistTable(rsvpsList) {
+
+        async function loadTrauzeugeData() {
+            await loadGlobalData();
+            buildTrauzeugeDashboard(window.allRsvps, window.allInvites);
+        }
+
+        function buildTrauzeugeDashboard(rsvpsList, invitesList) {
+            // Fülle die RSVP Tabelle für Trauzeugen
+            buildRsvpTable(rsvpsList, 'trauzeuge-table-body', false); // false = kein Admin
+            // Fülle die Playlist Tabelle für Trauzeugen
             buildPlaylistTable(rsvpsList, 'trauzeuge-playlist-body');
-        }
-
-        function buildAdminStatsAndTable(rsvpsList, invitesList) {
-            buildRsvpTable(rsvpsList, 'admin-table-body', true); // 'true' für Admin-Ansicht mit Löschen-Button
-            calculateAndRenderStats(rsvpsList, invitesList, 'stat-');
-        }
-        
-        function buildAdminPlaylistTable(rsvpsList) {
-            buildPlaylistTable(rsvpsList, 'admin-playlist-body');
+            // Berechne und rendere die Statistiken für Trauzeugen
+            calculateAndRenderStats(rsvpsList, invitesList, 'tz-');
         }
         
         // --- Generische Render-Funktionen ---
@@ -2406,7 +2385,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             let totalMeat = 0;
             let totalVeggie = 0;
             rsvpsList.forEach(rsvp => {
-                if (rsvp.status === "Zusage" && rsvp.gaeste) {
+                if (rsvp.status === "Zusage" && Array.isArray(rsvp.gaeste)) {
                     guestsConfirmed += rsvp.gaeste.length;
                     rsvp.gaeste.forEach(g => {
                         if (g.essen === "Fleisch") totalMeat++;
@@ -2492,6 +2471,15 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht.</td></tr>`;
             }
         }
+
+        function buildAdminStatsAndTable(rsvps, invites){
+             calculateAndRenderStats(rsvps, invites, 'stat-');
+             buildRsvpTable(rsvps, 'admin-table-body', true);
+        }
+        
+        function buildAdminPlaylistTable(rsvps) {
+            buildPlaylistTable(rsvps, 'admin-playlist-body');
+        }
         
         // --- CSV EXPORT FUNKTIONEN ---
         window.exportRsvpsToCsv = function() {
@@ -2563,7 +2551,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 if (error) {
                     alert("Fehler beim Löschen: " + error.message);
                 } else {
-                    loadAdminData();
+                    await loadAdminData();
                 }
             }
         };
@@ -2577,7 +2565,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const hasRsvpB = rsvpsList.some(r => r.pin === b.pin);
                 if (hasRsvpA && !hasRsvpB) return 1;  
                 if (!hasRsvpA && hasRsvpB) return -1; 
-                return 0;
+                return new Date(b.created_at) - new Date(a.created_at); // Neueste zuerst
             });
             
             invitesList.forEach(invite => {
@@ -2616,7 +2604,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig und eine eventuell bereits abgegebene Rückmeldung (Zusage/Absage) wird ebenfalls gelöscht.")) {
                 await _supabase.from('rsvps').delete().eq('pin', pin);
                 await _supabase.from('invitations').delete().eq('pin', pin);
-                loadAdminData(); // Alles neu laden
+                await loadAdminData(); // Alles neu laden
             }
         };
 
@@ -2630,7 +2618,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const count = parseInt(document.getElementById('invite-count').value);
                 const isTrauzeuge = document.getElementById('invite-is-trauzeuge').checked;
                 
-                const existingPins = (window.allInvites || []).map(i => i.pin);
+                const existingPins = window.allInvites.map(i => i.pin);
                 let newPin = "";
                 let isUnique = false;
                 while (!isUnique) {
@@ -2653,7 +2641,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     document.getElementById('invite-names').value = '';
                     document.getElementById('invite-count').value = '2';
                     document.getElementById('invite-is-trauzeuge').checked = false;
-                    loadAdminData(); 
+                    await loadAdminData(); 
                 }
             });
         }
