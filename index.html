@@ -348,27 +348,35 @@
         .countdown {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
+            margin-top: 20px;
         }
         .countdown-item {
             background: rgba(255, 255, 255, 0.1);
-            padding: 15px 25px;
+            width: 110px;
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             border-radius: 10px;
-            min-width: 100px;
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            box-sizing: border-box;
         }
         .countdown-item span {
             display: block;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 600;
             color: var(--accent);
+            line-height: 1.1;
         }
         .countdown-item label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-top: 5px;
         }
         /* --- ABLAUFPLAN (TIMELINE) --- */
         .timeline {
@@ -440,7 +448,7 @@
             display: block !important;
         }
         body.admin-mode-active .admin-location-controls {
-            display: block !important;
+            display: flex !important;
         }
         body.admin-mode-active .admin-location-toggle-bar {
             display: block !important;
@@ -840,10 +848,46 @@
         /* --- MOBILGERÄTE OPTIMIERUNGEN (SMARTPHONES) --- */
         @media (max-width: 768px) {
             body.admin-bar-active {
-                padding-top: 90px !important;
+                padding-top: 130px !important; /* Erhöhter Platz für mehrzeilige Handy-Adminbar */
             }
             body.guest-bar-active {
                 padding-top: 70px !important;
+            }
+            
+            /* Admin-Dashboard Smartphone Optimierung */
+            #admin-dashboard {
+                padding: 10px 5px !important;
+            }
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .admin-header h1 {
+                font-size: 1.6rem;
+            }
+            .admin-stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px;
+                margin-bottom: 25px;
+            }
+            .admin-card {
+                padding: 15px 10px;
+            }
+            .admin-card .stat-value {
+                font-size: 1.3rem;
+            }
+            .admin-grid-layout {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            .admin-panel {
+                padding: 15px 10px;
+            }
+            table.admin-table th, table.admin-table td {
+                padding: 8px 5px;
+                font-size: 0.8rem;
             }
             
             /* Hero Bereich anpassen */
@@ -950,6 +994,18 @@
             .hero h1 {
                 font-size: 2.3rem;
             }
+            
+            /* Quadrat-Timer auf Kleinstbildschirmen */
+            .countdown-item {
+                width: 75px;
+                height: 75px;
+            }
+            .countdown-item span {
+                font-size: 1.6rem;
+            }
+            .countdown-item label {
+                font-size: 0.65rem;
+            }
         }
     </style>
 </head>
@@ -1049,6 +1105,7 @@
                         <tr>
                             <th>Gruppe / Absender</th>
                             <th>E-Mail</th>
+
                             <th>Status</th>
                             <th>Personen & Essen</th>
                             <th>Nachricht</th>
@@ -1183,14 +1240,23 @@
         <h2>Die Locations</h2>
         <p>Hier wird gelacht, gefeiert und getanzt:</p>
         
-        <div class="admin-location-toggle-bar" style="display: none; margin-bottom: 30px;">
-            <button class="btn" onclick="window.toggleAccommodationSetting()" style="background: var(--accent); color: var(--primary-dark); border-color: var(--accent);">
-                <i class="fa-solid fa-hotel"></i> Unterkunftstipp ein-/ausblenden
+        <div class="admin-location-toggle-bar" style="display: none; margin-bottom: 30px; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn" onclick="window.addLocationDirect()" style="background: var(--accent); color: var(--primary-dark); border-color: var(--accent);">
+                <i class="fa-solid fa-plus"></i> Neue Location hinzufügen
+            </button>
+            <button class="btn" onclick="window.addAccommodationDirect()" style="background: var(--accent); color: var(--primary-dark); border-color: var(--accent);">
+                <i class="fa-solid fa-plus"></i> Neuen Unterkunftstipp hinzufügen
             </button>
         </div>
         
-        <div class="location-grid">
-            <!-- Wird dynamisch aus Settings geladen -->
+        <div class="location-grid" id="locations-container">
+            <!-- Wird dynamisch geladen -->
+        </div>
+
+        <h2 style="margin-top: 60px;">🏨 Unterkünfte & Tipps</h2>
+        <p>Hier könnt ihr nach einer langen Partynacht gemütlich schlafen:</p>
+        <div class="location-grid" id="accommodations-container">
+            <!-- Wird dynamisch geladen -->
         </div>
     </section>
 
@@ -1290,6 +1356,27 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             .replace(/'/g, "&#039;");
     }
 
+    // --- NAMENSERKENNUNG (Zerteilt Gruppen-Strings in Einzelnamen) ---
+    function detectGuestNames(groupName) {
+        let names = groupName.split(/\s*(?:,|\bund\b|\band\b|&|;)\s*/i);
+        names = names.map(n => n.trim()).filter(n => n.length > 0);
+        
+        // Entferne reine "Familie" oder "Fam." Vorsätze, falls dahinter noch Namen folgen
+        names = names.map(name => {
+            return name.replace(/^(?:Familie|Fam\.)\s+/i, "").trim();
+        }).filter(n => n.length > 0);
+
+        if (names.length === 0) {
+            return [groupName];
+        }
+        return names;
+    }
+
+    function getInitialGuests(dbGuestName) {
+        const names = detectGuestNames(dbGuestName);
+        return names.map(name => ({ name: name, essen: 'Fleisch' }));
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // --- 1. ECHTE SUPABASE SCHLÜSSEL ---
         const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
@@ -1362,7 +1449,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.getElementById('gifts-text1').innerText = settings.gifts_text1 || "Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.\nWollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!";
                 document.getElementById('gifts-text2').innerText = settings.gifts_text2 || 'Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.';
 
-                // 3. Locations im Frontend aufbauen
+                // 3. Locations & Unterkünfte im Frontend aufbauen
                 renderLocations(settings);
                 
             } catch (err) {
@@ -1376,23 +1463,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (!el) return;
             const currentText = el.innerText;
             const newText = prompt(`Inhalt für dieses Feld bearbeiten:`, currentText);
-            if (newText !== null) {
-                try {
-                    const { error } = await _supabase.from('settings').upsert({ key: key, value: newText.trim() });
-                    if (error) throw error;
-                    el.innerText = newText.trim();
-                    window.siteSettings[key] = newText.trim();
-                } catch (err) {
-                    alert("Fehler beim Speichern: " + err.message);
-                }
-            }
-        };
-
-        window.editSettingTextMultiline = async function(key, elementId) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            const currentText = el.innerText;
-            const newText = prompt(`Inhalt für dieses Feld bearbeiten (nutze \\n für Zeilenumbrüche):`, currentText);
             if (newText !== null) {
                 try {
                     const { error } = await _supabase.from('settings').upsert({ key: key, value: newText.trim() });
@@ -1437,25 +1507,331 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById('lock-img-file').click();
         };
 
-        window.toggleAccommodationSetting = async function() {
-            const currentVal = window.siteSettings.show_accommodation === 'true';
-            const newVal = !currentVal;
+        // --- LOCATIONS & UNTERKÜNFTE VERWALTUNG (DYNAMISCHES SYSTEM) ---
+        function renderLocations(settings) {
+            // Locations-Liste laden
+            let locations = [];
+            if (settings.locations_list) {
+                try { locations = JSON.parse(settings.locations_list); } catch(e) {}
+            }
+            // Fallback auf Altwerte, falls noch kein Array hinterlegt ist
+            if (locations.length === 0) {
+                locations = [{
+                    id: "loc_default",
+                    title: settings.location_title || 'Die Trauung & Feier',
+                    name: settings.location_name || 'Gutshof Sonnenschein',
+                    address: settings.location_address || 'Musterstraße 42\n12345 Traumstadt',
+                    desc: settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
+                }];
+            }
+
+            // Render Locations
+            const locContainer = document.getElementById('locations-container');
+            locContainer.innerHTML = '';
+            locations.forEach(loc => {
+                locContainer.innerHTML += `
+                    <div class="location-card">
+                        <i class="fa-solid fa-church"></i>
+                        <h3>${escapeHtml(loc.title)}</h3>
+                        <p><strong>${escapeHtml(loc.name)}</strong><br>
+                        ${escapeHtml(loc.address).replace(/\n/g, '<br>')}</p>
+                        <p>${escapeHtml(loc.desc)}</p>
+                        <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px; justify-content: center;">
+                            <button class="btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.editLocationDirect('${loc.id}')"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
+                            <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: #c0392b; border-color: #c0392b;" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash"></i> Löschen</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Unterkünfte-Liste laden
+            let accommodations = [];
+            if (settings.accommodations_list) {
+                try { accommodations = JSON.parse(settings.accommodations_list); } catch(e) {}
+            }
+            // Fallback auf Altwerte
+            if (accommodations.length === 0) {
+                accommodations = [{
+                    id: "acc_default",
+                    title: settings.accommodation_title || 'Unterkunftstipp',
+                    name: settings.accommodation_name || 'Hotel am Stadtpark',
+                    address: settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
+                    desc: settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
+                }];
+            }
+
+            // Render Unterkünfte
+            const accContainer = document.getElementById('accommodations-container');
+            accContainer.innerHTML = '';
+            accommodations.forEach(acc => {
+                accContainer.innerHTML += `
+                    <div class="location-card">
+                        <i class="fa-solid fa-hotel"></i>
+                        <h3>${escapeHtml(acc.title)}</h3>
+                        <p><strong>${escapeHtml(acc.name)}</strong><br>
+                        ${escapeHtml(acc.address).replace(/\n/g, '<br>')}</p>
+                        <p>${escapeHtml(acc.desc)}</p>
+                        <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px; justify-content: center;">
+                            <button class="btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.editAccommodationDirect('${acc.id}')"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
+                            <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: #c0392b; border-color: #c0392b;" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash"></i> Löschen</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Raster anpassen
+            locContainer.style.gridTemplateColumns = locations.length > 1 ? "1fr 1fr" : "1fr";
+            accContainer.style.gridTemplateColumns = accommodations.length > 1 ? "1fr 1fr" : "1fr";
+        }
+
+        window.addLocationDirect = async function() {
+            const title = prompt("Titel der Location (z.B. 'Freie Trauung'):");
+            if (!title) return;
+            const name = prompt("Name des Ortes (z.B. 'Gutshof Sonnenschein'):");
+            if (!name) return;
+            const address = prompt("Adresse (nutze \\n für neue Zeilen):");
+            if (!address) return;
+            const desc = prompt("Beschreibung / Parkplatzinfo (optional):");
+
+            let locations = [];
+            if (window.siteSettings.locations_list) {
+                try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
+            }
+            if (locations.length === 0) {
+                locations = [{
+                    id: "loc_default",
+                    title: window.siteSettings.location_title || 'Die Trauung & Feier',
+                    name: window.siteSettings.location_name || 'Gutshof Sonnenschein',
+                    address: window.siteSettings.location_address || 'Musterstraße 42\n12345 Traumstadt',
+                    desc: window.siteSettings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
+                }];
+            }
+
+            locations.push({
+                id: "loc_" + Date.now(),
+                title: title.trim(),
+                name: name.trim(),
+                address: address.trim(),
+                desc: (desc || "").trim()
+            });
+
             try {
-                const { error } = await _supabase.from('settings').upsert({ key: 'show_accommodation', value: newVal ? 'true' : 'false' });
+                const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
-                window.siteSettings.show_accommodation = newVal ? 'true' : 'false';
+                window.siteSettings.locations_list = JSON.stringify(locations);
+                renderLocations(window.siteSettings);
+            } catch (err) {
+                alert("Fehler beim Hinzufügen: " + err.message);
+            }
+        };
+
+        window.editLocationDirect = async function(id) {
+            let locations = [];
+            if (window.siteSettings.locations_list) {
+                try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
+            }
+            if (locations.length === 0) {
+                locations = [{
+                    id: "loc_default",
+                    title: window.siteSettings.location_title || 'Die Trauung & Feier',
+                    name: window.siteSettings.location_name || 'Gutshof Sonnenschein',
+                    address: window.siteSettings.location_address || 'Musterstraße 42\n12345 Traumstadt',
+                    desc: window.siteSettings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
+                }];
+            }
+
+            const loc = locations.find(l => l.id === id);
+            if (!loc) return;
+
+            const title = prompt("Titel bearbeiten:", loc.title);
+            if (title === null) return;
+            const name = prompt("Name bearbeiten:", loc.name);
+            if (name === null) return;
+            const address = prompt("Adresse bearbeiten (nutze \\n für neue Zeilen):", loc.address);
+            if (address === null) return;
+            const desc = prompt("Beschreibung bearbeiten:", loc.desc);
+            if (desc === null) return;
+
+            loc.title = title.trim();
+            loc.name = name.trim();
+            loc.address = address.trim();
+            loc.desc = desc.trim();
+
+            try {
+                const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
+                if (error) throw error;
+                window.siteSettings.locations_list = JSON.stringify(locations);
                 renderLocations(window.siteSettings);
             } catch (err) {
                 alert("Fehler beim Speichern: " + err.message);
             }
         };
 
+        window.deleteLocationDirect = async function(id) {
+            if (!confirm("Möchtest du diese Location wirklich löschen?")) return;
+            let locations = [];
+            if (window.siteSettings.locations_list) {
+                try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
+            }
+            locations = locations.filter(l => l.id !== id);
+
+            try {
+                const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
+                if (error) throw error;
+                window.siteSettings.locations_list = JSON.stringify(locations);
+                renderLocations(window.siteSettings);
+            } catch (err) {
+                alert("Fehler beim Löschen: " + err.message);
+            }
+        };
+
+        window.addAccommodationDirect = async function() {
+            const title = prompt("Titel für Unterkunft (z.B. 'Unterkunftstipp'):");
+            if (!title) return;
+            const name = prompt("Name des Hotels (z.B. 'Hotel am Stadtpark'):");
+            if (!name) return;
+            const address = prompt("Adresse (nutze \\n für neue Zeilen):");
+            if (!address) return;
+            const desc = prompt("Beschreibung Zimmerkontingent (optional):");
+
+            let accommodations = [];
+            if (window.siteSettings.accommodations_list) {
+                try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
+            }
+            if (accommodations.length === 0) {
+                accommodations = [{
+                    id: "acc_default",
+                    title: window.siteSettings.accommodation_title || 'Unterkunftstipp',
+                    name: window.siteSettings.accommodation_name || 'Hotel am Stadtpark',
+                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
+                    desc: window.siteSettings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
+                }];
+            }
+
+            accommodations.push({
+                id: "acc_" + Date.now(),
+                title: title.trim(),
+                name: name.trim(),
+                address: address.trim(),
+                desc: (desc || "").trim()
+            });
+
+            try {
+                const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
+                if (error) throw error;
+                window.siteSettings.accommodations_list = JSON.stringify(accommodations);
+                renderLocations(window.siteSettings);
+            } catch (err) {
+                alert("Fehler beim Hinzufügen: " + err.message);
+            }
+        };
+
+        window.editAccommodationDirect = async function(id) {
+            let accommodations = [];
+            if (window.siteSettings.accommodations_list) {
+                try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
+            }
+            if (accommodations.length === 0) {
+                accommodations = [{
+                    id: "acc_default",
+                    title: window.siteSettings.accommodation_title || 'Unterkunftstipp',
+                    name: window.siteSettings.accommodation_name || 'Hotel am Stadtpark',
+                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
+                    desc: window.siteSettings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
+                }];
+            }
+
+            const acc = accommodations.find(a => a.id === id);
+            if (!acc) return;
+
+            const title = prompt("Titel bearbeiten:", acc.title);
+            if (title === null) return;
+            const name = prompt("Hotel Name bearbeiten:", acc.name);
+            if (name === null) return;
+            const address = prompt("Adresse bearbeiten (nutze \\n für neue Zeilen):", acc.address);
+            if (address === null) return;
+            const desc = prompt("Beschreibung bearbeiten:", acc.desc);
+            if (desc === null) return;
+
+            acc.title = title.trim();
+            acc.name = name.trim();
+            acc.address = address.trim();
+            acc.desc = desc.trim();
+
+            try {
+                const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
+                if (error) throw error;
+                window.siteSettings.accommodations_list = JSON.stringify(accommodations);
+                renderLocations(window.siteSettings);
+            } catch (err) {
+                alert("Fehler beim Speichern: " + err.message);
+            }
+        };
+
+        window.deleteAccommodationDirect = async function(id) {
+            if (!confirm("Möchtest du diesen Unterkunftstipp wirklich löschen?")) return;
+            let accommodations = [];
+            if (window.siteSettings.accommodations_list) {
+                try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
+            }
+            accommodations = accommodations.filter(a => a.id !== id);
+
+            try {
+                const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
+                if (error) throw error;
+                window.siteSettings.accommodations_list = JSON.stringify(accommodations);
+                renderLocations(window.siteSettings);
+            } catch (err) {
+                alert("Fehler beim Löschen: " + err.message);
+            }
+        };
+
+        // --- DYNAMISCHER TAGESABLAUF (EINTRAGUNG ERZWINGEN) ---
+        async function loadTimeline() {
+            try {
+                let { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
+                if (error) throw error;
+                
+                // Falls Tabelle leer ist, Standard-Punkte direkt in Supabase einspeichern!
+                if (!data || data.length === 0) {
+                    const defaults = getDefaultTimeline();
+                    const { data: inserted, error: insertErr } = await _supabase.from('timeline_items').insert(defaults).select();
+                    if (!insertErr && inserted) {
+                        data = inserted;
+                    } else {
+                        data = defaults;
+                    }
+                }
+
+                const timelineContainer = document.querySelector('.timeline');
+                timelineContainer.innerHTML = '';
+                data.forEach((item, index) => {
+                    const sideClass = index % 2 === 0 ? 'left' : 'right';
+                    timelineContainer.innerHTML += `
+                        <div class="container ${sideClass}">
+                            <div class="content">
+                                <span class="time">${escapeHtml(item.time_text)}</span>
+                                <h3>${escapeHtml(item.title)}</h3>
+                                <p>${escapeHtml(item.description || '')}</p>
+                                <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px;">
+                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
+                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: #c0392b; border-color: #c0392b;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash"></i> Löschen</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Fehler beim Laden des Tagesablaufs:", err);
+            }
+        }
+
         window.addTimelineItemDirect = async function() {
             const time = prompt("Uhrzeit für den Programmpunkt (z.B. '14:00 Uhr'):");
             if (!time) return;
             const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
             if (!title) return;
-            const desc = prompt("Beschreibung (optional, z.B. 'Wir geben uns das Ja-Wort'):");
+            const desc = prompt("Beschreibung (optional):");
             
             try {
                 const { error } = await _supabase.from('timeline_items').insert([{
@@ -1493,6 +1869,18 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         };
 
+        window.deleteTimelineItemDirect = async function(id) {
+            if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
+                const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
+                if (error) {
+                    alert("Fehler beim Löschen: " + error.message);
+                } else {
+                    loadTimeline();
+                    loadAdminTimelineTable();
+                }
+            }
+        };
+
         window.toggleAdminView = function(view) {
             const dashboard = document.getElementById("admin-dashboard");
             const mainContent = document.getElementById("main-content");
@@ -1516,99 +1904,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 btnPreview.style.background = "var(--accent)";
                 btnPreview.style.color = "var(--primary-dark)";
                 document.body.classList.add('admin-mode-active');
-            }
-        };
-
-        function renderLocations(settings) {
-            const grid = document.querySelector('.location-grid');
-            const showAcc = settings.show_accommodation === 'true';
-            let locationHtml = `
-                <div class="location-card" style="${!showAcc ? 'grid-column: 1 / -1; max-width: 600px; margin: 0 auto;' : ''}">
-                    <i class="fa-solid fa-church"></i>
-                    <h3>
-                        <span id="loc-display-title">${escapeHtml(settings.location_title || 'Die Trauung & Feier')}</span>
-                        <button class="admin-edit-btn" onclick="window.editSettingText('location_title', 'loc-display-title')" title="Titel bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                    </h3>
-                    <p><strong>
-                        <span id="loc-display-name">${escapeHtml(settings.location_name || 'Gutshof Sonnenschein')}</span>
-                        <button class="admin-edit-btn" onclick="window.editSettingText('location_name', 'loc-display-name')" title="Name bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                    </strong><br>
-                    <span id="loc-display-address" style="white-space: pre-wrap;">${escapeHtml(settings.location_address || 'Musterstraße 42\n12345 Traumstadt')}</span>
-                    <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('location_address', 'loc-display-address')" title="Adresse bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                    </p>
-                    <p>
-                        <span id="loc-display-desc" style="white-space: pre-wrap;">${escapeHtml(settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.')}</span>
-                        <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('location_desc', 'loc-display-desc')" title="Beschreibung bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                    </p>
-                </div>
-            `;
-            if (showAcc) {
-                locationHtml += `
-                    <div class="location-card">
-                        <i class="fa-solid fa-hotel"></i>
-                        <h3>
-                            <span id="acc-display-title">${escapeHtml(settings.accommodation_title || 'Unterkunftstipp')}</span>
-                            <button class="admin-edit-btn" onclick="window.editSettingText('accommodation_title', 'acc-display-title')" title="Titel bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                        </h3>
-                        <p><strong>
-                            <span id="acc-display-name">${escapeHtml(settings.accommodation_name || 'Hotel am Stadtpark')}</span>
-                            <button class="admin-edit-btn" onclick="window.editSettingText('accommodation_name', 'acc-display-name')" title="Hotel Name bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                        </strong><br>
-                        <span id="acc-display-address" style="white-space: pre-wrap;">${escapeHtml(settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt')}</span>
-                        <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('accommodation_address', 'acc-display-address')" title="Adresse bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                        </p>
-                        <p>
-                            <span id="acc-display-desc" style="white-space: pre-wrap;">${escapeHtml(settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".')}</span>
-                            <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('accommodation_desc', 'acc-display-desc')" title="Beschreibung bearbeiten"><i class="fa-solid fa-pen"></i></button>
-                        </p>
-                    </div>
-                `;
-                grid.style.gridTemplateColumns = "1fr 1fr";
-            } else {
-                grid.style.gridTemplateColumns = "1fr";
-            }
-            grid.innerHTML = locationHtml;
-        }
-
-        async function loadTimeline() {
-            try {
-                const { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
-                if (error) throw error;
-                const timelineContainer = document.querySelector('.timeline');
-                timelineContainer.innerHTML = '';
-                const items = (data && data.length > 0) ? data : getDefaultTimeline();
-                items.forEach((item, index) => {
-                    const sideClass = index % 2 === 0 ? 'left' : 'right';
-                    timelineContainer.innerHTML += `
-                        <div class="container ${sideClass}">
-                            <div class="content">
-                                <span class="time">${escapeHtml(item.time_text)}</span>
-                                <h3>${escapeHtml(item.title)}</h3>
-                                <p>${escapeHtml(item.description || '')}</p>
-                                <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px;">
-                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editTimelineItemDirect('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
-                                    ${item.id ? `
-                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: #c0392b; border-color: #c0392b;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash"></i></button>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (err) {
-                console.error("Fehler beim Laden des Tagesablaufs:", err);
-            }
-        }
-
-        window.deleteTimelineItemDirect = async function(id) {
-            if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
-                const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
-                if (error) {
-                    alert("Fehler beim Löschen: " + error.message);
-                } else {
-                    loadTimeline();
-                    loadAdminTimelineTable();
-                }
             }
         };
 
@@ -1723,7 +2018,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     document.getElementById('guest-message').value = '';
                     document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
                     toggleFormFields(true);
-                    resetGuestFields(dbGuestName);
+                    
+                    // Verwendet die intelligente Zerstückelung bei neuen Gruppen-Zusagen!
+                    rebuildGuestFields(getInitialGuests(dbGuestName));
                     document.getElementById('submit-btn').innerText = "Rückmeldung absenden";
                 }
             } catch (e) {
@@ -2186,7 +2483,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         async function loadAdminTimelineTable() {
             try {
                 const tbody = document.getElementById('admin-timeline-body');
-                if (!tbody) return; // Beendet den Aufruf sicher, falls die Tabelle im Preview-Modus fehlt
+                if (!tbody) return; 
                 
                 const { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
                 if (error) throw error;
@@ -2199,7 +2496,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <td>${escapeHtml(item.title)}</td>
                         <td><small>${escapeHtml(item.description || '-')}</small></td>
                         <td>
-                            <button class="delete-btn" onclick="window.editTimelineItemDirect('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
+                            <button class="delete-btn" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
                                 <i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
                             </button>
                             ${item.id ? `
@@ -2236,7 +2533,13 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const { data, error } = await _supabase.storage
                     .from('website-images')
                     .upload(fileName, file, { cacheControl: '3600', upsert: true });
-                if (error) throw error;
+                if (error) {
+                    // Spezifische Hilfe, wenn die RLS-Regeln nicht stimmen
+                    if (error.message && error.message.includes("violates row-level security")) {
+                        throw new Error("RLS_POLICY_ERROR");
+                    }
+                    throw error;
+                }
                 
                 const { data: publicData } = _supabase.storage
                     .from('website-images')
@@ -2267,11 +2570,15 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
             } catch (err) {
                 console.error("Upload fehlgeschlagen:", err);
-                if (statusSpan) {
-                    statusSpan.style.color = "#c62828";
-                    statusSpan.innerText = "Fehler: " + err.message;
+                if (err.message === "RLS_POLICY_ERROR") {
+                    alert("Fehler beim Bilder-Upload!\n\nDas liegt an den Sicherheitsregeln (RLS) in deinem Supabase Storage.\n\nSo behebst du das in 1 Minute:\n1. Gehe in dein Supabase Dashboard.\n2. Klicke links auf 'Storage' und wähle den Bucket 'website-images' aus.\n3. Klicke oben auf 'Policies' (Sicherheitsregeln).\n4. Erstelle eine neue Regel für 'INSERT' (Einfügen) und 'SELECT' (Lesen) für 'public' (Anonym).\n\nAlternativ kannst du diesen SQL-Befehl im Supabase SQL Editor ausführen:\n\nCREATE POLICY \"Public Insert\" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'website-images');\nCREATE POLICY \"Public Select\" ON storage.objects FOR SELECT USING (bucket_id = 'website-images');");
                 } else {
-                    alert("Fehler beim Upload: " + err.message);
+                    if (statusSpan) {
+                        statusSpan.style.color = "#c62828";
+                        statusSpan.innerText = "Fehler: " + err.message;
+                    } else {
+                        alert("Fehler beim Upload: " + err.message);
+                    }
                 }
             }
         };
