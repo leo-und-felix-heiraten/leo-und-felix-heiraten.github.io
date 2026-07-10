@@ -130,7 +130,7 @@
             color: white !important; /* Wichtig, um andere Styles zu überschreiben */
             border: none;
             border-radius: 20px;
-            padding: 5px 14px;
+            padding: 0 12px;
             font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
@@ -138,8 +138,12 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 5px;
             text-decoration: none;
+            height: 28px !important; /* STRIKTE HÖHE FÜR KONSISTENZ */
+            line-height: 28px !important;
+            box-sizing: border-box;
         }
         .admin-inline-edit-btn.danger {
             background-color: #c0392b;
@@ -499,7 +503,6 @@
         }
         body.admin-mode-active .admin-location-controls {
             display: flex !important;
-            justify-content: flex-start !important; /* Button-Anpassung */
         }
         body.admin-mode-active .admin-location-toggle-bar {
             display: block !important;
@@ -539,10 +542,18 @@
             font-size: 1.5rem;
             color: var(--primary-dark);
         }
-         /* FIX: Kleinere Buttons für Location/Unterkunft */
-        .admin-location-controls .admin-inline-edit-btn {
-            padding: 4px 12px;
-            font-size: 0.7rem;
+        
+        /* ADMIN CONTROLS BUTTONS ALIGNMENT & RESET HEIGHT */
+        .admin-location-controls, .admin-timeline-controls {
+            display: none;
+            margin-top: 15px;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center !important; /* Verhindert das Strecken in die Höhe */
+            justify-content: flex-start !important;
+        }
+        body.admin-mode-active .admin-location-controls, body.admin-mode-active .admin-timeline-controls {
+            display: flex !important;
         }
 
         /* --- RSVP SECTION WITH DYNAMIC GUEST CARDS --- */
@@ -956,7 +967,7 @@
                 padding-top: 70px !important;
             }
             
-            /* Admin-Dashboard Smartphone Optimierung */
+            /* Admin-Dashboard Smartphone Optimization */
             #admin-dashboard {
                 padding: 10px 5px !important;
                 overflow-x: hidden;
@@ -1448,9 +1459,9 @@
         </div>
         <button id="add-to-calendar-btn" class="btn" style="padding: 6px 15px; font-size: 0.85rem; margin-bottom: 30px; background: transparent; border-color: white; color: white;" onclick="window.addToCalendar()"><i class="fa-solid fa-calendar-plus" style="margin-right: 5px;" aria-hidden="true"></i> In den Kalender eintragen</button>
         <a href="#rsvp" class="btn" id="hero-rsvp-btn">Jetzt zusagen</a>
-        <div style="position: absolute; bottom: 20px; right: 20px; display: flex; gap: 10px;">
-            <button class="admin-edit-btn" style="border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerHeroImageUpload()" aria-label="Hintergrundbild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Hintergrund ändern</button>
-            <button class="admin-edit-btn" style="border-radius: 50%; width: 44px; height: 44px; background-color: rgba(255,255,255,0.8); color: #2b2d42;" onclick="window.resetImage('hero_image_url')" title="Hintergrundbild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
+        <div class="hero-image-admin-controls" style="position: absolute; bottom: 20px; right: 20px; display: none; gap: 10px; z-index: 10;">
+            <button class="admin-inline-edit-btn" onclick="window.triggerHeroImageUpload()" aria-label="Hintergrundbild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Hintergrund ändern</button>
+            <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; justify-content: center;" onclick="window.resetImage('hero_image_url')" title="Hintergrundbild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
         </div>
     </header>
     <!-- COUNTDOWN -->
@@ -1484,10 +1495,10 @@
 
         <!-- NEUES BILD VON EUCH -->
         <div class="couple-image-wrapper">
-            <img src="" id="couple-image" class="couple-image" alt="Leo & Felix">
-            <div class="admin-edit-btn" style="position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; width: auto; height: auto; background: transparent; border: none; box-shadow: none;">
-                 <button class="admin-edit-btn" style="border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerImageUpload('couple-img-file')" aria-label="Bild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Bild ändern</button>
-                 <button class="admin-edit-btn" style="border-radius: 50%; width: 44px; height: 44px; background-color: rgba(255,255,255,0.8); color: #2b2d42;" onclick="window.resetImage('couple_image_url')" title="Bild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
+            <img src="https://images.unsplash.com/photo-1542042161-d10f4435d7d9?auto=format&fit=crop&q=80&w=800" id="couple-image" class="couple-image" alt="Leo & Felix">
+            <div class="couple-image-admin-controls" style="position: absolute; top: 15px; right: 15px; display: none; gap: 10px; z-index: 10;">
+                 <button class="admin-inline-edit-btn" onclick="window.triggerImageUpload('couple-img-file')" aria-label="Bild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Bild ändern</button>
+                 <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; justify-content: center;" onclick="window.resetImage('couple_image_url')" title="Bild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
             </div>
         </div>
 
@@ -1871,27 +1882,28 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     name: settings.location_name || 'Gutshof Sonnenschein',
                     address: settings.location_address || 'Musterstraße 42\n12345 Traumstadt',
                     desc: settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.',
-                    image_url: 'https://images.unsplash.com/photo-1593294334333-a3b04c2b9560?auto=format&fit=crop&q=80&w=800'
+                    image_url: 'https://images.unsplash.com/photo-1519225495810-7517c2965a7a?auto=format&fit=crop&q=80&w=800'
                 }];
             }
             // Render Locations
             const locContainer = document.getElementById('locations-container');
             locContainer.innerHTML = '';
             locations.forEach(loc => {
-                const imageUrl = loc.image_url ? `<img src="${escapeHtml(loc.image_url)}" alt="${escapeHtml(loc.title)}" class="location-card-image">` : '<div style="padding-top: 30px;"><i class="fa-solid fa-church" aria-hidden="true" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i></div>';
+                // FALLBACK WENN DIE DB KEIN BILD BEINHALTET (Sichert die Live-Darstellung)
+                const locImgUrl = loc.image_url || 'https://images.unsplash.com/photo-1519225495810-7517c2965a7a?auto=format&fit=crop&q=80&w=800';
+                const imageUrl = `<img src="${escapeHtml(locImgUrl)}" alt="${escapeHtml(loc.title)}" class="location-card-image">`;
                 locContainer.innerHTML += `
                     <div class="location-card">
-                        ${loc.image_url ? imageUrl : ''}
+                        ${imageUrl}
                         <div class="location-card-content">
-                            ${!loc.image_url ? imageUrl : ''}
                             <h3>${escapeHtml(loc.title)}</h3>
                             <p><strong>${escapeHtml(loc.name)}</strong><br>
                             ${escapeHtml(loc.address).replace(/\n/g, '<br>')}</p>
                             <p>${escapeHtml(loc.desc)}</p>
-                            <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px;">
+                            <div class="admin-location-controls">
                                 <button class="admin-inline-edit-btn" onclick="window.editLocationDirect('${loc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
                                 <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'loc', '${loc.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
-                                <button class="admin-inline-edit-btn danger" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; justify-content: center;" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </div>
@@ -1916,20 +1928,21 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const accContainer = document.getElementById('accommodations-container');
             accContainer.innerHTML = '';
             accommodations.forEach(acc => {
-                const imageUrl = acc.image_url ? `<img src="${escapeHtml(acc.image_url)}" alt="${escapeHtml(acc.title)}" class="location-card-image">` : '<div style="padding-top: 30px;"><i class="fa-solid fa-hotel" aria-hidden="true" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i></div>';
+                // FALLBACK WENN DIE DB KEIN BILD BEINHALTET (Sichert die Live-Darstellung)
+                const accImgUrl = acc.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800';
+                const imageUrl = `<img src="${escapeHtml(accImgUrl)}" alt="${escapeHtml(acc.title)}" class="location-card-image">`;
                 accContainer.innerHTML += `
                      <div class="location-card">
-                        ${acc.image_url ? imageUrl : ''}
+                        ${imageUrl}
                         <div class="location-card-content">
-                            ${!acc.image_url ? imageUrl : ''}
                             <h3>${escapeHtml(acc.title)}</h3>
                             <p><strong>${escapeHtml(acc.name)}</strong><br>
                             ${escapeHtml(acc.address).replace(/\n/g, '<br>')}</p>
                             <p>${escapeHtml(acc.desc)}</p>
-                            <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px;">
+                            <div class="admin-location-controls">
                                  <button class="admin-inline-edit-btn" onclick="window.editAccommodationDirect('${acc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
                                  <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'acc', '${acc.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
-                                 <button class="admin-inline-edit-btn danger" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                 <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; justify-content: center;" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </div>
@@ -2071,10 +2084,21 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     const { data: inserted, error: insertErr } = await _supabase.from('timeline_items').insert(defaults).select();
                     data = (!insertErr && inserted) ? inserted : defaults;
                 }
+
+                // DYNAMISCH GENERIERTE STANDARD-BILDER FÜR DEN ABLAUF (Sichert schöne Optik ohne DB-Lücken)
+                const defaultTimelineImages = [
+                    'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800', // Trauung
+                    'https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&q=80&w=800', // Empfang/Torte
+                    'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80&w=800', // Dinner
+                    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800'  // Party
+                ];
+
                 timelineContainer.innerHTML = '';
                 data.forEach((item, index) => {
                     const sideClass = index % 2 === 0 ? 'left' : 'right';
-                    const imageUrl = item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}" class="timeline-image">` : '';
+                    const defaultImg = defaultTimelineImages[index % defaultTimelineImages.length] || 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800';
+                    const timelineImgUrl = item.image_url || defaultImg;
+                    const imageUrl = `<img src="${escapeHtml(timelineImgUrl)}" alt="${escapeHtml(item.title)}" class="timeline-image">`;
                     
                     timelineContainer.innerHTML += `
                         <div class="container ${sideClass}">
@@ -2083,10 +2107,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                                 <h3>${escapeHtml(item.title)}</h3>
                                 <p>${escapeHtml(item.description || '')}</p>
                                 ${imageUrl}
-                                <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px; flex-wrap: wrap;">
+                                <div class="admin-timeline-controls">
                                     <button class="admin-inline-edit-btn" onclick="window.editTimelineItemDirect('${item.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
                                     <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'timeline', '${item.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
-                                    <button class="admin-inline-edit-btn danger" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                    <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; justify-content: center;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                                 </div>
                             </div>
                         </div>
