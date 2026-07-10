@@ -1105,9 +1105,8 @@
                         <tr>
                             <th>Gruppe / Absender</th>
                             <th>E-Mail</th>
-
                             <th>Status</th>
-                            <th>Personen & Essen</th>
+                            <th>Personen & Essen / Allergien / Musik</th>
                             <th>Nachricht</th>
                             <th>Aktion</th>
                         </tr>
@@ -1151,6 +1150,26 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- PLAYLIST REGISTRIERUNG AM UNTEREN RAND DES ADMINBEREICHS -->
+    <div class="admin-panel" style="margin-top: 20px;">
+        <h2>Die Hochzeits-Wunsch-Playlist 🎵</h2>
+        <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">Hier seht ihr alle Musikwünsche, die eure Gäste bei der Rückmeldung eingetragen haben:</p>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Titel</th>
+                        <th>Interpret</th>
+                        <th>Gewünscht von</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-playlist-body">
+                    <!-- Dynamisch befüllt -->
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -1262,8 +1281,8 @@
 
     <!-- RSVP SECTION WITH DYNAMIC FORM -->
     <section id="rsvp" class="rsvp">
-        <h2>Zusage & Rückmeldung</h2>
-        <p>Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!</p>
+        <h2 id="rsvp-main-title">Zusage & Rückmeldung</h2>
+        <p id="rsvp-intro-text">Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!</p>
         
         <div class="rsvp-form-container">
             <form id="wedding-rsvp-form">
@@ -1271,15 +1290,15 @@
                 <input type="hidden" name="benutzter_pin" id="hidden-guest-pin" value="">
                 <!-- 1. Teilnahme-Status -->
                 <div class="form-group">
-                    <label>Seid ihr dabei? *</label>
+                    <label id="label-attendance">Seid ihr dabei? *</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="teilnahme" value="Zusage" checked onclick="toggleFormFields(true)">
-                            Ja, ich/wir kommen! 🎉
+                            <span id="opt-zusage">Ja, ich/wir kommen! 🎉</span>
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="teilnahme" value="Absage" onclick="toggleFormFields(false)">
-                            Nein, leider nicht. 😢
+                            <span id="opt-absage">Nein, leider nicht. 😢</span>
                         </label>
                     </div>
                 </div>
@@ -1290,7 +1309,7 @@
                 </div>
                 <!-- Dynamischer Bereich für zusagende Gäste -->
                 <div id="dynamic-fields">
-                    <label style="display: block; font-weight: 600; margin-bottom: 15px; color: var(--primary-dark); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Gästeliste & Essenswünsche</label>
+                    <label style="display: block; font-weight: 600; margin-bottom: 15px; color: var(--primary-dark); font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 5px;">Gästeliste, Essenswünsche & Musik</label>
                     
                     <div id="guest-list-container">
                         <!-- Wird dynamisch befüllt -->
@@ -1300,17 +1319,17 @@
                         <i class="fa-solid fa-plus"></i> Weiteren Gast hinzufügen
                     </button>
                 </div>
-                <!-- 3. Optionale Nachricht / Allergien -->
+                <!-- 3. Optionale Nachricht -->
                 <div class="form-group">
-                    <label for="guest-message">Anmerkungen (z.B. Allergien, Musikwünsche, etc.)</label>
-                    <textarea id="guest-message" name="nachricht" class="form-control" placeholder="Schreibt uns hier, falls jemand bestimmte Allergien hat oder ihr uns noch etwas mitteilen möchtet..."></textarea>
+                    <label for="guest-message">Nachricht an Leo & Felix</label>
+                    <textarea id="guest-message" name="nachricht" class="form-control" placeholder="Schreibt uns hier, falls ihr uns noch etwas mitteilen möchtet..."></textarea>
                 </div>
                 <!-- Absende-Button -->
                 <button type="submit" class="submit-btn" id="submit-btn">Rückmeldung absenden</button>
             </form>
             <!-- Erfolgsmeldung nach dem Absenden -->
             <div id="form-status">
-                <h3>Vielen Dank für eure Rückmeldung! ❤️</h3>
+                <h3 id="form-status-header">Vielen Dank für eure Rückmeldung! ❤️</h3>
                 <p id="form-status-text" style="margin-top: 10px; font-size: 0.95rem;">Wir haben eure Antwort erhalten und freuen uns schon riesig auf euch!</p>
             </div>
         </div>
@@ -1365,7 +1384,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         names = names.map(name => {
             return name.replace(/^(?:Familie|Fam\.)\s+/i, "").trim();
         }).filter(n => n.length > 0);
-
+        
         if (names.length === 0) {
             return [groupName];
         }
@@ -1374,7 +1393,22 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 
     function getInitialGuests(dbGuestName) {
         const names = detectGuestNames(dbGuestName);
-        return names.map(name => ({ name: name, essen: 'Fleisch' }));
+        return names.map(name => ({ name: name, essen: 'Fleisch', allergien: '', song1_title: '', song1_artist: '', song2_title: '', song2_artist: '' }));
+    }
+
+    // --- PERSONALISIERUNG (Du vs. Ihr) ---
+    function applyGrammarAdaptation(isPlural) {
+        // RSVP Frage
+        document.getElementById('label-attendance').innerText = isPlural ? "Seid ihr dabei? *" : "Bist du dabei? *";
+        
+        // RSVP Radio Buttons
+        document.getElementById('opt-zusage').innerText = isPlural ? "Ja, wir kommen! 🎉" : "Ja, ich komme! 🎉";
+        document.getElementById('opt-absage').innerText = isPlural ? "Nein, leider nicht. 😢" : "Nein, leider nicht. 😢";
+        
+        // RSVP Intro-Text
+        document.getElementById('rsvp-intro-text').innerText = isPlural 
+            ? "Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!" 
+            : "Bitte fülle das Formular aus, damit wir das Fest perfekt planen können!";
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1514,7 +1548,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (settings.locations_list) {
                 try { locations = JSON.parse(settings.locations_list); } catch(e) {}
             }
-            // Fallback auf Altwerte, falls noch kein Array hinterlegt ist
             if (locations.length === 0) {
                 locations = [{
                     id: "loc_default",
@@ -1549,7 +1582,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (settings.accommodations_list) {
                 try { accommodations = JSON.parse(settings.accommodations_list); } catch(e) {}
             }
-            // Fallback auf Altwerte
             if (accommodations.length === 0) {
                 accommodations = [{
                     id: "acc_default",
@@ -1579,7 +1611,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 `;
             });
 
-            // Raster anpassen
             locContainer.style.gridTemplateColumns = locations.length > 1 ? "1fr 1fr" : "1fr";
             accContainer.style.gridTemplateColumns = accommodations.length > 1 ? "1fr 1fr" : "1fr";
         }
@@ -1630,16 +1661,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (window.siteSettings.locations_list) {
                 try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
             }
-            if (locations.length === 0) {
-                locations = [{
-                    id: "loc_default",
-                    title: window.siteSettings.location_title || 'Die Trauung & Feier',
-                    name: window.siteSettings.location_name || 'Gutshof Sonnenschein',
-                    address: window.siteSettings.location_address || 'Musterstraße 42\n12345 Traumstadt',
-                    desc: window.siteSettings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
-                }];
-            }
-
             const loc = locations.find(l => l.id === id);
             if (!loc) return;
 
@@ -1731,16 +1752,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (window.siteSettings.accommodations_list) {
                 try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
             }
-            if (accommodations.length === 0) {
-                accommodations = [{
-                    id: "acc_default",
-                    title: window.siteSettings.accommodation_title || 'Unterkunftstipp',
-                    name: window.siteSettings.accommodation_name || 'Hotel am Stadtpark',
-                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
-                    desc: window.siteSettings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
-                }];
-            }
-
             const acc = accommodations.find(a => a.id === id);
             if (!acc) return;
 
@@ -1792,7 +1803,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 let { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
                 if (error) throw error;
                 
-                // Falls Tabelle leer ist, Standard-Punkte direkt in Supabase einspeichern!
+                // Standard-Punkte direkt in Supabase einspeichern falls Tabelle leer ist
                 if (!data || data.length === 0) {
                     const defaults = getDefaultTimeline();
                     const { data: inserted, error: insertErr } = await _supabase.from('timeline_items').insert(defaults).select();
@@ -1977,7 +1988,18 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             sessionStorage.setItem('wedding_pin', pin);
             sessionStorage.setItem('current_guest_name', dbGuestName);
             
-            document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass ihr da seid.`;
+            const guestNames = detectGuestNames(dbGuestName);
+            const isPlural = guestNames.length > 1;
+            
+            // Grammatik anwenden
+            applyGrammarAdaptation(isPlural);
+            
+            if (isPlural) {
+                document.getElementById("personal-greeting").innerText = `Hallo ihr Lieben! Schön, dass ihr da seid.`;
+            } else {
+                document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass du da bist.`;
+            }
+            
             document.getElementById("hidden-guest-pin").value = pin;
             
             document.getElementById("guest-top-bar").style.display = "block";
@@ -2019,7 +2041,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     document.querySelector('input[name="teilnahme"][value="Zusage"]').checked = true;
                     toggleFormFields(true);
                     
-                    // Verwendet die intelligente Zerstückelung bei neuen Gruppen-Zusagen!
+                    // Zerteilt Gruppen-Strings für separate Kacheln direkt beim ersten Login!
                     rebuildGuestFields(getInitialGuests(dbGuestName));
                     document.getElementById('submit-btn').innerText = "Rückmeldung absenden";
                 }
@@ -2068,6 +2090,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 return; 
             }
             buildAdminStatsAndTable(data);
+            buildAdminPlaylistTable(data);
         }
         
         function buildAdminStatsAndTable(rsvpsList) {
@@ -2085,7 +2108,17 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     gaesteListe.forEach(g => {
                         if (g.essen === "Fleisch") totalMeat++;
                         if (g.essen === "Vegetarisch") totalVeggie++;
-                        rsvpGuestsHtml += `<span class="food-item"><strong>${g.name}</strong> (${g.essen})</span>`;
+                        
+                        // Zähler für ausgefüllte Extra-Optionen pro Person
+                        let extrasText = "";
+                        if (g.allergien) {
+                            extrasText += `<br><span style="font-size:0.75rem; color:#c0392b;"><i class="fa-solid fa-triangle-exclamation"></i> Allergie: ${escapeHtml(g.allergien)}</span>`;
+                        }
+                        if (g.song1_title || g.song2_title) {
+                            extrasText += `<br><span style="font-size:0.75rem; color:#606c38;"><i class="fa-solid fa-music"></i> Songwunsch aktiv</span>`;
+                        }
+
+                        rsvpGuestsHtml += `<span class="food-item"><strong>${escapeHtml(g.name)}</strong> (${escapeHtml(g.essen)})${extrasText}</span>`;
                     });
                 } else { 
                     rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
@@ -2093,11 +2126,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 
                 const row = tableBody.insertRow();
                 row.innerHTML = `
-                    <td><strong>${rsvp.name}</strong></td>
-                    <td><a href="mailto:${rsvp.email}" style="color:var(--primary);">${rsvp.email}</a></td>
+                    <td><strong>${escapeHtml(rsvp.name)}</strong></td>
+                    <td><a href="mailto:${escapeHtml(rsvp.email)}" style="color:var(--primary);">${escapeHtml(rsvp.email)}</a></td>
                     <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
-                    <td>${rsvpGuestsHtml}</td>
-                    <td><small style="font-size:0.9rem; color:#555;">${rsvp.nachricht || '-'}</small></td>
+                    <td><div style="display:flex; flex-direction:column; gap:8px;">${rsvpGuestsHtml}</div></td>
+                    <td><small style="font-size:0.9rem; color:#555;">${escapeHtml(rsvp.nachricht) || '-'}</small></td>
                     <td>
                         <button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen">
                             <i class="fa-solid fa-trash"></i>
@@ -2110,6 +2143,43 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById('stat-veggie').innerText = totalVeggie;
             
             calculateGlobalStats();
+        }
+
+        // --- CONSOLIDATED PLAYLIST RENDERER ---
+        function buildAdminPlaylistTable(rsvpsList) {
+            const playlistBody = document.getElementById('admin-playlist-body');
+            playlistBody.innerHTML = "";
+            let songCount = 0;
+
+            rsvpsList.forEach(rsvp => {
+                if (rsvp.status === "Zusage" && rsvp.gaeste) {
+                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
+                    gaesteListe.forEach(g => {
+                        if (g.song1_title && g.song1_title.trim() !== "") {
+                            songCount++;
+                            const row = playlistBody.insertRow();
+                            row.innerHTML = `
+                                <td><strong>${escapeHtml(g.song1_title)}</strong></td>
+                                <td>${escapeHtml(g.song1_artist || 'Unbekannt')}</td>
+                                <td><small>${escapeHtml(g.name)}</small></td>
+                            `;
+                        }
+                        if (g.song2_title && g.song2_title.trim() !== "") {
+                            songCount++;
+                            const row = playlistBody.insertRow();
+                            row.innerHTML = `
+                                <td><strong>${escapeHtml(g.song2_title)}</strong></td>
+                                <td>${escapeHtml(g.song2_artist || 'Unbekannt')}</td>
+                                <td><small>${escapeHtml(g.name)}</small></td>
+                            `;
+                        }
+                    });
+                }
+            });
+
+            if (songCount === 0) {
+                playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht</td></tr>`;
+            }
         }
         
         window.deleteRsvp = async function(pin) {
@@ -2168,7 +2238,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 
                 row.innerHTML = `
                     <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
-                    <td>${invite.names}</td>
+                    <td>${escapeHtml(invite.names)}</td>
                     <td>${invite.expected_count}</td>
                     <td>${statusHtml}</td>
                     <td>
@@ -2223,7 +2293,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById('stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
         }
 
-        // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN (PIN GENERIEREN) ---
+        // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN ---
         const inviteForm = document.getElementById('admin-invite-form');
         if (inviteForm) {
             inviteForm.addEventListener('submit', async function(e) {
@@ -2260,7 +2330,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             });
         }
 
-        // --- FORMULAR RSVP ABSENDEN (SPEICHERN / UPDATEN) ---
+        // --- FORMULAR RSVP ABSENDEN (SPEICHERN) ---
         const form = document.getElementById('wedding-rsvp-form');
         if (form) {
             form.addEventListener('submit', async function(e) {
@@ -2275,9 +2345,25 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 
                 if (status === "Zusage") {
                     document.querySelectorAll('.guest-block').forEach((block, index) => {
-                        const gName = block.querySelector(`input[name="gast_${index + 1}_name"]`).value;
-                        const gEssen = block.querySelector(`input[name="gast_${index + 1}_essen"]:checked`).value;
-                        gaesteArray.push({ name: gName, essen: gEssen });
+                        const idx = index + 1;
+                        const gName = block.querySelector(`input[name="gast_${idx}_name"]`).value;
+                        const gEssen = block.querySelector(`input[name="gast_${idx}_essen"]:checked`).value;
+                        const gAllergien = block.querySelector(`input[name="gast_${idx}_allergien"]`).value;
+                        
+                        const s1_title = block.querySelector(`input[name="gast_${idx}_song1_title"]`).value;
+                        const s1_artist = block.querySelector(`input[name="gast_${idx}_song1_artist"]`).value;
+                        const s2_title = block.querySelector(`input[name="gast_${idx}_song2_title"]`).value;
+                        const s2_artist = block.querySelector(`input[name="gast_${idx}_song2_artist"]`).value;
+
+                        gaesteArray.push({ 
+                            name: gName, 
+                            essen: gEssen,
+                            allergien: gAllergien,
+                            song1_title: s1_title,
+                            song1_artist: s1_artist,
+                            song2_title: s2_title,
+                            song2_artist: s2_artist
+                        });
                     });
                 }
                 
@@ -2310,10 +2396,20 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     form.style.display = "none"; 
                     document.getElementById('form-status').style.display = "block";
                     
+                    const isPlural = detectGuestNames(savedGuestName).length > 1;
+                    const statusHeader = document.getElementById('form-status-header');
+                    const statusText = document.getElementById('form-status-text');
+
                     if (status === "Zusage") {
-                        document.getElementById('form-status-text').innerText = "Wir haben eure Änderungen erhalten und freuen uns schon riesig auf euch!";
+                        statusHeader.innerText = "Wir freuen uns riesig auf euch! ❤️";
+                        statusText.innerText = isPlural 
+                            ? "Wir haben eure Änderungen erhalten und können es kaum erwarten, mit euch zu feiern!"
+                            : "Wir haben deine Änderungen erhalten und können es kaum erwarten, mit dir zu feiern!";
                     } else {
-                        document.getElementById('form-status-text').innerText = "Schade, dass ihr nicht kommen könnt. Wir haben eure Absage vermerkt.";
+                        statusHeader.innerText = "Schade! 😢";
+                        statusText.innerText = isPlural
+                            ? "Schade, dass ihr nicht kommen könnt. Wir haben eure Absage vermerkt."
+                            : "Schade, dass du nicht kommen kannst. Wir haben deine Absage vermerkt.";
                     }
                 }
             });
@@ -2359,10 +2455,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         </button>
                         `}
                     </h4>
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${guest.name}" required>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${guest.name || ''}" required>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
+                    <div class="form-group" style="margin-bottom: 12px;">
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
                         <div class="radio-group">
                             <label class="radio-option">
@@ -2375,13 +2471,30 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                             </label>
                         </div>
                     </div>
+                    <!-- Extrafeld für Allergien / Unverträglichkeiten -->
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Allergien / Unverträglichkeiten / Anmerkungen:</label>
+                        <input type="text" name="gast_${guestCount}_allergien" class="form-control" placeholder="z.B. Laktoseintoleranz, kein Fisch..." value="${guest.allergien || ''}">
+                    </div>
+                    <!-- Extrafelder für Playlist (Musikwünsche) -->
+                    <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
+                        <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; display: block; color: var(--primary-dark);"><i class="fa-solid fa-music"></i> Lieblingslieder für die Playlist (max. 2):</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                            <input type="text" name="gast_${guestCount}_song1_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Titel" value="${guest.song1_title || ''}">
+                            <input type="text" name="gast_${guestCount}_song1_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Interpret" value="${guest.song1_artist || ''}">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <input type="text" name="gast_${guestCount}_song2_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Titel" value="${guest.song2_title || ''}">
+                            <input type="text" name="gast_${guestCount}_song2_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Interpret" value="${guest.song2_artist || ''}">
+                        </div>
+                    </div>
                 `;
                 container.appendChild(guestBlock);
             });
         }
 
         function resetGuestFields(defaultName) {
-            rebuildGuestFields([{ name: defaultName, essen: 'Fleisch' }]);
+            rebuildGuestFields([{ name: defaultName, essen: 'Fleisch', allergien: '', song1_title: '', song1_artist: '', song2_title: '', song2_artist: '' }]);
         }
 
         function addGuestField() {
@@ -2403,10 +2516,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <i class="fa-solid fa-trash"></i> Entfernen
                     </button>
                 </h4>
-                <div class="form-group" style="margin-bottom: 10px;">
+                <div class="form-group" style="margin-bottom: 12px;">
                     <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" required>
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 12px;">
                     <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
                     <div class="radio-group">
                         <label class="radio-option">
@@ -2417,6 +2530,21 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                             <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch">
                             Vegetarisch 🥦
                         </label>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Allergien / Unverträglichkeiten / Anmerkungen:</label>
+                    <input type="text" name="gast_${guestCount}_allergien" class="form-control" placeholder="z.B. Laktoseintoleranz, kein Fisch...">
+                </div>
+                <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
+                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; display: block; color: var(--primary-dark);"><i class="fa-solid fa-music"></i> Lieblingslieder für die Playlist (max. 2):</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
+                        <input type="text" name="gast_${guestCount}_song1_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Titel">
+                        <input type="text" name="gast_${guestCount}_song1_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Interpret">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="text" name="gast_${guestCount}_song2_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Titel">
+                        <input type="text" name="gast_${guestCount}_song2_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Interpret">
                     </div>
                 </div>
             `;
@@ -2472,7 +2600,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             
             if (show) {
                 dynamicFields.style.display = "block";
-                inputs.forEach(input => input.required = true);
+                inputs.forEach(input => {
+                    if (input.name.includes("_name")) input.required = true;
+                });
             } else {
                 dynamicFields.style.display = "none";
                 inputs.forEach(input => input.required = false);
@@ -2534,7 +2664,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     .from('website-images')
                     .upload(fileName, file, { cacheControl: '3600', upsert: true });
                 if (error) {
-                    // Spezifische Hilfe, wenn die RLS-Regeln nicht stimmen
                     if (error.message && error.message.includes("violates row-level security")) {
                         throw new Error("RLS_POLICY_ERROR");
                     }
@@ -2569,7 +2698,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     alert("Bild erfolgreich hochgeladen und als Hintergrund gespeichert!");
                 }
             } catch (err) {
-                console.error("Upload fehlgeschlagen:", err);
+                console.error("Upload failed:", err);
                 if (err.message === "RLS_POLICY_ERROR") {
                     alert("Fehler beim Bilder-Upload!\n\nDas liegt an den Sicherheitsregeln (RLS) in deinem Supabase Storage.\n\nSo behebst du das in 1 Minute:\n1. Gehe in dein Supabase Dashboard.\n2. Klicke links auf 'Storage' und wähle den Bucket 'website-images' aus.\n3. Klicke oben auf 'Policies' (Sicherheitsregeln).\n4. Erstelle eine neue Regel für 'INSERT' (Einfügen) und 'SELECT' (Lesen) für 'public' (Anonym).\n\nAlternativ kannst du diesen SQL-Befehl im Supabase SQL Editor ausführen:\n\nCREATE POLICY \"Public Insert\" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'website-images');\nCREATE POLICY \"Public Select\" ON storage.objects FOR SELECT USING (bucket_id = 'website-images');");
                 } else {
