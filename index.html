@@ -436,7 +436,13 @@
         body.admin-mode-active .admin-timeline-controls {
             display: flex !important;
         }
+        body.admin-mode-active .admin-timeline-add-bar {
+            display: block !important;
+        }
         body.admin-mode-active .admin-location-controls {
+            display: block !important;
+        }
+        body.admin-mode-active .admin-location-toggle-bar {
             display: block !important;
         }
         /* --- LOCATION CARD --- */
@@ -830,6 +836,121 @@
             20%, 60% { transform: translateX(-8px); }
             40%, 80% { transform: translateX(8px); }
         }
+
+        /* --- MOBILGERÄTE OPTIMIERUNGEN (SMARTPHONES) --- */
+        @media (max-width: 768px) {
+            body.admin-bar-active {
+                padding-top: 90px !important;
+            }
+            body.guest-bar-active {
+                padding-top: 70px !important;
+            }
+            
+            /* Hero Bereich anpassen */
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            .hero p.subtitle {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+            }
+            .hero .date {
+                font-size: 1.1rem;
+                padding: 8px 15px;
+                margin-bottom: 30px;
+            }
+            
+            /* Generelle Abstände verkleinern */
+            section {
+                padding: 50px 15px;
+            }
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            /* Timeline für Smartphones umbauen (Links-bündig) */
+            .timeline::after {
+                left: 20px;
+            }
+            .container {
+                width: 100% !important;
+                padding-left: 50px !important;
+                padding-right: 0 !important;
+                left: 0 !important;
+                text-align: left;
+                margin-bottom: 20px;
+            }
+            .container::after {
+                left: 12px !important;
+                right: auto !important;
+                top: 20px;
+            }
+            .content {
+                padding: 15px 20px;
+            }
+            
+            /* Location Grid auf Handy untereinander anordnen */
+            .location-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            .location-card {
+                padding: 25px;
+                text-align: left;
+            }
+            
+            /* RSVP Formular Quetschung beheben */
+            .rsvp-form-container {
+                padding: 25px 15px;
+                margin: 20px auto 0 auto;
+            }
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .guest-block {
+                padding: 15px;
+            }
+            
+            /* Admin & Gast Bars anpassen */
+            #guest-top-bar, #admin-top-bar {
+                padding: 8px 10px;
+            }
+            .top-bar-content {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+            .top-bar-content span {
+                font-size: 0.85rem;
+                width: 100%;
+            }
+            .top-bar-content div {
+                width: 100%;
+                justify-content: center;
+                gap: 5px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .lock-container {
+                padding: 25px 15px;
+            }
+            .lock-container h2 {
+                font-size: 1.8rem;
+            }
+            .key {
+                width: 60px;
+                height: 60px;
+                font-size: 1.2rem;
+            }
+            .keypad {
+                gap: 10px;
+            }
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -847,9 +968,10 @@
 <div id="admin-top-bar">
     <div class="top-bar-content">
         <span>Admin-Bereich ❤️</span>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn" style="padding: 6px 15px; font-size: 0.85rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark);" onclick="window.toggleAdminView('dashboard')" id="btn-toggle-dash">Planer-Dashboard</button>
-            <button class="btn" style="padding: 6px 15px; font-size: 0.85rem; background: transparent; border-color: white; color: white;" onclick="window.toggleAdminView('preview')" id="btn-toggle-preview">Gästeseite anzeigen</button>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark);" onclick="window.toggleAdminView('dashboard')" id="btn-toggle-dash">Planer-Dashboard</button>
+            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.toggleAdminView('preview')" id="btn-toggle-preview">Gästeseite anzeigen</button>
+            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.triggerLockImageUpload()"><i class="fa-solid fa-lock"></i> Sperrbild-Hintergrund</button>
             <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket"></i> Abmelden</button>
         </div>
     </div>
@@ -974,118 +1096,6 @@
             </div>
         </div>
     </div>
-
-    <!-- NEUES NEBEN-GRID FÜR TAGESABLAUF, LOCATIONS & DESIGN -->
-    <div class="admin-grid-layout">
-        <!-- Linke Spalte: Tagesablauf (Timeline) verwalten -->
-        <div class="admin-panel">
-            <h2>Tagesablauf (Timeline) verwalten</h2>
-            <form id="admin-timeline-form" style="margin-bottom: 25px;">
-                <input type="hidden" id="timeline-id" value="">
-                <div class="admin-form-group">
-                    <label for="timeline-time">Uhrzeit</label>
-                    <input type="text" id="timeline-time" class="admin-form-control" placeholder="z.B. 14:00 Uhr" required>
-                </div>
-                <div class="admin-form-group">
-                    <label for="timeline-title">Titel des Programmpunkts</label>
-                    <input type="text" id="timeline-title" class="admin-form-control" placeholder="z.B. Freie Trauung" required>
-                </div>
-                <div class="admin-form-group">
-                    <label for="timeline-desc">Kurze Beschreibung (optional)</label>
-                    <textarea id="timeline-desc" class="admin-form-control" placeholder="z.B. Wir geben uns das Ja-Wort..." rows="2"></textarea>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" class="admin-btn" id="timeline-submit-btn">Termin hinzufügen</button>
-                    <button type="button" class="admin-btn" id="timeline-cancel-btn" style="background-color: #777; display: none;" onclick="window.cancelTimelineEdit()">Abbrechen</button>
-                </div>
-            </form>
-            <h3>Aktuelle Tagesordnungspunkte</h3>
-            <div style="overflow-x: auto;">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Zeit</th>
-                            <th>Titel</th>
-                            <th>Beschreibung</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-timeline-body">
-                        <!-- Dynamisch -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Rechte Spalte: Locations, Unterkunft & Medien -->
-        <div class="admin-panel">
-            <h2>Locations & Unterkunft bearbeiten</h2>
-            <form id="admin-locations-form" style="margin-bottom: 25px;">
-                <h3>📍 Hauptlocation (Trauung & Feier)</h3>
-                <div class="admin-form-group">
-                    <label for="loc-title">Titel</label>
-                    <input type="text" id="loc-title" class="admin-form-control" required>
-                </div>
-                <div class="admin-form-group">
-                    <label for="loc-name">Name der Location</label>
-                    <input type="text" id="loc-name" class="admin-form-control" required>
-                </div>
-                <div class="admin-form-group">
-                    <label for="loc-address">Adresse (mehrzeilig möglich)</label>
-                    <textarea id="loc-address" class="admin-form-control" rows="2" required></textarea>
-                </div>
-                <div class="admin-form-group">
-                    <label for="loc-desc">Beschreibung / Parken</label>
-                    <textarea id="loc-desc" class="admin-form-control" rows="2"></textarea>
-                </div>
-                <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-                <div class="admin-form-group" style="display: flex; align-items: center; gap: 10px;">
-                    <input type="checkbox" id="loc-show-acc" style="width: 18px; height: 18px;" onchange="window.toggleAccFormFields()">
-                    <label for="loc-show-acc" style="font-size: 1rem; margin: 0; cursor: pointer;">🏨 Unterkunftstipp anzeigen</label>
-                </div>
-                <div id="acc-form-fields" style="display: none;">
-                    <h3>🏨 Details Unterkunftstipp</h3>
-                    <div class="admin-form-group">
-                        <label for="acc-title">Titel</label>
-                        <input type="text" id="acc-title" class="admin-form-control">
-                    </div>
-                    <div class="admin-form-group">
-                        <label for="acc-name">Hotel Name</label>
-                        <input type="text" id="acc-name" class="admin-form-control">
-                    </div>
-                    <div class="admin-form-group">
-                        <label for="acc-address">Hotel Adresse</label>
-                        <textarea id="acc-address" class="admin-form-control" rows="2"></textarea>
-                    </div>
-                    <div class="admin-form-group">
-                        <label for="acc-desc">Beschreibung / Zimmerkontingent</label>
-                        <textarea id="acc-desc" class="admin-form-control" rows="2"></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="admin-btn" id="save-locations-btn">Locations & Details speichern</button>
-            </form>
-            <hr style="margin: 20px 0; border: none; border-top: 2px solid var(--accent);">
-            <h2>🖼️ Eigene Bilder hochladen (Design)</h2>
-            <p style="font-size: 0.85rem; margin-bottom: 15px; color: #555;">Wählt eigene Bilder aus, um den Hintergrund anzupassen. Sie werden im Bucket 'website-images' gespeichert.</p>
-            
-            <div class="admin-form-group">
-                <label>Hero Hintergrundbild (Hauptseite)</label>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <input type="file" id="hero-img-file" accept="image/*" onchange="window.uploadImage('hero-img-file', 'hero_image_url', 'hero-preview')">
-                    <img id="hero-preview" class="admin-image-preview" src="" alt="Vorschau">
-                </div>
-                <span id="hero-img-file-status" style="font-size: 0.85rem; color: var(--primary);"></span>
-            </div>
-            <div class="admin-form-group">
-                <label>Sperrbildschirm Hintergrundbild</label>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <input type="file" id="lock-img-file" accept="image/*" onchange="window.uploadImage('lock-img-file', 'lock_image_url', 'lock-preview')">
-                    <img id="lock-preview" class="admin-image-preview" src="" alt="Vorschau">
-                </div>
-                <span id="lock-img-file-status" style="font-size: 0.85rem; color: var(--primary);"></span>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- HAUPTINHALT -->
@@ -1159,6 +1169,10 @@
         <h2>Der Ablaufplan</h2>
         <p>So haben wir unseren großen Tag geplant:</p>
         
+        <div class="admin-timeline-add-bar" style="display: none; margin-bottom: 30px;">
+            <button class="btn" onclick="window.addTimelineItemDirect()"><i class="fa-solid fa-plus"></i> Neuen Programmpunkt hinzufügen</button>
+        </div>
+        
         <div class="timeline">
             <!-- Wird dynamisch aus Supabase geladen -->
         </div>
@@ -1168,6 +1182,12 @@
     <section id="location">
         <h2>Die Locations</h2>
         <p>Hier wird gelacht, gefeiert und getanzt:</p>
+        
+        <div class="admin-location-toggle-bar" style="display: none; margin-bottom: 30px;">
+            <button class="btn" onclick="window.toggleAccommodationSetting()" style="background: var(--accent); color: var(--primary-dark); border-color: var(--accent);">
+                <i class="fa-solid fa-hotel"></i> Unterkunftstipp ein-/ausblenden
+            </button>
+        </div>
         
         <div class="location-grid">
             <!-- Wird dynamisch aus Settings geladen -->
@@ -1246,6 +1266,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
     </section>
 </div>
 
+<!-- Hidden File Inputs für Direkt-Uploads im Admin-Vorschau-Modus -->
+<input type="file" id="hero-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('hero-img-file', 'hero_image_url')">
+<input type="file" id="lock-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('lock-img-file', 'lock_image_url')">
+
 <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
 <script>
     // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
@@ -1323,8 +1347,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const lockUrl = settings.lock_image_url || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
                 document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${heroUrl}')`;
                 document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${lockUrl}')`;
-                document.getElementById('hero-preview').src = heroUrl;
-                document.getElementById('lock-preview').src = lockUrl;
 
                 // 2. Dynamische Textinhalte aus Settings laden
                 document.getElementById('hero-title').innerText = settings.hero_title || 'Leo & Felix';
@@ -1342,21 +1364,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 
                 // 3. Locations im Frontend aufbauen
                 renderLocations(settings);
-
-                // 4. Admin-Formular mit bestehenden Werten füllen
-                document.getElementById('loc-title').value = settings.location_title || 'Die Trauung & Feier';
-                document.getElementById('loc-name').value = settings.location_name || 'Gutshof Sonnenschein';
-                document.getElementById('loc-address').value = settings.location_address || 'Musterstraße 42\n12345 Traumstadt';
-                document.getElementById('loc-desc').value = settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.';
-                
-                const showAcc = settings.show_accommodation === 'true';
-                document.getElementById('loc-show-acc').checked = showAcc;
-                window.toggleAccFormFields();
-                
-                document.getElementById('acc-title').value = settings.accommodation_title || 'Unterkunftstipp';
-                document.getElementById('acc-name').value = settings.accommodation_name || 'Hotel am Stadtpark';
-                document.getElementById('acc-address').value = settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt';
-                document.getElementById('acc-desc').value = settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".';
                 
             } catch (err) {
                 console.error("Fehler beim Laden der Einstellungen:", err);
@@ -1369,6 +1376,23 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (!el) return;
             const currentText = el.innerText;
             const newText = prompt(`Inhalt für dieses Feld bearbeiten:`, currentText);
+            if (newText !== null) {
+                try {
+                    const { error } = await _supabase.from('settings').upsert({ key: key, value: newText.trim() });
+                    if (error) throw error;
+                    el.innerText = newText.trim();
+                    window.siteSettings[key] = newText.trim();
+                } catch (err) {
+                    alert("Fehler beim Speichern: " + err.message);
+                }
+            }
+        };
+
+        window.editSettingTextMultiline = async function(key, elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const currentText = el.innerText;
+            const newText = prompt(`Inhalt für dieses Feld bearbeiten (nutze \\n für Zeilenumbrüche):`, currentText);
             if (newText !== null) {
                 try {
                     const { error } = await _supabase.from('settings').upsert({ key: key, value: newText.trim() });
@@ -1409,15 +1433,64 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById('hero-img-file').click();
         };
 
-        window.editLocationDirect = function() {
-            window.toggleAdminView('dashboard');
-            document.getElementById('admin-locations-form').scrollIntoView({ behavior: 'smooth' });
+        window.triggerLockImageUpload = function() {
+            document.getElementById('lock-img-file').click();
         };
 
-        window.editTimelineItemDirect = function(id, time, title, desc) {
-            window.toggleAdminView('dashboard');
-            window.editTimelineItem(id, time, title, desc);
-            document.getElementById('admin-timeline-form').scrollIntoView({ behavior: 'smooth' });
+        window.toggleAccommodationSetting = async function() {
+            const currentVal = window.siteSettings.show_accommodation === 'true';
+            const newVal = !currentVal;
+            try {
+                const { error } = await _supabase.from('settings').upsert({ key: 'show_accommodation', value: newVal ? 'true' : 'false' });
+                if (error) throw error;
+                window.siteSettings.show_accommodation = newVal ? 'true' : 'false';
+                renderLocations(window.siteSettings);
+            } catch (err) {
+                alert("Fehler beim Speichern: " + err.message);
+            }
+        };
+
+        window.addTimelineItemDirect = async function() {
+            const time = prompt("Uhrzeit für den Programmpunkt (z.B. '14:00 Uhr'):");
+            if (!time) return;
+            const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
+            if (!title) return;
+            const desc = prompt("Beschreibung (optional, z.B. 'Wir geben uns das Ja-Wort'):");
+            
+            try {
+                const { error } = await _supabase.from('timeline_items').insert([{
+                    time_text: time.trim(),
+                    title: title.trim(),
+                    description: (desc || "").trim()
+                }]);
+                if (error) throw error;
+                loadTimeline();
+                loadAdminTimelineTable();
+            } catch (err) {
+                alert("Fehler beim Hinzufügen: " + err.message);
+            }
+        };
+
+        window.editTimelineItemDirect = async function(id, currentTime, currentTitle, currentDesc) {
+            const time = prompt("Uhrzeit bearbeiten:", currentTime);
+            if (time === null) return;
+            const title = prompt("Titel bearbeiten:", currentTitle);
+            if (title === null) return;
+            const desc = prompt("Beschreibung bearbeiten:", currentDesc);
+            if (desc === null) return;
+            
+            try {
+                const { error } = await _supabase.from('timeline_items').update({
+                    time_text: time.trim(),
+                    title: title.trim(),
+                    description: desc.trim()
+                }).eq('id', id);
+                if (error) throw error;
+                loadTimeline();
+                loadAdminTimelineTable();
+            } catch (err) {
+                alert("Fehler beim Speichern: " + err.message);
+            }
         };
 
         window.toggleAdminView = function(view) {
@@ -1452,26 +1525,42 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             let locationHtml = `
                 <div class="location-card" style="${!showAcc ? 'grid-column: 1 / -1; max-width: 600px; margin: 0 auto;' : ''}">
                     <i class="fa-solid fa-church"></i>
-                    <h3>${escapeHtml(settings.location_title || 'Die Trauung & Feier')}</h3>
-                    <p><strong>${escapeHtml(settings.location_name || 'Gutshof Sonnenschein')}</strong><br>
-                    ${escapeHtml(settings.location_address || 'Musterstraße 42\n12345 Traumstadt').replace(/\n/g, '<br>')}</p>
-                    <p>${escapeHtml(settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.')}</p>
-                    <div class="admin-location-controls" style="display: none; margin-top: 15px;">
-                        <button class="btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.editLocationDirect()"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
-                    </div>
+                    <h3>
+                        <span id="loc-display-title">${escapeHtml(settings.location_title || 'Die Trauung & Feier')}</span>
+                        <button class="admin-edit-btn" onclick="window.editSettingText('location_title', 'loc-display-title')" title="Titel bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                    </h3>
+                    <p><strong>
+                        <span id="loc-display-name">${escapeHtml(settings.location_name || 'Gutshof Sonnenschein')}</span>
+                        <button class="admin-edit-btn" onclick="window.editSettingText('location_name', 'loc-display-name')" title="Name bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                    </strong><br>
+                    <span id="loc-display-address" style="white-space: pre-wrap;">${escapeHtml(settings.location_address || 'Musterstraße 42\n12345 Traumstadt')}</span>
+                    <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('location_address', 'loc-display-address')" title="Adresse bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                    </p>
+                    <p>
+                        <span id="loc-display-desc" style="white-space: pre-wrap;">${escapeHtml(settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.')}</span>
+                        <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('location_desc', 'loc-display-desc')" title="Beschreibung bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                    </p>
                 </div>
             `;
             if (showAcc) {
                 locationHtml += `
                     <div class="location-card">
                         <i class="fa-solid fa-hotel"></i>
-                        <h3>${escapeHtml(settings.accommodation_title || 'Unterkunftstipp')}</h3>
-                        <p><strong>${escapeHtml(settings.accommodation_name || 'Hotel am Stadtpark')}</strong><br>
-                        ${escapeHtml(settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt').replace(/\n/g, '<br>')}</p>
-                        <p>${escapeHtml(settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".')}</p>
-                        <div class="admin-location-controls" style="display: none; margin-top: 15px;">
-                            <button class="btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.editLocationDirect()"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
-                        </div>
+                        <h3>
+                            <span id="acc-display-title">${escapeHtml(settings.accommodation_title || 'Unterkunftstipp')}</span>
+                            <button class="admin-edit-btn" onclick="window.editSettingText('accommodation_title', 'acc-display-title')" title="Titel bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                        </h3>
+                        <p><strong>
+                            <span id="acc-display-name">${escapeHtml(settings.accommodation_name || 'Hotel am Stadtpark')}</span>
+                            <button class="admin-edit-btn" onclick="window.editSettingText('accommodation_name', 'acc-display-name')" title="Hotel Name bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                        </strong><br>
+                        <span id="acc-display-address" style="white-space: pre-wrap;">${escapeHtml(settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt')}</span>
+                        <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('accommodation_address', 'acc-display-address')" title="Adresse bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                        </p>
+                        <p>
+                            <span id="acc-display-desc" style="white-space: pre-wrap;">${escapeHtml(settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".')}</span>
+                            <button class="admin-edit-btn" onclick="window.editSettingTextMultiline('accommodation_desc', 'acc-display-desc')" title="Beschreibung bearbeiten"><i class="fa-solid fa-pen"></i></button>
+                        </p>
                     </div>
                 `;
                 grid.style.gridTemplateColumns = "1fr 1fr";
@@ -1497,7 +1586,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                                 <h3>${escapeHtml(item.title)}</h3>
                                 <p>${escapeHtml(item.description || '')}</p>
                                 <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px;">
-                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editTimelineItemDirect('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editTimelineItemDirect('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i> Bearbeiten</button>
                                     ${item.id ? `
                                     <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: #c0392b; border-color: #c0392b;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash"></i></button>
                                     ` : ''}
@@ -1568,14 +1657,12 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 unlockAdminDashboard(); 
             } 
             else {
-                // Hole Einladung live aus Supabase
                 const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', enteredPin).maybeSingle();
                 
                 if (invite) {
                     errorDiv.style.opacity = "0";
                     unlockWebsite(enteredPin, invite.names);
                 } else {
-                    // Bereinigte Fallback-Datenbank (Nur Test-Gast 1111 bleibt übrig)
                     const fallbackDB = { "1111": "Test-Gast" };
                     if (fallbackDB[enteredPin]) {
                         errorDiv.style.opacity = "0";
@@ -1595,16 +1682,13 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             sessionStorage.setItem('wedding_pin', pin);
             sessionStorage.setItem('current_guest_name', dbGuestName);
             
-            // Greeting & Hidden fields
             document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass ihr da seid.`;
             document.getElementById("hidden-guest-pin").value = pin;
             
-            // GAST FLOATING TOP BAR aktivieren & Abstand setzen
             document.getElementById("guest-top-bar").style.display = "block";
             document.getElementById("guest-top-greeting").innerText = `Angemeldet als: ${dbGuestName}`;
-            document.body.style.paddingTop = "50px";
+            document.body.classList.add('guest-bar-active');
             
-            // RSVP-Prüfung im Hintergrund
             try {
                 const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
                 if (error) throw error;
@@ -1616,7 +1700,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     document.getElementById('guest-email').value = data.email || '';
                     document.getElementById('guest-message').value = data.nachricht || '';
                     
-                    // Hero Button anpassen
                     heroBtn.innerText = "Rückmeldung ändern";
                     
                     if (data.status === "Zusage") {
@@ -1661,11 +1744,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             
             fadeOut(lockScreen);
             
-            // ADMIN FLOATING TOP BAR aktivieren & Abstand setzen
             document.getElementById("admin-top-bar").style.display = "block";
-            document.body.style.paddingTop = "50px";
+            document.body.classList.add('admin-bar-active');
             
-            // Standardmäßig das Planer-Dashboard öffnen
             window.toggleAdminView('dashboard');
         }
         
@@ -1697,7 +1778,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const tableBody = document.getElementById('admin-table-body');
             tableBody.innerHTML = "";
             
-            // Speichere RSVPs global im DOM für den Invitations-Abgleich
             window.allRsvps = rsvpsList;
             
             rsvpsList.forEach(rsvp => {
@@ -1732,11 +1812,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById('stat-meat').innerText = totalMeat;
             document.getElementById('stat-veggie').innerText = totalVeggie;
             
-            // Berechne Statistiken neu
             calculateGlobalStats();
         }
         
-        // --- RSVP LÖSCHEN ---
         window.deleteRsvp = async function(pin) {
             if (confirm("Möchtest du diese Rückmeldung wirklich löschen? Der Gast kann danach neu abstimmen.")) {
                 const { error } = await _supabase.from('rsvps').delete().eq('pin', pin);
@@ -1744,7 +1822,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     alert("Fehler beim Löschen: " + error.message);
                 } else {
                     loadSupabaseRsvps();
-                    loadSupabaseInvites(); // Aktualisiere Tabellen
+                    loadSupabaseInvites(); 
                 }
             }
         };
@@ -1764,25 +1842,22 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             invitesBody.innerHTML = "";
             
             window.allInvites = invitesList;
-            // Sortier-Logik: Einladungen MIT Rückmeldung rutschen nach UNTEN. 
-            // Einladungen OHNE Rückmeldung (Ausstehend) bleiben ganz OBEN.
             invitesList.sort((a, b) => {
                 const hasRsvpA = window.allRsvps ? window.allRsvps.some(r => r.pin === a.pin) : false;
                 const hasRsvpB = window.allRsvps ? window.allRsvps.some(r => r.pin === b.pin) : false;
                 
-                if (hasRsvpA && !hasRsvpB) return 1;  // a rutscht nach unten
-                if (!hasRsvpA && hasRsvpB) return -1; // a bleibt oben
+                if (hasRsvpA && !hasRsvpB) return 1;  
+                if (!hasRsvpA && hasRsvpB) return -1; 
                 return 0;
             });
             
             invitesList.forEach(invite => {
-                // Finde heraus, ob für diese PIN eine RSVP vorliegt
                 const matchedRsvp = window.allRsvps ? window.allRsvps.find(r => r.pin === invite.pin) : null;
                 
                 let statusHtml = '<span class="badge badge-ausstehend">Ausstehend</span>';
-                let rowStyle = 'style="background-color: #fff5f5; border-left: 4px solid #ff6b6b;"'; // Leicht rot hinterlegt
+                let rowStyle = 'style="background-color: #fff5f5; border-left: 4px solid #ff6b6b;"'; 
                 if (matchedRsvp) {
-                    rowStyle = 'style="background-color: #f3faf4; border-left: 4px solid #2e7d32;"'; // Leicht grün hinterlegt
+                    rowStyle = 'style="background-color: #f3faf4; border-left: 4px solid #2e7d32;"'; 
                     if (matchedRsvp.status === "Zusage") {
                         const count = matchedRsvp.gaeste ? matchedRsvp.gaeste.length : 0;
                         statusHtml = `<span class="badge badge-zusage">Zusage (${count} Pers.)</span>`;
@@ -1792,7 +1867,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
                 
                 const row = invitesBody.insertRow();
-                row.setAttribute('style', rowStyle.slice(7, -1)); // Style-Inhalt extrahieren und anwenden
+                row.setAttribute('style', rowStyle.slice(7, -1)); 
                 
                 row.innerHTML = `
                     <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
@@ -1810,7 +1885,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             calculateGlobalStats();
         }
 
-        // --- EINLADUNG LÖSCHEN ---
         window.deleteInvite = async function(pin) {
             if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig.")) {
                 const { error } = await _supabase.from('invitations').delete().eq('pin', pin);
@@ -1827,7 +1901,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const rsvps = window.allRsvps || [];
             const invites = window.allInvites || [];
             
-            // 1. Zugesagte Personen insgesamt
             let guestsConfirmed = 0;
             rsvps.forEach(rsvp => {
                 if (rsvp.status === "Zusage" && rsvp.gaeste) {
@@ -1835,7 +1908,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
             });
             
-            // 2. Erwartete Personen insgesamt (aus Einladungen)
             let guestsExpectedTotal = 0;
             invites.forEach(inv => {
                 guestsExpectedTotal += (inv.expected_count || 0);
@@ -1843,7 +1915,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             
             document.getElementById('stat-total-guests').innerText = `${guestsConfirmed} / ${guestsExpectedTotal}`;
             
-            // 3. Beantwortungsquote
             const totalInvites = invites.length;
             const answeredInvites = invites.filter(inv => rsvps.some(r => r.pin === inv.pin)).length;
             
@@ -1864,7 +1935,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const names = document.getElementById('invite-names').value;
                 const count = parseInt(document.getElementById('invite-count').value);
                 
-                // Einzigartige PIN generieren
                 const existingInvites = window.allInvites || [];
                 const existingPins = existingInvites.map(i => i.pin);
                 
@@ -1888,7 +1958,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 } else {
                     document.getElementById('invite-names').value = '';
                     document.getElementById('invite-count').value = '2';
-                    loadSupabaseInvites(); // Tabelle neu laden
+                    loadSupabaseInvites(); 
                 }
             });
         }
@@ -2112,12 +2182,14 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         }
 
-        // --- ADMIN: TAGESABLAUF TABLE LADEN ---
+        // --- SAFE-GUARD FÜR ADMIN-TABELLE ---
         async function loadAdminTimelineTable() {
             try {
+                const tbody = document.getElementById('admin-timeline-body');
+                if (!tbody) return; // Beendet den Aufruf sicher, falls die Tabelle im Preview-Modus fehlt
+                
                 const { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
                 if (error) throw error;
-                const tbody = document.getElementById('admin-timeline-body');
                 tbody.innerHTML = '';
                 const items = (data && data.length > 0) ? data : getDefaultTimeline();
                 items.forEach(item => {
@@ -2127,11 +2199,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <td>${escapeHtml(item.title)}</td>
                         <td><small>${escapeHtml(item.description || '-')}</small></td>
                         <td>
-                            <button class="delete-btn" onclick="window.editTimelineItem('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
+                            <button class="delete-btn" onclick="window.editTimelineItemDirect('${item.id || ''}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
                                 <i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
                             </button>
                             ${item.id ? `
-                            <button class="delete-btn" onclick="window.deleteTimelineItem('${item.id}')" title="Löschen">
+                            <button class="delete-btn" onclick="window.deleteTimelineItemDirect('${item.id}')" title="Löschen">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                             ` : `<small style="color: #999; font-style: italic;">Standard</small>`}
@@ -2143,161 +2215,64 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         }
 
-        // Formular-Submit für Tagesablauf
-        const timelineForm = document.getElementById('admin-timeline-form');
-        if (timelineForm) {
-            timelineForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const submitBtn = document.getElementById('timeline-submit-btn');
-                submitBtn.disabled = true;
-                const itemId = document.getElementById('timeline-id').value;
-                const timeText = document.getElementById('timeline-time').value;
-                const title = document.getElementById('timeline-title').value;
-                const desc = document.getElementById('timeline-desc').value;
-                const itemData = {
-                    time_text: timeText,
-                    title: title,
-                    description: desc
-                };
-                try {
-                    let result;
-                    if (itemId) {
-                        result = await _supabase.from('timeline_items').update(itemData).eq('id', itemId);
-                    } else {
-                        result = await _supabase.from('timeline_items').insert([itemData]);
-                    }
-                    if (result.error) throw result.error;
-                    
-                    // Formular zurücksetzen
-                    window.cancelTimelineEdit();
-                    loadTimeline();
-                    loadAdminTimelineTable();
-                } catch (err) {
-                    alert("Fehler beim Speichern: " + err.message);
-                } finally {
-                    submitBtn.disabled = false;
-                }
-            });
-        }
-
-        window.editTimelineItem = function(id, time, title, desc) {
-            document.getElementById('timeline-id').value = id;
-            document.getElementById('timeline-time').value = time;
-            document.getElementById('timeline-title').value = title;
-            document.getElementById('timeline-desc').value = desc;
-            document.getElementById('timeline-submit-btn').innerText = "Änderung speichern";
-            document.getElementById('timeline-cancel-btn').style.display = "inline-block";
-        };
-
-        window.cancelTimelineEdit = function() {
-            document.getElementById('timeline-id').value = "";
-            document.getElementById('timeline-time').value = "";
-            document.getElementById('timeline-title').value = "";
-            document.getElementById('timeline-desc').value = "";
-            document.getElementById('timeline-submit-btn').innerText = "Termin hinzufügen";
-            document.getElementById('timeline-cancel-btn').style.display = "none";
-        };
-
-        window.deleteTimelineItem = async function(id) {
-            if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
-                const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
-                if (error) {
-                    alert("Fehler beim Löschen: " + error.message);
-                } else {
-                    loadTimeline();
-                    loadAdminTimelineTable();
-                }
-            }
-        };
-
-        // --- ADMIN: LOCATIONS SPEICHERN ---
-        const locationsForm = document.getElementById('admin-locations-form');
-        if (locationsForm) {
-            locationsForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const saveBtn = document.getElementById('save-locations-btn');
-                saveBtn.disabled = true;
-                saveBtn.innerText = "Wird gespeichert...";
-                const settingsToSave = {
-                    'location_title': document.getElementById('loc-title').value,
-                    'location_name': document.getElementById('loc-name').value,
-                    'location_address': document.getElementById('loc-address').value,
-                    'location_desc': document.getElementById('loc-desc').value,
-                    'show_accommodation': document.getElementById('loc-show-acc').checked ? 'true' : 'false',
-                    'accommodation_title': document.getElementById('acc-title').value,
-                    'accommodation_name': document.getElementById('acc-name').value,
-                    'accommodation_address': document.getElementById('acc-address').value,
-                    'accommodation_desc': document.getElementById('acc-desc').value
-                };
-                try {
-                    for (const [key, value] of Object.entries(settingsToSave)) {
-                        const { error } = await _supabase.from('settings').upsert({ key: key, value: value });
-                        if (error) throw error;
-                        window.siteSettings[key] = value;
-                    }
-                    alert("Locations erfolgreich gespeichert!");
-                    renderLocations(window.siteSettings);
-                } catch (err) {
-                    console.error(err);
-                    alert("Fehler beim Speichern der Locations: " + err.message);
-                } finally {
-                    saveBtn.disabled = false;
-                    saveBtn.innerText = "Locations & Details speichern";
-                }
-            });
-        }
-
-        window.toggleAccFormFields = function() {
-            const isChecked = document.getElementById('loc-show-acc').checked;
-            document.getElementById('acc-form-fields').style.display = isChecked ? 'block' : 'none';
-        };
-
         // --- ADMIN: BILD-UPLOAD SYSTEM (STORAGE BUCKET) ---
         window.uploadImage = async function(fileInputId, settingKey, previewImgId) {
             const fileInput = document.getElementById(fileInputId);
-            const statusSpan = document.getElementById(fileInputId + '-status');
-            
-            if (!fileInput.files || fileInput.files.length === 0) return;
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
             const file = fileInput.files[0];
-            statusSpan.style.color = "var(--primary)";
-            statusSpan.innerText = "Bild wird hochgeladen...";
+            
+            const statusSpan = document.getElementById(fileInputId + '-status');
+            if (statusSpan) {
+                statusSpan.style.color = "var(--primary)";
+                statusSpan.innerText = "Bild wird hochgeladen...";
+            } else {
+                alert("Upload gestartet... Bitte gedulde dich einen kurzen Moment!");
+            }
+            
             try {
-                // Einzigartigen Dateinamen generieren
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${settingKey}_${Date.now()}.${fileExt}`;
                 
-                // In das Bucket 'website-images' hochladen
                 const { data, error } = await _supabase.storage
                     .from('website-images')
                     .upload(fileName, file, { cacheControl: '3600', upsert: true });
                 if (error) throw error;
                 
-                // Öffentliche URL generieren
                 const { data: publicData } = _supabase.storage
                     .from('website-images')
                     .getPublicUrl(fileName);
                 const publicUrl = publicData.publicUrl;
                 
-                // In der Settings-Tabelle registrieren
                 const { error: dbError } = await _supabase.from('settings').upsert({ key: settingKey, value: publicUrl });
                 if (dbError) throw dbError;
                 
-                // Live-Vorschau aktualisieren
                 window.siteSettings[settingKey] = publicUrl;
-                document.getElementById(previewImgId).src = publicUrl;
                 
-                // Hintergrund direkt anpassen
+                if (previewImgId) {
+                    const previewImg = document.getElementById(previewImgId);
+                    if (previewImg) previewImg.src = publicUrl;
+                }
+                
                 if (settingKey === 'hero_image_url') {
                     document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${publicUrl}')`;
                 } else if (settingKey === 'lock_image_url') {
                     document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${publicUrl}')`;
                 }
-                statusSpan.style.color = "#2e7d32";
-                statusSpan.innerText = "Erfolgreich hochgeladen & gespeichert!";
+                
+                if (statusSpan) {
+                    statusSpan.style.color = "#2e7d32";
+                    statusSpan.innerText = "Erfolgreich hochgeladen & gespeichert!";
+                } else {
+                    alert("Bild erfolgreich hochgeladen und als Hintergrund gespeichert!");
+                }
             } catch (err) {
-                console.error("Upload failed:", err);
-                statusSpan.style.color = "#c62828";
-                statusSpan.innerText = "Fehler: " + err.message;
+                console.error("Upload fehlgeschlagen:", err);
+                if (statusSpan) {
+                    statusSpan.style.color = "#c62828";
+                    statusSpan.innerText = "Fehler: " + err.message;
+                } else {
+                    alert("Fehler beim Upload: " + err.message);
+                }
             }
         };
         
