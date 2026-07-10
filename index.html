@@ -7,7 +7,7 @@
     <!-- Google Fonts für elegante Typografie -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Javascript Library -->
@@ -124,7 +124,6 @@
         body.admin-mode-active .hero .admin-edit-btn[style*="position: absolute"] {
             display: inline-flex !important;
         }
-
         /* --- ADMIN INLINE EDIT BUTTONS (KOMPAKT & EDEL) --- */
         .admin-inline-edit-btn {
             background-color: var(--primary);
@@ -155,8 +154,6 @@
         .admin-inline-edit-btn i {
              color: white !important;
         }
-
-
         /* --- SPERRBILDSCHIRM (PIN PAD) --- */
         #lock-screen {
             position: fixed;
@@ -1105,7 +1102,6 @@
 </head>
 <body>
 <div id="error-overlay"></div>
-
 <!-- FLOATING GAST TOP BAR (Wird sichtbar wenn eingeloggt als Gast) -->
 <div id="guest-top-bar">
     <div class="top-bar-content">
@@ -1115,7 +1111,6 @@
         </div>
     </div>
 </div>
-
 <!-- FLOATING ADMIN TOP BAR (Wird sichtbar wenn eingeloggt als Admin oder Trauzeuge) -->
 <div id="admin-top-bar">
     <div class="top-bar-content">
@@ -1131,7 +1126,6 @@
         </div>
     </div>
 </div>
-
 <!-- SPERRBILDSCHIRM (PIN PAD) -->
 <div id="lock-screen" style="display: flex;">
     <div class="lock-container">
@@ -1162,7 +1156,6 @@
         <div id="lock-error">Falscher PIN. Bitte versucht es noch einmal.</div>
     </div>
 </div>
-
 <!-- ADMIN DASHBOARD (PIN: 1407) -->
 <div id="admin-dashboard">
     <div class="admin-header">
@@ -1328,7 +1321,6 @@
         </div>
     </div>
 </div>
-
 <!-- TRAUZEUGE DASHBOARD (Spezielle Lese-Ansicht für ausgewählte Gäste) -->
 <div id="trauzeuge-dashboard" style="display: none; padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
     
@@ -1351,7 +1343,6 @@
             <div class="stat-value" id="tz-quote">0%</div>
         </div>
     </div>
-
     <!-- TRAUZEUGE RSVPS -->
     <div class="admin-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
@@ -1375,7 +1366,6 @@
             </table>
         </div>
     </div>
-
     <!-- TRAUZEUGE PLAYLIST -->
     <div class="admin-panel" style="margin-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
@@ -1398,7 +1388,6 @@
         </div>
     </div>
 </div>
-
 <!-- HAUPTINHALT -->
 <div id="main-content">
     <!-- HERO SECTION -->
@@ -1427,7 +1416,6 @@
             <button class="admin-edit-btn" style="border-radius: 50%; width: 44px; height: 44px; background-color: rgba(255,255,255,0.8); color: #2b2d42;" onclick="window.resetImage('hero_image_url')" title="Hintergrundbild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
         </div>
     </header>
-
     <!-- COUNTDOWN -->
     <div class="countdown-container">
         <h3>Wir können es kaum erwarten...</h3>
@@ -1450,7 +1438,6 @@
             </div>
         </div>
     </div>
-
     <!-- UNSERE STORY / EINLADUNG -->
     <section id="einladung">
         <h2>
@@ -1470,7 +1457,6 @@
             <button class="admin-edit-btn" onclick="window.editSettingText('intro_p3', 'intro-p3')" title="Textabsatz bearbeiten" aria-label="Textabsatz bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
         </p>
     </section>
-
     <!-- ABLAUFPLAN -->
     <section id="ablauf" style="background-color: #f3f5f0;">
         <h2>Der Ablaufplan</h2>
@@ -1484,7 +1470,6 @@
             <!-- Wird dynamisch aus Supabase geladen -->
         </div>
     </section>
-
     <!-- LOCATION -->
     <section id="location">
         <h2>Die Locations</h2>
@@ -1508,7 +1493,6 @@
             <!-- Wird dynamisch geladen -->
         </div>
     </section>
-
     <!-- RSVP SECTION WITH DYNAMIC FORM -->
     <section id="rsvp" class="rsvp">
         <h2 id="rsvp-main-title">Zusage & Rückmeldung</h2>
@@ -1564,7 +1548,6 @@
             </div>
         </div>
     </section>
-
     <!-- TRAUZEUGEN SECTION -->
     <section id="trauzeugen-section" style="background-color: #f3f5f0;">
         <i class="fa-solid fa-users" aria-hidden="true" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
@@ -1575,7 +1558,6 @@
             <!-- Wird dynamisch befüllt -->
         </div>
     </section>
-
     <!-- GESCHENKE -->
     <section id="geschenke">
         <i class="fa-solid fa-gift" aria-hidden="true"></i>
@@ -1591,11 +1573,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         </p>
     </section>
 </div>
-
 <!-- Hidden File Inputs für Direkt-Uploads im Admin-Vorschau-Modus -->
 <input type="file" id="hero-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('hero-img-file', 'hero_image_url')">
 <input type="file" id="lock-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('lock-img-file', 'lock_image_url')">
-
 <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
 <script>
     // --- GLOBALE VARIABLES FÜR PIN-PAD (Direkt verfügbar) ---
@@ -1680,7 +1660,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         window.allRsvps = []; // Globale RSVP-Liste
         window.allInvites = []; // Globale Invite-Liste
         window.allTrauzeugen = []; // Globale Trauzeugen-Liste
-
         // --- Elemente des Sperrbildschirms ---
         const lockScreen = document.getElementById("lock-screen");
         const errorDiv = document.getElementById("lock-error");
@@ -1801,7 +1780,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const minutes = String(dateObj.getMinutes()).padStart(2, '0');
             const seconds = String(dateObj.getSeconds()).padStart(2, '0');
             const endDate = `${year}${month}${day}T${hours}${minutes}${seconds}`;
-
             const icsString = [
                 "BEGIN:VCALENDAR",
                 "VERSION:2.0",
@@ -1814,7 +1792,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 "END:VEVENT",
                 "END:VCALENDAR"
             ].join("\r\n");
-
             const blob = new Blob([icsString], { type: "text/calendar;charset=utf-8" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
@@ -1823,7 +1800,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             link.click();
             document.body.removeChild(link);
         };
-
         // --- LOCATIONS & UNTERKÜNFTE VERWALTUNG (DYNAMISCHES SYSTEM) ---
         function renderLocations(settings) {
             // Locations-Liste laden
@@ -1990,9 +1966,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 accommodations = [{
                     id: "acc_default",
                     title: window.siteSettings.accommodation_title || 'Unterkunftstipp',
-                    name: settings.accommodation_name || 'Hotel am Stadtpark',
-                    address: settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
-                    desc: settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
+                    name: window.siteSettings.accommodation_name || 'Hotel am Stadtpark', // FIX: settings -> window.siteSettings
+                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt', // FIX: settings -> window.siteSettings
+                    desc: window.siteSettings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".' // FIX: settings -> window.siteSettings
                 }];
             }
             accommodations.push({
@@ -2098,7 +2074,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const time = prompt("Uhrzeit für den Programmpunkt (z.B. '14:00 Uhr'):");
             if (!time) return;
             const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
-            if (!title) return;
+            if (!time) return;
             const desc = prompt("Beschreibung (optional):");
             
             try {
@@ -2139,7 +2115,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
                 const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
                 if (error) {
-                    alert("Fehler beim Löschen: " + error.message);
+                    alert("Fehler beim Erstellen/Löschen: " + error.message);
                 } else {
                     loadTimeline();
                     loadAdminTimelineTable();
@@ -2171,17 +2147,14 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.body.classList.add('admin-mode-active');
             }
         };
-
         // --- HAUPTFUNKTIONEN BEIM LADEN (LOGIN-LOGIK) ---
         async function initializePage() {
             await loadGlobalData();
             await loadSiteSettings();
             await loadTimeline();
             renderTrauzeugenSection();
-
             const role = sessionStorage.getItem('user_role');
             const pin = sessionStorage.getItem('wedding_pin');
-
             if (role === 'admin' && pin === '1407') {
                  unlockAdminDashboard();
             } else if (role === 'trauzeuge' && pin) {
@@ -2247,7 +2220,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 unlockTrauzeugenDashboard(enteredPin, trauzeuge.name);
                 return;
             }
-
             // 3. Check Guest
             const { data: invite, error: invError } = await _supabase.from('invitations').select('names').eq('pin', enteredPin).maybeSingle();
             if (invite) {
@@ -2257,7 +2229,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 unlockWebsite(enteredPin, invite.names);
                 return;
             }
-
             // 4. If nothing matches
             errorDiv.style.opacity = "1";
             const container = lockScreen.querySelector('.lock-container');
@@ -2284,7 +2255,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                  personalGreeting = `Hallo! Schön, dass du da bist.`; // Fallback
             }
             document.getElementById("personal-greeting").innerText = personalGreeting;
-
             
             document.getElementById("hidden-guest-pin").value = pin;
             
@@ -2352,7 +2322,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.body.classList.add('admin-bar-active');
             window.toggleAdminView('dashboard');
         }
-
         async function unlockTrauzeugenDashboard(pin, name) {
             await loadTrauzeugeData();
             fadeOut(lockScreen);
@@ -2363,14 +2332,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById('trauzeuge-dashboard').style.display = 'block';
         }
         
-        
         // --- ZENTRALE DATENLADE- & RENDER-FUNKTIONEN ---
-
         async function loadGlobalData() {
             const rsvpsPromise = _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
             const invitesPromise = _supabase.from('invitations').select('*').order('created_at', { ascending: false });
             const trauzeugenPromise = _supabase.from('trauzeugen').select('*').order('created_at', { ascending: false });
-
             const [{ data: rsvps, error: rsvpsErr }, { data: invites, error: invitesErr }, { data: trauzeugen, error: tzErr }] = await Promise.all([rsvpsPromise, invitesPromise, trauzeugenPromise]);
             
             if (rsvpsErr || invitesErr || tzErr) {
@@ -2381,7 +2347,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             window.allInvites = invites || [];
             window.allTrauzeugen = trauzeugen || [];
         }
-
         async function loadAdminData() {
             await loadGlobalData();
             buildAdminStatsAndTable(window.allRsvps, window.allInvites);
@@ -2390,12 +2355,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             buildTrauzeugenAdminTable(window.allTrauzeugen);
             await loadAdminTimelineTable();
         }
-
         async function loadTrauzeugeData() {
             await loadGlobalData();
             buildTrauzeugeDashboard(window.allRsvps, window.allInvites);
         }
-
         function buildTrauzeugeDashboard(rsvpsList, invitesList) {
             // Fülle die RSVP Tabelle für Trauzeugen
             buildRsvpTable(rsvpsList, 'trauzeuge-table-body', false); // false = kein Admin
@@ -2406,7 +2369,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         }
         
         // --- Generische Render-Funktionen ---
-
         function calculateAndRenderStats(rsvpsList, invitesList, prefix) {
             let guestsConfirmed = 0;
             let totalMeat = 0;
@@ -2420,12 +2382,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     });
                 }
             });
-
             let guestsExpectedTotal = 0;
             invitesList.forEach(inv => {
                 guestsExpectedTotal += (inv.expected_count || 0);
             });
-
             const totalInvites = invitesList.length;
             const answeredInvites = invitesList.filter(inv => rsvpsList.some(r => r.pin === inv.pin)).length;
             let quote = totalInvites > 0 ? Math.round((answeredInvites / totalInvites) * 100) : 0;
@@ -2435,7 +2395,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById(`${prefix}veggie`).innerText = totalVeggie;
             document.getElementById(`${prefix}quote`).innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
         }
-
         function buildRsvpTable(rsvpsList, tableBodyId, isAdmin = false) {
             const tableBody = document.getElementById(tableBodyId);
             tableBody.innerHTML = "";
@@ -2451,7 +2410,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 } else {
                     rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`;
                 }
-
                 const row = tableBody.insertRow();
                 let rowHtml = `
                     <td><strong>${escapeHtml(rsvp.name)}</strong></td>
@@ -2460,7 +2418,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     <td><div style="display:flex; flex-direction:column; gap:8px;">${rsvpGuestsHtml}</div></td>
                     <td><small style="font-size:0.9rem; color:#555;">${escapeHtml(rsvp.nachricht) || '-'}</small></td>
                 `;
-
                 if (isAdmin) {
                     rowHtml += `<td><button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td>`;
                 }
@@ -2471,7 +2428,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 tableBody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#777; font-style:italic;">Bisher keine Rückmeldungen erhalten.</td></tr>`;
             }
         }
-
         function buildPlaylistTable(rsvpsList, tableBodyId) {
             const playlistBody = document.getElementById(tableBodyId);
             playlistBody.innerHTML = "";
@@ -2484,7 +2440,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     });
                 }
             });
-
             if (songs.length > 0) {
                 songs.forEach(song => {
                     const row = playlistBody.insertRow();
@@ -2498,7 +2453,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht.</td></tr>`;
             }
         }
-
         function buildAdminStatsAndTable(rsvps, invites){
              calculateAndRenderStats(rsvps, invites, 'stat-');
              buildRsvpTable(rsvps, 'admin-table-body', true);
@@ -2534,7 +2488,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             });
             downloadCsv(csvContent, 'hochzeit_gaesteliste.csv');
         };
-
         window.exportSongsToCsv = function() {
             const rsvps = window.allRsvps || [];
             let songs = [];
@@ -2546,12 +2499,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     });
                 }
             });
-
             if (songs.length === 0) {
                 alert("Keine Musikwünsche zum Exportieren vorhanden.");
                 return;
             }
-
             let csvContent = "\uFEFF"; // UTF-8 BOM
             csvContent += "Titel;Interpret;Gewünscht von\r\n";
             songs.forEach(song => {
@@ -2560,7 +2511,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             });
             downloadCsv(csvContent, 'hochzeit_wunschliste.csv');
         };
-
         function downloadCsv(content, fileName) {
             const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
             const url = URL.createObjectURL(blob);
@@ -2571,7 +2521,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             link.click();
             document.body.removeChild(link);
         }
-
         window.deleteRsvp = async function(pin) {
             if (confirm("Möchtest du diese Rückmeldung wirklich löschen? Der Gast kann danach neu abstimmen.")) {
                 const { error } = await _supabase.from('rsvps').delete().eq('pin', pin);
@@ -2640,8 +2589,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777; font-style:italic;">Noch keine Trauzeugen-PINs erstellt.</td></tr>`;
             }
         }
-
-
         // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN ---
         window.deleteInvite = async function(id) {
             const inviteToDelete = window.allInvites.find(inv => inv.id === id);
@@ -2653,17 +2600,14 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 await loadAdminData(); // Alles neu laden
             }
         };
-
         window.deleteTrauzeuge = async function(id) {
             const tzToDelete = window.allTrauzeugen.find(tz => tz.id === id);
              if (!tzToDelete) return;
-
             if (confirm(`Möchtest du den Trauzeugen-PIN für "${tzToDelete.name}" wirklich löschen?`)) {
                 await _supabase.from('trauzeugen').delete().eq('id', id);
                 await loadAdminData();
             }
         };
-
         // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN ---
         const inviteForm = document.getElementById('admin-invite-form');
         if (inviteForm) {
@@ -2705,7 +2649,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const phone = document.getElementById('trauzeuge-phone').value;
                 const gender = document.getElementById('trauzeuge-gender').value;
                 const responsibility = document.getElementById('trauzeuge-responsibility').value;
-
                 const existingPins = [...window.allInvites.map(i => i.pin), ...window.allTrauzeugen.map(t => t.pin)];
                 let newPin = "";
                 let isUnique = false;
@@ -2729,7 +2672,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
             });
         }
-
         // --- FORMULAR RSVP ABSENDEN (SPEICHERN) ---
         const form = document.getElementById('wedding-rsvp-form');
         if (form) {
@@ -3056,7 +2998,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 console.error("Fehler beim Laden des Admin-Tagesablaufs:", err);
             }
         }
-
          function renderTrauzeugenSection() {
             const container = document.getElementById('trauzeugen-container');
             container.innerHTML = ''; // Leeren
@@ -3066,7 +3007,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     let title = "Trauzeug:in";
                     if(tz.gender === 'männlich') title = 'Trauzeuge';
                     if(tz.gender === 'weiblich') title = 'Trauzeugin';
-
                     container.innerHTML += `
                         <div class="location-card" style="text-align: center;">
                             <i class="fa-solid fa-heart" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
@@ -3101,7 +3041,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     .from('website-images')
                     .upload(fileName, file, { cacheControl: '3600', upsert: true });
                 if (error) throw error;
-
                 const { data: publicData } = _supabase.storage.from('website-images').getPublicUrl(fileName);
                 const publicUrl = publicData.publicUrl;
                 
@@ -3110,13 +3049,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 
                 updateImageOnPage(settingKey, publicUrl);
                 alert("Bild erfolgreich hochgeladen und gespeichert!");
-
             } catch (err) {
                 console.error("Upload failed:", err);
                 alert("Fehler beim Upload: " + err.message);
             }
         };
-
         window.resetImage = async function(settingKey) {
             if (!confirm("Möchtest du das Bild wirklich auf den Standard zurücksetzen?")) return;
             try {
@@ -3128,7 +3065,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 alert("Fehler beim Zurücksetzen: " + err.message);
             }
         };
-
         function updateImageOnPage(settingKey, url) {
             const finalUrl = url || DEFAULT_HERO_IMAGE;
             if (settingKey === 'hero_image_url') {
@@ -3148,6 +3084,19 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         
         function fadeOut(el) { el.style.opacity = "0"; setTimeout(() => el.style.display = "none", 500); }
         function fadeIn(el) { el.style.display = "block"; setTimeout(() => el.style.opacity = "1", 50); }
+
+        // Keyboard-Unterstützung für das PIN-Pad
+        document.addEventListener('keydown', function(e) {
+            if (lockScreen && lockScreen.style.display !== 'none') {
+                if (e.key >= '0' && e.key <= '9') {
+                    pressKey(e.key);
+                } else if (e.key === 'Backspace') {
+                    deleteLast();
+                } else if (e.key === 'Escape') {
+                    clearPin();
+                }
+            }
+        });
     });
 </script>
 </body>
