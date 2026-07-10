@@ -499,6 +499,7 @@
         }
         body.admin-mode-active .admin-location-controls {
             display: flex !important;
+            justify-content: flex-start !important; /* Button-Anpassung */
         }
         body.admin-mode-active .admin-location-toggle-bar {
             display: block !important;
@@ -514,10 +515,19 @@
         }
         .location-card {
             background: white;
-            padding: 40px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             border-top: 5px solid var(--primary);
+            overflow: hidden; /* Für das Bild */
+        }
+        .location-card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+        .location-card-content {
+            padding: 30px;
         }
         .location-card i {
             font-size: 2rem;
@@ -529,6 +539,12 @@
             font-size: 1.5rem;
             color: var(--primary-dark);
         }
+         /* FIX: Kleinere Buttons für Location/Unterkunft */
+        .admin-location-controls .admin-inline-edit-btn {
+            padding: 4px 12px;
+            font-size: 0.7rem;
+        }
+
         /* --- RSVP SECTION WITH DYNAMIC GUEST CARDS --- */
         .rsvp {
             background-color: var(--primary-dark);
@@ -1051,9 +1067,8 @@
                 grid-template-columns: 1fr !important;
                 gap: 20px;
             }
-            .location-card {
+            .location-card-content {
                 padding: 25px;
-                text-align: left;
             }
             
             /* RSVP Formular Quetschung beheben */
@@ -1469,7 +1484,7 @@
 
         <!-- NEUES BILD VON EUCH -->
         <div class="couple-image-wrapper">
-            <img src="" id="couple-image" class="couple-image" alt="Leo & Felix" style="display: none;">
+            <img src="" id="couple-image" class="couple-image" alt="Leo & Felix">
             <div class="admin-edit-btn" style="position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; width: auto; height: auto; background: transparent; border: none; box-shadow: none;">
                  <button class="admin-edit-btn" style="border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerImageUpload('couple-img-file')" aria-label="Bild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Bild ändern</button>
                  <button class="admin-edit-btn" style="border-radius: 50%; width: 44px; height: 44px; background-color: rgba(255,255,255,0.8); color: #2b2d42;" onclick="window.resetImage('couple_image_url')" title="Bild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
@@ -1609,13 +1624,14 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 <input type="file" id="hero-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('hero-img-file', 'hero_image_url')">
 <input type="file" id="lock-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('lock-img-file', 'lock_image_url')">
 <input type="file" id="couple-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('couple-img-file', 'couple_image_url')">
-<input type="file" id="timeline-img-upload" accept="image/*" style="display: none;">
+<input type="file" id="generic-img-upload" accept="image/*" style="display: none;">
 
 <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
 <script>
     // --- GLOBALE VARIABLES FÜR PIN-PAD (Direkt verfügbar) ---
     let enteredPin = "";
     const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
+    const DEFAULT_COUPLE_IMAGE = 'https://images.unsplash.com/photo-1542042161-d10f4435d7d9?auto=format&fit=crop&q=80&w=800';
     
     // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
     window.logout = function() {
@@ -1701,11 +1717,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         
         // --- Standard-Fallbacks für Tagesablauf ---
         function getDefaultTimeline() {
-            return [
-                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.", image_url: null },
-                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.", image_url: null },
-                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: null },
-                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!", image_url: null }
+             return [
+                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.", image_url: 'https://images.unsplash.com/photo-1597983726256-11e1b1b49118?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.", image_url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!", image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800' }
             ];
         }
         
@@ -1726,7 +1742,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 // 1. Bilder laden / setzen
                 updateImageOnPage('hero_image_url', settings.hero_image_url);
                 updateImageOnPage('lock_image_url', settings.lock_image_url);
-                updateImageOnPage('couple_image_url', settings.couple_image_url);
+                updateImageOnPage('couple_image_url', settings.couple_image_url || DEFAULT_COUPLE_IMAGE); // NEU: Default für Paarbild
 
                 // 2. Dynamische Textinhalte aus Settings laden
                 document.getElementById('hero-title').innerText = settings.hero_title || 'Leo & Felix';
@@ -1849,28 +1865,34 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 try { locations = JSON.parse(settings.locations_list); } catch(e) {}
             }
             if (locations.length === 0) {
-                locations = [{
+                 locations = [{
                     id: "loc_default",
                     title: settings.location_title || 'Die Trauung & Feier',
                     name: settings.location_name || 'Gutshof Sonnenschein',
                     address: settings.location_address || 'Musterstraße 42\n12345 Traumstadt',
-                    desc: settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
+                    desc: settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.',
+                    image_url: 'https://images.unsplash.com/photo-1593294334333-a3b04c2b9560?auto=format&fit=crop&q=80&w=800'
                 }];
             }
             // Render Locations
             const locContainer = document.getElementById('locations-container');
             locContainer.innerHTML = '';
             locations.forEach(loc => {
+                const imageUrl = loc.image_url ? `<img src="${escapeHtml(loc.image_url)}" alt="${escapeHtml(loc.title)}" class="location-card-image">` : '<div style="padding-top: 30px;"><i class="fa-solid fa-church" aria-hidden="true" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i></div>';
                 locContainer.innerHTML += `
                     <div class="location-card">
-                        <i class="fa-solid fa-church" aria-hidden="true"></i>
-                        <h3>${escapeHtml(loc.title)}</h3>
-                        <p><strong>${escapeHtml(loc.name)}</strong><br>
-                        ${escapeHtml(loc.address).replace(/\n/g, '<br>')}</p>
-                        <p>${escapeHtml(loc.desc)}</p>
-                        <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px; justify-content: center;">
-                            <button class="admin-inline-edit-btn" onclick="window.editLocationDirect('${loc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
-                            <button class="admin-inline-edit-btn danger" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i> Löschen</button>
+                        ${loc.image_url ? imageUrl : ''}
+                        <div class="location-card-content">
+                            ${!loc.image_url ? imageUrl : ''}
+                            <h3>${escapeHtml(loc.title)}</h3>
+                            <p><strong>${escapeHtml(loc.name)}</strong><br>
+                            ${escapeHtml(loc.address).replace(/\n/g, '<br>')}</p>
+                            <p>${escapeHtml(loc.desc)}</p>
+                            <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px;">
+                                <button class="admin-inline-edit-btn" onclick="window.editLocationDirect('${loc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
+                                <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'loc', '${loc.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
+                                <button class="admin-inline-edit-btn danger" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1881,28 +1903,34 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 try { accommodations = JSON.parse(settings.accommodations_list); } catch(e) {}
             }
             if (accommodations.length === 0) {
-                accommodations = [{
+                 accommodations = [{
                     id: "acc_default",
-                    title: settings.accommodation_title || 'Unterkunftstipp',
-                    name: settings.accommodation_name || 'Hotel am Stadtpark',
-                    address: settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
-                    desc: settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
+                    title: 'Unterkunftstipp',
+                    name: 'Hotel am Stadtpark',
+                    address: 'Bahnhofstraße 5\n12345 Traumstadt',
+                    desc: 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".',
+                    image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800'
                 }];
             }
             // Render Unterkünfte
             const accContainer = document.getElementById('accommodations-container');
             accContainer.innerHTML = '';
             accommodations.forEach(acc => {
+                const imageUrl = acc.image_url ? `<img src="${escapeHtml(acc.image_url)}" alt="${escapeHtml(acc.title)}" class="location-card-image">` : '<div style="padding-top: 30px;"><i class="fa-solid fa-hotel" aria-hidden="true" style="font-size: 2rem; color: var(--accent); margin-bottom: 20px;"></i></div>';
                 accContainer.innerHTML += `
-                    <div class="location-card">
-                        <i class="fa-solid fa-hotel" aria-hidden="true"></i>
-                        <h3>${escapeHtml(acc.title)}</h3>
-                        <p><strong>${escapeHtml(acc.name)}</strong><br>
-                        ${escapeHtml(acc.address).replace(/\n/g, '<br>')}</p>
-                        <p>${escapeHtml(acc.desc)}</p>
-                        <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px; justify-content: center;">
-                            <button class="admin-inline-edit-btn" onclick="window.editAccommodationDirect('${acc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
-                            <button class="admin-inline-edit-btn danger" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i> Löschen</button>
+                     <div class="location-card">
+                        ${acc.image_url ? imageUrl : ''}
+                        <div class="location-card-content">
+                            ${!acc.image_url ? imageUrl : ''}
+                            <h3>${escapeHtml(acc.title)}</h3>
+                            <p><strong>${escapeHtml(acc.name)}</strong><br>
+                            ${escapeHtml(acc.address).replace(/\n/g, '<br>')}</p>
+                            <p>${escapeHtml(acc.desc)}</p>
+                            <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px;">
+                                 <button class="admin-inline-edit-btn" onclick="window.editAccommodationDirect('${acc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
+                                 <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'acc', '${acc.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
+                                 <button class="admin-inline-edit-btn danger" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1918,160 +1946,117 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const address = prompt("Adresse (nutze \\n für neue Zeilen):");
             if (!address) return;
             const desc = prompt("Beschreibung / Parkplatzinfo (optional):");
-            let locations = [];
-            if (window.siteSettings.locations_list) {
-                try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
-            }
-            if (locations.length === 0) {
-                locations = [{
-                    id: "loc_default",
-                    title: window.siteSettings.location_title || 'Die Trauung & Feier',
-                    name: window.siteSettings.location_name || 'Gutshof Sonnenschein',
-                    address: window.siteSettings.location_address || 'Musterstraße 42\n12345 Traumstadt',
-                    desc: window.siteSettings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
-                }];
-            }
-            locations.push({
-                id: "loc_" + Date.now(),
-                title: title.trim(),
-                name: name.trim(),
-                address: address.trim(),
-                desc: (desc || "").trim()
-            });
+            const imageUrl = prompt("Optionale Bild-URL:");
+            
+            let locations = JSON.parse(window.siteSettings.locations_list || '[]');
+            locations.push({ id: "loc_" + Date.now(), title, name, address, desc, image_url: imageUrl || null });
+
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
                 window.siteSettings.locations_list = JSON.stringify(locations);
                 renderLocations(window.siteSettings);
-            } catch (err) {
-                alert("Fehler beim Hinzufügen: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
         window.editLocationDirect = async function(id) {
-            let locations = [];
-            if (window.siteSettings.locations_list) {
-                try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
-            }
+            let locations = JSON.parse(window.siteSettings.locations_list || '[]');
             const loc = locations.find(l => l.id === id);
             if (!loc) return;
+            
             const title = prompt("Titel bearbeiten:", loc.title);
             if (title === null) return;
             const name = prompt("Name bearbeiten:", loc.name);
             if (name === null) return;
-            const address = prompt("Adresse bearbeiten (nutze \\n für neue Zeilen):", loc.address);
+            const address = prompt("Adresse bearbeiten:", loc.address);
             if (address === null) return;
             const desc = prompt("Beschreibung bearbeiten:", loc.desc);
             if (desc === null) return;
+            const imageUrl = prompt("Bild-URL bearbeiten:", loc.image_url || '');
+            if (imageUrl === null) return;
+
             loc.title = title.trim();
             loc.name = name.trim();
             loc.address = address.trim();
             loc.desc = desc.trim();
+            loc.image_url = imageUrl.trim() || null;
+
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
                 window.siteSettings.locations_list = JSON.stringify(locations);
                 renderLocations(window.siteSettings);
-            } catch (err) {
-                alert("Fehler beim Speichern: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
         window.deleteLocationDirect = async function(id) {
-            if (!confirm("Möchtest du diese Location wirklich löschen?")) return;
-            let locations = [];
-            if (window.siteSettings.locations_list) {
-                try { locations = JSON.parse(window.siteSettings.locations_list); } catch(e) {}
-            }
-            locations = locations.filter(l => l.id !== id);
+            if (!confirm("Diese Location wirklich löschen?")) return;
+            let locations = JSON.parse(window.siteSettings.locations_list || '[]').filter(l => l.id !== id);
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
                 window.siteSettings.locations_list = JSON.stringify(locations);
                 renderLocations(window.siteSettings);
-            } catch (err) {
-                alert("Fehler beim Löschen: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
         window.addAccommodationDirect = async function() {
             const title = prompt("Titel für Unterkunft (z.B. 'Unterkunftstipp'):");
             if (!title) return;
-            const name = prompt("Name des Hotels (z.B. 'Hotel am Stadtpark'):");
+            const name = prompt("Name des Hotels:");
             if (!name) return;
-            const address = prompt("Adresse (nutze \\n für neue Zeilen):");
+            const address = prompt("Adresse:");
             if (!address) return;
-            const desc = prompt("Beschreibung Zimmerkontingent (optional):");
-            let accommodations = [];
-            if (window.siteSettings.accommodations_list) {
-                try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
-            }
-            if (accommodations.length === 0) {
-                accommodations = [{
-                    id: "acc_default",
-                    title: window.siteSettings.accommodation_title || 'Unterkunftstipp',
-                    name: window.siteSettings.accommodation_name || 'Hotel am Stadtpark', // FIX: settings -> window.siteSettings
-                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt', // FIX: settings -> window.siteSettings
-                    desc: window.siteSettings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".' // FIX: settings -> window.siteSettings
-                }];
-            }
-            accommodations.push({
-                id: "acc_" + Date.now(),
-                title: title.trim(),
-                name: name.trim(),
-                address: address.trim(),
-                desc: (desc || "").trim()
-            });
+            const desc = prompt("Beschreibung (optional):");
+            const imageUrl = prompt("Optionale Bild-URL:");
+
+            let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]');
+            accommodations.push({ id: "acc_" + Date.now(), title, name, address, desc, image_url: imageUrl || null });
+            
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
                 if (error) throw error;
                 window.siteSettings.accommodations_list = JSON.stringify(accommodations);
                 renderLocations(window.siteSettings);
-            } catch (err) {
-                alert("Fehler beim Hinzufügen: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
         window.editAccommodationDirect = async function(id) {
-            let accommodations = [];
-            if (window.siteSettings.accommodations_list) {
-                try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
-            }
+            let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]');
             const acc = accommodations.find(a => a.id === id);
             if (!acc) return;
+
             const title = prompt("Titel bearbeiten:", acc.title);
             if (title === null) return;
-            const name = prompt("Hotel Name bearbeiten:", acc.name);
+            const name = prompt("Name bearbeiten:", acc.name);
             if (name === null) return;
-            const address = prompt("Adresse bearbeiten (nutze \\n für neue Zeilen):", acc.address);
+            const address = prompt("Adresse bearbeiten:", acc.address);
             if (address === null) return;
             const desc = prompt("Beschreibung bearbeiten:", acc.desc);
             if (desc === null) return;
+            const imageUrl = prompt("Bild-URL bearbeiten:", acc.image_url || '');
+            if (imageUrl === null) return;
+
             acc.title = title.trim();
             acc.name = name.trim();
             acc.address = address.trim();
             acc.desc = desc.trim();
+            acc.image_url = imageUrl.trim() || null;
+            
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
                 if (error) throw error;
                 window.siteSettings.accommodations_list = JSON.stringify(accommodations);
                 renderLocations(window.siteSettings);
-            } catch (err) {
-                alert("Fehler beim Speichern: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
         window.deleteAccommodationDirect = async function(id) {
-            if (!confirm("Möchtest du diesen Unterkunftstipp wirklich löschen?")) return;
-            let accommodations = [];
-            if (window.siteSettings.accommodations_list) {
-                try { accommodations = JSON.parse(window.siteSettings.accommodations_list); } catch(e) {}
-            }
-            accommodations = accommodations.filter(a => a.id !== id);
-            try {
+            if (!confirm("Diesen Unterkunftstipp wirklich löschen?")) return;
+            let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]').filter(a => a.id !== id);
+             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
                 if (error) throw error;
                 window.siteSettings.accommodations_list = JSON.stringify(accommodations);
                 renderLocations(window.siteSettings);
-            } catch (err) {
-                alert("Fehler beim Löschen: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
+
         // --- DYNAMISCHER TAGESABLAUF (EINTRAGUNG ERZWINGEN) ---
         async function loadTimeline() {
             try {
@@ -2084,11 +2069,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 if (!data || data.length === 0) {
                     const defaults = getDefaultTimeline();
                     const { data: inserted, error: insertErr } = await _supabase.from('timeline_items').insert(defaults).select();
-                    if (!insertErr && inserted) {
-                        data = inserted;
-                    } else {
-                        data = defaults;
-                    }
+                    data = (!insertErr && inserted) ? inserted : defaults;
                 }
                 timelineContainer.innerHTML = '';
                 data.forEach((item, index) => {
@@ -2103,9 +2084,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                                 <p>${escapeHtml(item.description || '')}</p>
                                 ${imageUrl}
                                 <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px; flex-wrap: wrap;">
-                                    <button class="admin-inline-edit-btn" onclick="window.editTimelineItemDirect('${item.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text Ändern</button>
-                                    <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('timeline-img-upload', '${item.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild Ändern</button>
-                                    <button class="admin-inline-edit-btn danger" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i> Löschen</button>
+                                    <button class="admin-inline-edit-btn" onclick="window.editTimelineItemDirect('${item.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
+                                    <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'timeline', '${item.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
+                                    <button class="admin-inline-edit-btn danger" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -2116,33 +2097,23 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         }
         window.addTimelineItemDirect = async function() {
-            const time = prompt("Uhrzeit für den Programmpunkt (z.B. '14:00 Uhr'):");
+            const time = prompt("Uhrzeit (z.B. '14:00 Uhr'):");
             if (!time) return;
-            const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
+            const title = prompt("Titel (z.B. 'Freie Trauung'):");
             if (!title) return;
             const desc = prompt("Beschreibung (optional):");
-            const imageUrl = prompt("Optionale Bild-URL (leer lassen für kein Bild):");
+            const imageUrl = prompt("Optionale Bild-URL:");
             
             try {
-                const { error } = await _supabase.from('timeline_items').insert([{
-                    time_text: time.trim(),
-                    title: title.trim(),
-                    description: (desc || "").trim(),
-                    image_url: (imageUrl || null)
-                }]);
+                const { error } = await _supabase.from('timeline_items').insert([{ time_text: time.trim(), title: title.trim(), description: (desc || "").trim(), image_url: (imageUrl || null) }]);
                 if (error) throw error;
                 loadTimeline();
-            } catch (err) {
-                alert("Fehler beim Hinzufügen: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
 
         window.editTimelineItemDirect = async function(id) {
             let { data: item, error: fetchError } = await _supabase.from('timeline_items').select('*').eq('id', id).single();
-            if (fetchError || !item) {
-                alert("Fehler: Programmpunkt nicht gefunden.");
-                return;
-            }
+            if (fetchError || !item) { alert("Fehler: Programmpunkt nicht gefunden."); return; }
 
             const time = prompt("Uhrzeit bearbeiten:", item.time_text);
             if (time === null) return;
@@ -2154,28 +2125,17 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (imageUrl === null) return;
             
             try {
-                const { error } = await _supabase.from('timeline_items').update({
-                    time_text: time.trim(),
-                    title: title.trim(),
-                    description: desc.trim(),
-                    image_url: (imageUrl.trim() || null)
-                }).eq('id', id);
-
+                const { error } = await _supabase.from('timeline_items').update({ time_text: time.trim(), title: title.trim(), description: desc.trim(), image_url: (imageUrl.trim() || null) }).eq('id', id);
                 if (error) throw error;
                 loadTimeline();
-            } catch (err) {
-                alert("Fehler beim Speichern: " + err.message);
-            }
+            } catch (err) { alert("Fehler: " + err.message); }
         };
 
         window.deleteTimelineItemDirect = async function(id) {
-            if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
+            if (confirm("Diesen Tagesordnungspunkt wirklich löschen?")) {
                 const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
-                if (error) {
-                    alert("Fehler beim Löschen: " + error.message);
-                } else {
-                    loadTimeline();
-                }
+                if (error) { alert("Fehler: " + error.message); } 
+                else { loadTimeline(); }
             }
         };
 
@@ -3032,14 +2992,16 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     if(tz.gender === 'weiblich') title = 'Trauzeugin';
                     container.innerHTML += `
                         <div class="location-card" style="text-align: center;">
-                            <i class="fa-solid fa-heart" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
-                            <h3>${title}</h3>
-                            <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">${escapeHtml(tz.name)}</p>
-                            ${tz.responsibility ? `<p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„${escapeHtml(tz.responsibility)}“</p>` : ''}
-                            <p style="font-size: 0.95rem; line-height: 1.8;">
-                                ${tz.email ? `<a href="mailto:${escapeHtml(tz.email)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> ${escapeHtml(tz.email)}</a><br>` : ''}
-                                ${tz.phone ? `<a href="tel:${escapeHtml(tz.phone)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> ${escapeHtml(tz.phone)}</a>` : ''}
-                            </p>
+                             <div class="location-card-content">
+                                <i class="fa-solid fa-heart" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
+                                <h3>${title}</h3>
+                                <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">${escapeHtml(tz.name)}</p>
+                                ${tz.responsibility ? `<p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„${escapeHtml(tz.responsibility)}“</p>` : ''}
+                                <p style="font-size: 0.95rem; line-height: 1.8;">
+                                    ${tz.email ? `<a href="mailto:${escapeHtml(tz.email)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> ${escapeHtml(tz.email)}</a><br>` : ''}
+                                    ${tz.phone ? `<a href="tel:${escapeHtml(tz.phone)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> ${escapeHtml(tz.phone)}</a>` : ''}
+                                </p>
+                            </div>
                         </div>
                     `;
                 });
@@ -3078,17 +3040,17 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         };
 
-        // Hilfsfunktion zum Upload für Timeline
-        window.uploadAndGetUrl = async function(fileInputId, timelineItemId) {
+        // Hilfsfunktion zum Upload für Timeline, Locations & Unterkünfte
+        window.uploadAndGetUrl = async function(fileInputId, type, itemId) {
             const fileInput = document.getElementById(fileInputId);
             fileInput.onchange = async () => {
                  if (!fileInput.files || fileInput.files.length === 0) return;
                  const file = fileInput.files[0];
-                 alert("Upload für Timeline-Bild gestartet...");
+                 alert("Upload gestartet...");
 
                  try {
                     const fileExt = file.name.split('.').pop();
-                    const fileName = `timeline_${timelineItemId}_${Date.now()}.${fileExt}`;
+                    const fileName = `${type}_${itemId}_${Date.now()}.${fileExt}`;
                     
                     const { error: uploadError } = await _supabase.storage.from('website-images').upload(fileName, file, { upsert: true });
                     if (uploadError) throw uploadError;
@@ -3097,15 +3059,14 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     const publicUrl = publicData.publicUrl;
                     
                     navigator.clipboard.writeText(publicUrl).then(() => {
-                        alert("Bild-URL wurde in die Zwischenablage kopiert!");
-                        window.editTimelineItemDirect(timelineItemId);
-                    }, () => {
-                        alert("Kopieren in die Zwischenablage ist fehlgeschlagen.");
-                         window.editTimelineItemDirect(timelineItemId);
+                        alert("Bild-URL wurde in die Zwischenablage kopiert! Du kannst sie jetzt im nächsten Dialog einfügen.");
+                        if (type === 'timeline') window.editTimelineItemDirect(itemId);
+                        if (type === 'loc') window.editLocationDirect(itemId);
+                        if (type === 'acc') window.editAccommodationDirect(itemId);
                     });
 
                  } catch(err) {
-                    alert("Fehler beim Timeline-Bild Upload: " + err.message);
+                    alert("Fehler beim Upload: " + err.message);
                  }
             };
             fileInput.click();
@@ -3132,13 +3093,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             } else if (settingKey === 'lock_image_url') {
                 document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${url || DEFAULT_HERO_IMAGE}')`;
             } else if (settingKey === 'couple_image_url') {
-                const img = document.getElementById('couple-image');
-                if (url) {
-                    img.src = url;
-                    img.style.display = 'block';
-                } else {
-                    img.style.display = 'none';
-                }
+                document.getElementById('couple-image').src = url || DEFAULT_COUPLE_IMAGE;
             }
         }
         
