@@ -1107,21 +1107,22 @@
     <div class="top-bar-content">
         <span id="guest-top-greeting">Hallo Gast!</span>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark); display: none;" id="btn-trauzeuge-dashboard" onclick="window.toggleTrauzeugeView()">Trauzeuge-Dashboard 🌟</button>
             <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Abmelden</button>
         </div>
     </div>
 </div>
 
-<!-- FLOATING ADMIN TOP BAR (Wird sichtbar wenn eingeloggt als Admin) -->
+<!-- FLOATING ADMIN TOP BAR (Wird sichtbar wenn eingeloggt als Admin oder Trauzeuge) -->
 <div id="admin-top-bar">
     <div class="top-bar-content">
-        <span>Admin-Bereich ❤️</span>
+        <span id="admin-top-bar-title">Admin-Bereich ❤️</span>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark);" onclick="window.toggleAdminView('dashboard')" id="btn-toggle-dash">Planer-Dashboard</button>
-            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.toggleAdminView('preview')" id="btn-toggle-preview">Gästeseite anzeigen</button>
-            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.triggerLockImageUpload()"><i class="fa-solid fa-image"></i> Sperrbild ändern</button>
-            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: #ffc107; color: #ffc107;" onclick="window.resetImage('lock_image_url')"><i class="fa-solid fa-rotate-left"></i> Sperrbild zurücksetzen</button>
+            <div id="admin-controls">
+                <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark);" onclick="window.toggleAdminView('dashboard')" id="btn-toggle-dash">Planer-Dashboard</button>
+                <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.toggleAdminView('preview')" id="btn-toggle-preview">Gästeseite anzeigen</button>
+                <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.triggerLockImageUpload()"><i class="fa-solid fa-image"></i> Sperrbild ändern</button>
+                <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: #ffc107; color: #ffc107;" onclick="window.resetImage('lock_image_url')"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
             <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Abmelden</button>
         </div>
     </div>
@@ -1226,10 +1227,6 @@
                     <label for="invite-count">Erwartete Personenanzahl</label>
                     <input type="number" id="invite-count" class="admin-form-control" value="2" min="1" required>
                 </div>
-                <div class="admin-form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 15px;">
-                    <input type="checkbox" id="invite-is-trauzeuge" style="width: 18px; height: 18px; accent-color: var(--primary);">
-                    <label for="invite-is-trauzeuge" style="font-weight: 500; font-size: 0.9rem; color: var(--primary-dark); cursor: pointer; margin-bottom:0;">Ist Trauzeuge 🌟 (erhält Lese-Zugriff auf Gästeliste & Playlist)</label>
-                </div>
                 <button type="submit" class="admin-btn">Speichern & PIN generieren</button>
             </form>
             
@@ -1249,6 +1246,46 @@
                         <!-- Dynamisch -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+    <!-- TRAUZEUGEN-VERWALTUNG -->
+    <div class="admin-panel">
+        <h2>Trauzeugen-Verwaltung 🌟</h2>
+        <p style="font-size:0.9rem; margin-bottom:20px; color:#555;">Hier könnt ihr spezielle PINs für eure Trauzeugen generieren. Diese PINs gewähren nur Zugriff auf das Lese-Dashboard mit den Planungs-Infos. Die Trauzeugen müssen sich zum Zusagen zusätzlich als normale Gäste mit einem regulären Einladungs-PIN anmelden.</p>
+        <div class="admin-grid-layout">
+            <form id="trauzeugen-form">
+                <div class="admin-form-group">
+                    <label for="trauzeuge-name">Name des Trauzeugen</label>
+                    <input type="text" id="trauzeuge-name" class="admin-form-control" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="trauzeuge-email">E-Mail (optional)</label>
+                    <input type="email" id="trauzeuge-email" class="admin-form-control">
+                </div>
+                 <div class="admin-form-group">
+                    <label for="trauzeuge-phone">Telefon (optional)</label>
+                    <input type="tel" id="trauzeuge-phone" class="admin-form-control">
+                </div>
+                <button type="submit" class="admin-btn">Trauzeugen-PIN generieren</button>
+            </form>
+            <div>
+                <h3>Erstellte Trauzeugen-PINs</h3>
+                <div style="overflow-x: auto; margin-top:15px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>PIN</th>
+                                <th>Name</th>
+                                <th>Kontakt</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trauzeugen-list-body">
+                            <!-- Dynamisch -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -1278,14 +1315,8 @@
 
 <!-- TRAUZEUGE DASHBOARD (Spezielle Lese-Ansicht für ausgewählte Gäste) -->
 <div id="trauzeuge-dashboard" style="display: none; padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
-    <div class="admin-header">
-        <div>
-            <h1>Trauzeuge-Dashboard 🌟</h1>
-            <p style="text-align: left; margin: 5px 0 0 0; font-size: 0.95rem; color: #666;">Hallo Trauzeuge! Hier hast du Einblick in die Gästeliste und Musikwünsche. ❤️</p>
-        </div>
-    </div>
     
-    <!-- TRAUZEUGE STATS GRID -->
+    <!-- STATS GRID -->
     <div class="admin-stats-grid">
         <div class="admin-card">
             <h3>Gäste Zugesagt</h3>
@@ -1580,7 +1611,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
     window.logout = function() {
         sessionStorage.removeItem('wedding_pin');
         sessionStorage.removeItem('current_guest_name');
-        sessionStorage.removeItem('is_trauzeuge');
+        sessionStorage.removeItem('user_role');
         window.location.reload();
     };
     // Helfer zum Escapen von HTML-Tags
@@ -1653,6 +1684,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         window.siteSettings = {};
         window.allRsvps = []; // Globale RSVP-Liste
         window.allInvites = []; // Globale Invite-Liste
+        window.allTrauzeugen = []; // Globale Trauzeugen-Liste
 
         // --- Elemente des Sperrbildschirms ---
         const lockScreen = document.getElementById("lock-screen");
@@ -2145,48 +2177,23 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         };
 
-        // --- TRAUZEUGE VIEW SWITCHER (VEREINFACHT) ---
-        window.toggleTrauzeugeView = function(view) {
-            const dashboard = document.getElementById("trauzeuge-dashboard");
-            const mainContent = document.getElementById("main-content");
-            const btnTz = document.getElementById("btn-trauzeuge-dashboard");
-            
-            if (view === 'preview' || (dashboard.style.display === "block" && !view)) {
-                dashboard.style.display = "none";
-                mainContent.style.display = "block";
-                mainContent.style.opacity = "1";
-                btnTz.innerText = "Trauzeuge-Dashboard 🌟";
-                btnTz.style.background = "var(--accent)";
-                btnTz.style.color = "var(--primary-dark)";
-                btnTz.style.border = "none";
-            } else {
-                dashboard.style.display = "block";
-                mainContent.style.display = "none";
-                btnTz.innerText = "Gästeseite anzeigen 📖";
-                btnTz.style.background = "transparent";
-                btnTz.style.color = "white";
-                btnTz.style.borderColor = "white";
-                btnTz.style.border = "1px solid white";
-            }
-        };
-
         // --- HAUPTFUNKTIONEN BEIM LADEN (LOGIN-LOGIK) ---
         async function initializePage() {
             await loadSiteSettings();
             await loadTimeline();
-            const savedPin = sessionStorage.getItem('wedding_pin');
-            if (savedPin) {
-                if (savedPin === "1407") {
-                    unlockAdminDashboard();
+            const role = sessionStorage.getItem('user_role');
+            const pin = sessionStorage.getItem('wedding_pin');
+
+            if (role === 'admin' && pin === '1407') {
+                 unlockAdminDashboard();
+            } else if (role === 'trauzeuge' && pin) {
+                unlockTrauzeugenDashboard(pin);
+            } else if (role === 'guest' && pin) {
+                const guestName = sessionStorage.getItem('current_guest_name');
+                if (guestName) {
+                    unlockWebsite(pin, guestName);
                 } else {
-                    // PIN ist vorhanden, lade den Gastnamen neu aus der DB
-                    const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', savedPin).maybeSingle();
-                    if (invite && invite.names) {
-                        unlockWebsite(savedPin, invite.names);
-                    } else {
-                        // PIN ist ungültig, also abmelden
-                        window.logout();
-                    }
+                    window.logout();
                 }
             }
         }
@@ -2224,43 +2231,42 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         }
         
         async function checkPin() {
+            // 1. Check Admin
             if (enteredPin === "1407") { 
-                errorDiv.style.opacity = "0"; 
+                sessionStorage.setItem('user_role', 'admin');
+                sessionStorage.setItem('wedding_pin', '1407');
                 unlockAdminDashboard(); 
+                return;
             } 
-            else {
-                const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', enteredPin).maybeSingle();
-                
-                if (invite) {
-                    errorDiv.style.opacity = "0";
-                    unlockWebsite(enteredPin, invite.names);
-                } else {
-                    errorDiv.style.opacity = "1";
-                    const container = lockScreen.querySelector('.lock-container');
-                    container.style.animation = "shake 0.3s ease";
-                    setTimeout(() => { container.style.animation = ""; }, 300);
-                    clearPin();
-                }
+            
+            // 2. Check Trauzeuge
+            const { data: trauzeuge, error: tzError } = await _supabase.from('trauzeugen').select('name').eq('pin', enteredPin).maybeSingle();
+            if (trauzeuge) {
+                sessionStorage.setItem('user_role', 'trauzeuge');
+                sessionStorage.setItem('wedding_pin', enteredPin);
+                unlockTrauzeugenDashboard(enteredPin, trauzeuge.name);
+                return;
             }
+
+            // 3. Check Guest
+            const { data: invite, error: invError } = await _supabase.from('invitations').select('names').eq('pin', enteredPin).maybeSingle();
+            if (invite) {
+                sessionStorage.setItem('user_role', 'guest');
+                sessionStorage.setItem('wedding_pin', enteredPin);
+                sessionStorage.setItem('current_guest_name', invite.names);
+                unlockWebsite(enteredPin, invite.names);
+                return;
+            }
+
+            // 4. If nothing matches
+            errorDiv.style.opacity = "1";
+            const container = lockScreen.querySelector('.lock-container');
+            container.style.animation = "shake 0.3s ease";
+            setTimeout(() => { container.style.animation = ""; }, 300);
+            clearPin();
         }
         
         async function unlockWebsite(pin, dbGuestName) {
-            sessionStorage.setItem('wedding_pin', pin);
-            sessionStorage.setItem('current_guest_name', dbGuestName);
-            
-            // Trauzeuge Status aus der Datenbank prüfen
-            const { data: invite, error: inviteErr } = await _supabase.from('invitations').select('is_trauzeuge').eq('pin', pin).maybeSingle();
-            const isTrauzeuge = invite && invite.is_trauzeuge === true;
-            
-            if (isTrauzeuge) {
-                document.getElementById("btn-trauzeuge-dashboard").style.display = "inline-block";
-                sessionStorage.setItem('is_trauzeuge', 'true');
-                loadTrauzeugeData();
-            } else {
-                document.getElementById("btn-trauzeuge-dashboard").style.display = "none";
-                sessionStorage.removeItem('is_trauzeuge');
-            }
-            
             const guestNames = detectGuestNames(dbGuestName);
             const isPlural = guestNames.length > 1;
             
@@ -2338,27 +2344,42 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         }
         
         async function unlockAdminDashboard() {
-            sessionStorage.setItem('wedding_pin', '1407');
             await loadAdminData(); // Zentrale Funktion für Admin
             fadeOut(lockScreen);
             document.getElementById("admin-top-bar").style.display = "block";
+            document.getElementById("admin-controls").style.display = "flex";
+            document.getElementById("admin-top-bar-title").innerText = "Admin-Bereich ❤️";
             document.body.classList.add('admin-bar-active');
             window.toggleAdminView('dashboard');
+        }
+
+        async function unlockTrauzeugenDashboard(pin, name) {
+            await loadTrauzeugeData();
+            fadeOut(lockScreen);
+            document.getElementById("admin-top-bar").style.display = "block";
+            document.getElementById("admin-controls").style.display = "none";
+            document.getElementById("admin-top-bar-title").innerText = `Trauzeugen-Dashboard für ${name} 🌟`;
+            document.body.classList.add('admin-bar-active');
+            document.getElementById('trauzeuge-dashboard').style.display = 'block';
         }
         
         
         // --- ZENTRALE DATENLADE- & RENDER-FUNKTIONEN ---
 
         async function loadGlobalData() {
-            const { data: rsvps, error: rsvpsErr } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
-            const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
+            const rsvpsPromise = _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
+            const invitesPromise = _supabase.from('invitations').select('*').order('created_at', { ascending: false });
+            const trauzeugenPromise = _supabase.from('trauzeugen').select('*').order('created_at', { ascending: false });
+
+            const [{ data: rsvps, error: rsvpsErr }, { data: invites, error: invitesErr }, { data: trauzeugen, error: tzErr }] = await Promise.all([rsvpsPromise, invitesPromise, trauzeugenPromise]);
             
-            if (rsvpsErr || invitesErr) {
-                console.error("Fehler beim Laden der globalen Daten:", rsvpsErr || invitesErr);
+            if (rsvpsErr || invitesErr || tzErr) {
+                console.error("Fehler beim Laden der globalen Daten:", rsvpsErr || invitesErr || tzErr);
                 return;
             }
             window.allRsvps = rsvps || [];
             window.allInvites = invites || [];
+            window.allTrauzeugen = trauzeugen || [];
         }
 
         async function loadAdminData() {
@@ -2366,6 +2387,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             buildAdminStatsAndTable(window.allRsvps, window.allInvites);
             buildAdminPlaylistTable(window.allRsvps);
             buildAdminInvitesTable(window.allInvites, window.allRsvps);
+            buildTrauzeugenAdminTable(window.allTrauzeugen);
             await loadAdminTimelineTable();
         }
 
@@ -2565,13 +2587,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const invitesBody = document.getElementById('admin-invites-body');
             invitesBody.innerHTML = "";
             
-            invitesList.sort((a, b) => {
-                const hasRsvpA = rsvpsList.some(r => r.pin === a.pin);
-                const hasRsvpB = rsvpsList.some(r => r.pin === b.pin);
-                if (hasRsvpA && !hasRsvpB) return 1;  
-                if (!hasRsvpA && hasRsvpB) return -1; 
-                return new Date(b.created_at) - new Date(a.created_at); // Neueste zuerst
-            });
+            invitesList.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             
             invitesList.forEach(invite => {
                 const matchedRsvp = rsvpsList.find(r => r.pin === invite.pin);
@@ -2585,10 +2601,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     }
                 }
                 
-                if (invite.is_trauzeuge) {
-                    statusHtml += ' <span class="badge" style="background-color: var(--accent); color: var(--primary-dark); margin-left: 5px;"><i class="fa-solid fa-star"></i> TZ</span>';
-                }
-                
                 const row = invitesBody.insertRow();
                 row.innerHTML = `
                     <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
@@ -2596,20 +2608,59 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     <td>${invite.expected_count}</td>
                     <td>${statusHtml}</td>
                     <td>
-                        <button class="delete-btn" onclick="window.deleteInvite('${invite.pin}')" title="Einladung löschen">
+                        <button class="delete-btn" onclick="window.deleteInvite('${invite.id}')" title="Einladung löschen">
                             <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                         </button>
                     </td>
                 `;
             });
         }
+        
+        function buildTrauzeugenAdminTable(trauzeugenList) {
+            const listBody = document.getElementById('trauzeugen-list-body');
+            listBody.innerHTML = "";
+            if (trauzeugenList.length > 0) {
+                 trauzeugenList.forEach(tz => {
+                    const row = listBody.insertRow();
+                    row.innerHTML = `
+                        <td><strong style="color:var(--primary); font-family: monospace;">${tz.pin}</strong></td>
+                        <td>${escapeHtml(tz.name)}</td>
+                        <td>
+                           ${tz.email ? `<a href="mailto:${escapeHtml(tz.email)}">${escapeHtml(tz.email)}</a><br>` : ''}
+                           ${tz.phone ? `<a href="tel:${escapeHtml(tz.phone)}">${escapeHtml(tz.phone)}</a>` : ''}
+                        </td>
+                        <td>
+                            <button class="delete-btn" onclick="window.deleteTrauzeuge('${tz.id}')" title="Trauzeugen-PIN löschen">
+                                <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                    `;
+                });
+            } else {
+                listBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#777; font-style:italic;">Noch keine Trauzeugen-PINs erstellt.</td></tr>`;
+            }
+        }
+
 
         // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN (VERKNÜPFTE RSVP AUCH LÖSCHEN) ---
-        window.deleteInvite = async function(pin) {
-            if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig und eine eventuell bereits abgegebene Rückmeldung (Zusage/Absage) wird ebenfalls gelöscht.")) {
-                await _supabase.from('rsvps').delete().eq('pin', pin);
-                await _supabase.from('invitations').delete().eq('pin', pin);
+        window.deleteInvite = async function(id) {
+            const inviteToDelete = window.allInvites.find(inv => inv.id === id);
+            if (!inviteToDelete) return;
+            
+            if (confirm(`Möchtest du die Einladung für "${inviteToDelete.names}" unwiderruflich löschen? Der PIN wird ungültig und eine eventuell bereits abgegebene Rückmeldung wird ebenfalls gelöscht.`)) {
+                await _supabase.from('rsvps').delete().eq('pin', inviteToDelete.pin);
+                await _supabase.from('invitations').delete().eq('id', id);
                 await loadAdminData(); // Alles neu laden
+            }
+        };
+
+        window.deleteTrauzeuge = async function(id) {
+            const tzToDelete = window.allTrauzeugen.find(tz => tz.id === id);
+             if (!tzToDelete) return;
+
+            if (confirm(`Möchtest du den Trauzeugen-PIN für "${tzToDelete.name}" wirklich löschen?`)) {
+                await _supabase.from('trauzeugen').delete().eq('id', id);
+                await loadAdminData();
             }
         };
 
@@ -2621,9 +2672,8 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 
                 const names = document.getElementById('invite-names').value;
                 const count = parseInt(document.getElementById('invite-count').value);
-                const isTrauzeuge = document.getElementById('invite-is-trauzeuge').checked;
                 
-                const existingPins = window.allInvites.map(i => i.pin);
+                const existingPins = [...window.allInvites.map(i => i.pin), ...window.allTrauzeugen.map(t => t.pin)];
                 let newPin = "";
                 let isUnique = false;
                 while (!isUnique) {
@@ -2633,23 +2683,50 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     }
                 }
                 
-                const { error } = await _supabase.from('invitations').insert([{
-                    pin: newPin,
-                    names: names,
-                    expected_count: count,
-                    is_trauzeuge: isTrauzeuge
-                }]);
+                const { error } = await _supabase.from('invitations').insert([{ pin: newPin, names: names, expected_count: count }]);
                 
                 if (error) {
                     alert("Fehler beim Erstellen der Einladung: " + error.message);
                 } else {
                     document.getElementById('invite-names').value = '';
                     document.getElementById('invite-count').value = '2';
-                    document.getElementById('invite-is-trauzeuge').checked = false;
                     await loadAdminData(); 
                 }
             });
         }
+        // --- ADMIN FORMULAR: NEUEN TRAUZEUGEN-PIN ANLEGEN ---
+        const trauzeugenForm = document.getElementById('trauzeugen-form');
+        if (trauzeugenForm) {
+            trauzeugenForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('trauzeuge-name').value;
+                const email = document.getElementById('trauzeuge-email').value;
+                const phone = document.getElementById('trauzeuge-phone').value;
+
+                const existingPins = [...window.allInvites.map(i => i.pin), ...window.allTrauzeugen.map(t => t.pin)];
+                let newPin = "";
+                let isUnique = false;
+                while (!isUnique) {
+                    newPin = Math.floor(1000 + Math.random() * 9000).toString();
+                    if (!existingPins.includes(newPin) && newPin !== "1407") {
+                        isUnique = true;
+                    }
+                }
+                
+                const { error } = await _supabase.from('trauzeugen').insert([{ pin: newPin, name, email, phone }]);
+                
+                if (error) {
+                    alert("Fehler beim Erstellen des Trauzeugen-PINs: " + error.message);
+                } else {
+                    document.getElementById('trauzeuge-name').value = '';
+                    document.getElementById('trauzeuge-email').value = '';
+                    document.getElementById('trauzeuge-phone').value = '';
+                    await loadAdminData(); 
+                }
+            });
+        }
+
         // --- FORMULAR RSVP ABSENDEN (SPEICHERN) ---
         const form = document.getElementById('wedding-rsvp-form');
         if (form) {
