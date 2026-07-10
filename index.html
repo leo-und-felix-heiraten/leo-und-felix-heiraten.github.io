@@ -1253,7 +1253,10 @@
     </div>
     <!-- PLAYLIST REGISTRIERUNG AM UNTEREN RAND DES ADMINBEREICHS -->
     <div class="admin-panel" style="margin-top: 20px;">
-        <h2>Die Hochzeits-Wunsch-Playlist 🎵</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin:0; padding:0; border:none;">Die Hochzeits-Wunsch-Playlist 🎵</h2>
+             <button class="btn" onclick="window.exportSongsToCsv()" style="background: var(--primary); font-size: 0.85rem; padding: 8px 15px;"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> Wunschliste exportieren (CSV)</button>
+        </div>
         <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">Hier seht ihr alle Musikwünsche, die eure Gäste bei der Rückmeldung eingetragen haben:</p>
         <div style="overflow-x: auto;">
             <table class="admin-table">
@@ -2324,16 +2327,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         
         function unlockAdminDashboard() {
             sessionStorage.setItem('wedding_pin', '1407');
-            loadSupabaseRsvps();
-            loadSupabaseInvites();
-            loadAdminTimelineTable();
-            
-            fadeOut(lockScreen);
-            
-            document.getElementById("admin-top-bar").style.display = "block";
-            document.body.classList.add('admin-bar-active');
-            
-            window.toggleAdminView('dashboard');
+            loadAdminData(); // Zentrale Funktion für Admin
         }
         
         // Tastatur-Events
@@ -2349,18 +2343,31 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         });
         
-        // --- ADMIN DATEN: RSVPS LADEN ---
-        async function loadSupabaseRsvps() {
-            const { data, error } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
-            if (error) { 
-                console.error("Fehler beim Laden der Gästeliste:", error); 
-                return; 
+        // --- ZENTRALE DATENLADE- & RENDER-FUNKTIONEN ---
+
+        async function loadAdminData() {
+            const { data: rsvps, error: rsvpsErr } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
+            const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
+            
+            if (rsvpsErr || invitesErr) {
+                console.error("Fehler beim Laden der Admin-Daten:", rsvpsErr || invitesErr);
+                return;
             }
-            buildAdminStatsAndTable(data);
-            buildAdminPlaylistTable(data);
+            
+            window.allRsvps = rsvps;
+            window.allInvites = invites;
+
+            buildAdminStatsAndTable(rsvps, invites);
+            buildAdminPlaylistTable(rsvps);
+            buildAdminInvitesTable(invites, rsvps);
+            loadAdminTimelineTable();
+
+            fadeOut(lockScreen);
+            document.getElementById("admin-top-bar").style.display = "block";
+            document.body.classList.add('admin-bar-active');
+            window.toggleAdminView('dashboard');
         }
 
-        // --- TRAUZEUGE DATEN: GÄSTELISTE & PLAYLIST LADEN (READ-ONLY) ---
         async function loadTrauzeugeData() {
             const { data: rsvps, error: rsvpsErr } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
             const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*');
@@ -2371,287 +2378,212 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
             
             buildTrauzeugeStatsAndTable(rsvps, invites);
+            buildTrauzeugePlaylistTable(rsvps); // Eigene Funktion für TZ-Playlist
         }
 
         function buildTrauzeugeStatsAndTable(rsvpsList, invitesList) {
-            let totalGuests = 0, totalMeat = 0, totalVeggie = 0;
-            const tableBody = document.getElementById('trauzeuge-table-body');
-            tableBody.innerHTML = "";
-            
+            buildRsvpTable(rsvpsList, 'trauzeuge-table-body');
+            calculateAndRenderStats(rsvpsList, invitesList, 'tz-');
+        }
+        
+        function buildTrauzeugePlaylistTable(rsvpsList) {
+            buildPlaylistTable(rsvpsList, 'trauzeuge-playlist-body');
+        }
+
+        function buildAdminStatsAndTable(rsvpsList, invitesList) {
+            buildRsvpTable(rsvpsList, 'admin-table-body', true); // 'true' für Admin-Ansicht mit Löschen-Button
+            calculateAndRenderStats(rsvpsList, invitesList, 'stat-');
+        }
+        
+        function buildAdminPlaylistTable(rsvpsList) {
+            buildPlaylistTable(rsvpsList, 'admin-playlist-body');
+        }
+        
+        // --- Generische Render-Funktionen ---
+
+        function calculateAndRenderStats(rsvpsList, invitesList, prefix) {
+            let guestsConfirmed = 0;
+            let totalMeat = 0;
+            let totalVeggie = 0;
             rsvpsList.forEach(rsvp => {
-                let rsvpGuestsHtml = "";
-                if (rsvp.status === "Zusage") {
-                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
-                    totalGuests += gaesteListe.length;
-                    gaesteListe.forEach(g => {
+                if (rsvp.status === "Zusage" && rsvp.gaeste) {
+                    guestsConfirmed += rsvp.gaeste.length;
+                    rsvp.gaeste.forEach(g => {
                         if (g.essen === "Fleisch") totalMeat++;
                         if (g.essen === "Vegetarisch") totalVeggie++;
-                        
-                        let extrasText = "";
-                        if (g.allergien) {
-                            extrasText += `<br><span style="font-size:0.75rem; color:#c0392b;"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Allergie: ${escapeHtml(g.allergien)}</span>`;
-                        }
-                        if (g.song1_title || g.song2_title) {
-                            extrasText += `<br><span style="font-size:0.75rem; color:#606c38;"><i class="fa-solid fa-music" aria-hidden="true"></i> Songwunsch aktiv</span>`;
-                        }
-                        rsvpGuestsHtml += `<span class="food-item"><strong>${escapeHtml(g.name)}</strong> (${escapeHtml(g.essen)})${extrasText}</span>`;
                     });
-                } else { 
-                    rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
                 }
-                
-                const row = tableBody.insertRow();
-                row.innerHTML = `
-                    <td><strong>${escapeHtml(rsvp.name)}</strong></td>
-                    <td><a href="mailto:${escapeHtml(rsvp.email)}" style="color:var(--primary);">${escapeHtml(rsvp.email)}</a></td>
-                    <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
-                    <td><div style="display:flex; flex-direction:column; gap:8px;">${rsvpGuestsHtml}</div></td>
-                    <td><small style="font-size:0.9rem; color:#555;">${escapeHtml(rsvp.nachricht) || '-'}</small></td>
-                `;
             });
-            
-            document.getElementById('tz-stat-meat').innerText = totalMeat;
-            document.getElementById('tz-stat-veggie').innerText = totalVeggie;
-            
-            // Erwartete Personen insgesamt berechnen
+
             let guestsExpectedTotal = 0;
             invitesList.forEach(inv => {
                 guestsExpectedTotal += (inv.expected_count || 0);
             });
-            document.getElementById('tz-stat-total-guests').innerText = `${totalGuests} / ${guestsExpectedTotal}`;
-            
+
             const totalInvites = invitesList.length;
             const answeredInvites = invitesList.filter(inv => rsvpsList.some(r => r.pin === inv.pin)).length;
+            let quote = totalInvites > 0 ? Math.round((answeredInvites / totalInvites) * 100) : 0;
             
-            let quote = 0;
-            if (totalInvites > 0) {
-                quote = Math.round((answeredInvites / totalInvites) * 100);
-            }
-            document.getElementById('tz-stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
-            
-            buildTrauzeugePlaylistTable(rsvpsList);
+            document.getElementById(`${prefix}total-guests`).innerText = `${guestsConfirmed} / ${guestsExpectedTotal}`;
+            document.getElementById(`${prefix}meat`).innerText = totalMeat;
+            document.getElementById(`${prefix}veggie`).innerText = totalVeggie;
+            document.getElementById(`${prefix}quote`).innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
         }
 
-        function buildTrauzeugePlaylistTable(rsvpsList) {
-            const playlistBody = document.getElementById('trauzeuge-playlist-body');
-            playlistBody.innerHTML = "";
-            let songCount = 0;
-            rsvpsList.forEach(rsvp => {
-                if (rsvp.status === "Zusage" && rsvp.gaeste) {
-                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
-                    gaesteListe.forEach(g => {
-                        if (g.song1_title && g.song1_title.trim() !== "") {
-                            songCount++;
-                            const row = playlistBody.insertRow();
-                            row.innerHTML = `
-                                <td><strong>${escapeHtml(g.song1_title)}</strong></td>
-                                <td>${escapeHtml(g.song1_artist || 'Unbekannt')}</td>
-                                <td><small>${escapeHtml(g.name)}</small></td>
-                            `;
-                        }
-                        if (g.song2_title && g.song2_title.trim() !== "") {
-                            songCount++;
-                            const row = playlistBody.insertRow();
-                            row.innerHTML = `
-                                <td><strong>${escapeHtml(g.song2_title)}</strong></td>
-                                <td>${escapeHtml(g.song2_artist || 'Unbekannt')}</td>
-                                <td><small>${escapeHtml(g.name)}</small></td>
-                            `;
-                        }
-                    });
-                }
-            });
-            if (songCount === 0) {
-                playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht</td></tr>`;
-            }
-        }
-        
-        function buildAdminStatsAndTable(rsvpsList) {
-            let totalGuests = 0, totalMeat = 0, totalVeggie = 0;
-            const tableBody = document.getElementById('admin-table-body');
+        function buildRsvpTable(rsvpsList, tableBodyId, isAdmin = false) {
+            const tableBody = document.getElementById(tableBodyId);
             tableBody.innerHTML = "";
-            
-            window.allRsvps = rsvpsList;
-            
             rsvpsList.forEach(rsvp => {
                 let rsvpGuestsHtml = "";
-                if (rsvp.status === "Zusage") {
-                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
-                    totalGuests += gaesteListe.length;
-                    gaesteListe.forEach(g => {
-                        if (g.essen === "Fleisch") totalMeat++;
-                        if (g.essen === "Vegetarisch") totalVeggie++;
-                        
-                        // Zähler für ausgefüllte Extra-Optionen pro Person
+                if (rsvp.status === "Zusage" && Array.isArray(rsvp.gaeste)) {
+                    rsvp.gaeste.forEach(g => {
                         let extrasText = "";
-                        if (g.allergien) {
-                            extrasText += `<br><span style="font-size:0.75rem; color:#c0392b;"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Allergie: ${escapeHtml(g.allergien)}</span>`;
-                        }
-                        if (g.song1_title || g.song2_title) {
-                            extrasText += `<br><span style="font-size:0.75rem; color:#606c38;"><i class="fa-solid fa-music" aria-hidden="true"></i> Songwunsch aktiv</span>`;
-                        }
+                        if (g.allergien) extrasText += `<br><span style="font-size:0.75rem; color:#c0392b;"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Allergie: ${escapeHtml(g.allergien)}</span>`;
+                        if (g.song1_title || g.song2_title) extrasText += `<br><span style="font-size:0.75rem; color:#606c38;"><i class="fa-solid fa-music" aria-hidden="true"></i> Songwunsch</span>`;
                         rsvpGuestsHtml += `<span class="food-item"><strong>${escapeHtml(g.name)}</strong> (${escapeHtml(g.essen)})${extrasText}</span>`;
                     });
-                } else { 
-                    rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
+                } else {
+                    rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`;
                 }
-                
+
                 const row = tableBody.insertRow();
-                row.innerHTML = `
+                let rowHtml = `
                     <td><strong>${escapeHtml(rsvp.name)}</strong></td>
                     <td><a href="mailto:${escapeHtml(rsvp.email)}" style="color:var(--primary);">${escapeHtml(rsvp.email)}</a></td>
                     <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
                     <td><div style="display:flex; flex-direction:column; gap:8px;">${rsvpGuestsHtml}</div></td>
                     <td><small style="font-size:0.9rem; color:#555;">${escapeHtml(rsvp.nachricht) || '-'}</small></td>
-                    <td>
-                        <button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen">
-                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                        </button>
-                    </td>
                 `;
+
+                if (isAdmin) {
+                    rowHtml += `<td><button class="delete-btn" onclick="window.deleteRsvp('${rsvp.pin}')" title="Rückmeldung löschen"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td>`;
+                }
+                row.innerHTML = rowHtml;
             });
-            
-            document.getElementById('stat-meat').innerText = totalMeat;
-            document.getElementById('stat-veggie').innerText = totalVeggie;
-            
-            calculateGlobalStats();
+             if (rsvpsList.length === 0) {
+                const colSpan = isAdmin ? 6 : 5;
+                tableBody.innerHTML = `<tr><td colspan="${colSpan}" style="text-align:center; color:#777; font-style:italic;">Bisher keine Rückmeldungen erhalten.</td></tr>`;
+            }
         }
-        // --- CSV-EXPORT DER GÄSTELISTE (EXCEL-KOMPATIBEL) ---
+
+        function buildPlaylistTable(rsvpsList, tableBodyId) {
+            const playlistBody = document.getElementById(tableBodyId);
+            playlistBody.innerHTML = "";
+            let songs = [];
+            rsvpsList.forEach(rsvp => {
+                if (rsvp.status === "Zusage" && Array.isArray(rsvp.gaeste)) {
+                    rsvp.gaeste.forEach(g => {
+                        if (g.song1_title && g.song1_title.trim()) songs.push({ title: g.song1_title, artist: g.song1_artist, by: g.name });
+                        if (g.song2_title && g.song2_title.trim()) songs.push({ title: g.song2_title, artist: g.song2_artist, by: g.name });
+                    });
+                }
+            });
+
+            if (songs.length > 0) {
+                songs.forEach(song => {
+                    const row = playlistBody.insertRow();
+                    row.innerHTML = `
+                        <td><strong>${escapeHtml(song.title)}</strong></td>
+                        <td>${escapeHtml(song.artist || 'Unbekannt')}</td>
+                        <td><small>${escapeHtml(song.by)}</small></td>
+                    `;
+                });
+            } else {
+                playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht.</td></tr>`;
+            }
+        }
+        
+        // --- CSV EXPORT FUNKTIONEN ---
         window.exportRsvpsToCsv = function() {
             const rsvps = window.allRsvps || [];
             if (rsvps.length === 0) {
                 alert("Keine Rückmeldungen zum Exportieren vorhanden.");
                 return;
             }
-            // UTF-8 BOM für fehlerfreie Umlaut-Anzeige in MS Excel (\uFEFF)
-            let csvContent = "\uFEFF";
+            let csvContent = "\uFEFF"; // UTF-8 BOM
             csvContent += "Gruppe/Absender;E-Mail;Status;Gast-Name;Essen;Allergien;Lied 1 Titel;Lied 1 Interpret;Lied 2 Titel;Lied 2 Interpret;Nachricht\r\n";
             rsvps.forEach(rsvp => {
                 const groupName = rsvp.name || "";
                 const email = rsvp.email || "";
                 const status = rsvp.status || "";
                 const msg = (rsvp.nachricht || "").replace(/[\r\n]+/g, " ");
-                if (status === "Zusage") {
-                    const gaeste = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
-                    gaeste.forEach(g => {
-                        const row = [
-                            groupName,
-                            email,
-                            status,
-                            g.name || "",
-                            g.essen || "",
-                            g.allergien || "",
-                            g.song1_title || "",
-                            g.song1_artist || "",
-                            g.song2_title || "",
-                            g.song2_artist || "",
-                            msg
-                        ].map(val => `"${val.replace(/"/g, '""')}"`).join(";");
+                if (status === "Zusage" && Array.isArray(rsvp.gaeste) && rsvp.gaeste.length > 0) {
+                    rsvp.gaeste.forEach(g => {
+                        const row = [groupName, email, status, g.name || "", g.essen || "", g.allergien || "", g.song1_title || "", g.song1_artist || "", g.song2_title || "", g.song2_artist || "", msg].map(val => `"${(val || "").replace(/"/g, '""')}"`).join(";");
                         csvContent += row + "\r\n";
                     });
                 } else {
-                    const row = [
-                        groupName,
-                        email,
-                        status,
-                        "-",
-                        "-",
-                        "-",
-                        "-",
-                        "-",
-                        "-",
-                        "-",
-                        msg
-                    ].map(val => `"${val.replace(/"/g, '""')}"`).join(";");
+                    const row = [groupName, email, status, "-", "-", "-", "-", "-", "-", "-", msg].map(val => `"${(val || "").replace(/"/g, '""')}"`).join(";");
                     csvContent += row + "\r\n";
                 }
             });
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "hochzeit_gaesteliste.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            downloadCsv(csvContent, 'hochzeit_gaesteliste.csv');
         };
-        // --- CONSOLIDATED PLAYLIST RENDERER ---
-        function buildAdminPlaylistTable(rsvpsList) {
-            const playlistBody = document.getElementById('admin-playlist-body');
-            playlistBody.innerHTML = "";
-            let songCount = 0;
-            rsvpsList.forEach(rsvp => {
-                if (rsvp.status === "Zusage" && rsvp.gaeste) {
-                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
-                    gaesteListe.forEach(g => {
-                        if (g.song1_title && g.song1_title.trim() !== "") {
-                            songCount++;
-                            const row = playlistBody.insertRow();
-                            row.innerHTML = `
-                                <td><strong>${escapeHtml(g.song1_title)}</strong></td>
-                                <td>${escapeHtml(g.song1_artist || 'Unbekannt')}</td>
-                                <td><small>${escapeHtml(g.name)}</small></td>
-                            `;
-                        }
-                        if (g.song2_title && g.song2_title.trim() !== "") {
-                            songCount++;
-                            const row = playlistBody.insertRow();
-                            row.innerHTML = `
-                                <td><strong>${escapeHtml(g.song2_title)}</strong></td>
-                                <td>${escapeHtml(g.song2_artist || 'Unbekannt')}</td>
-                                <td><small>${escapeHtml(g.name)}</small></td>
-                            `;
-                        }
+
+        window.exportSongsToCsv = function() {
+            const rsvps = window.allRsvps || [];
+            let songs = [];
+            rsvps.forEach(rsvp => {
+                if (rsvp.status === "Zusage" && Array.isArray(rsvp.gaeste)) {
+                    rsvp.gaeste.forEach(g => {
+                        if (g.song1_title && g.song1_title.trim()) songs.push({ title: g.song1_title, artist: g.song1_artist, by: g.name });
+                        if (g.song2_title && g.song2_title.trim()) songs.push({ title: g.song2_title, artist: g.song2_artist, by: g.name });
                     });
                 }
             });
-            if (songCount === 0) {
-                playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht</td></tr>`;
+
+            if (songs.length === 0) {
+                alert("Keine Musikwünsche zum Exportieren vorhanden.");
+                return;
             }
+
+            let csvContent = "\uFEFF"; // UTF-8 BOM
+            csvContent += "Titel;Interpret;Gewünscht von\r\n";
+            songs.forEach(song => {
+                const row = [song.title, song.artist || 'Unbekannt', song.by].map(val => `"${(val || "").replace(/"/g, '""')}"`).join(";");
+                csvContent += row + "\r\n";
+            });
+            downloadCsv(csvContent, 'hochzeit_wunschliste.csv');
+        };
+
+        function downloadCsv(content, fileName) {
+            const blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
-        
+
         window.deleteRsvp = async function(pin) {
             if (confirm("Möchtest du diese Rückmeldung wirklich löschen? Der Gast kann danach neu abstimmen.")) {
                 const { error } = await _supabase.from('rsvps').delete().eq('pin', pin);
                 if (error) {
                     alert("Fehler beim Löschen: " + error.message);
                 } else {
-                    loadSupabaseRsvps();
-                    loadSupabaseInvites(); 
+                    loadAdminData();
                 }
             }
         };
         // --- ADMIN DATEN: EINLADUNGEN (INVITATIONS) LADEN ---
-        async function loadSupabaseInvites() {
-            const { data, error } = await _supabase.from('invitations').select('*').order('created_at', { ascending: false });
-            if (error) {
-                console.error("Fehler beim Laden der Einladungen:", error);
-                return;
-            }
-            buildAdminInvitesTable(data);
-        }
-        
-        function buildAdminInvitesTable(invitesList) {
+        function buildAdminInvitesTable(invitesList, rsvpsList) {
             const invitesBody = document.getElementById('admin-invites-body');
             invitesBody.innerHTML = "";
             
-            window.allInvites = invitesList;
             invitesList.sort((a, b) => {
-                const hasRsvpA = window.allRsvps ? window.allRsvps.some(r => r.pin === a.pin) : false;
-                const hasRsvpB = window.allRsvps ? window.allRsvps.some(r => r.pin === b.pin) : false;
-                
+                const hasRsvpA = rsvpsList.some(r => r.pin === a.pin);
+                const hasRsvpB = rsvpsList.some(r => r.pin === b.pin);
                 if (hasRsvpA && !hasRsvpB) return 1;  
                 if (!hasRsvpA && hasRsvpB) return -1; 
                 return 0;
             });
             
             invitesList.forEach(invite => {
-                const matchedRsvp = window.allRsvps ? window.allRsvps.find(r => r.pin === invite.pin) : null;
-                
+                const matchedRsvp = rsvpsList.find(r => r.pin === invite.pin);
                 let statusHtml = '<span class="badge badge-ausstehend">Ausstehend</span>';
-                let rowStyle = 'style="background-color: #fff5f5; border-left: 4px solid #ff6b6b;"'; 
                 if (matchedRsvp) {
-                    rowStyle = 'style="background-color: #f3faf4; border-left: 4px solid #2e7d32;"'; 
                     if (matchedRsvp.status === "Zusage") {
                         const count = matchedRsvp.gaeste ? matchedRsvp.gaeste.length : 0;
                         statusHtml = `<span class="badge badge-zusage">Zusage (${count} Pers.)</span>`;
@@ -2660,14 +2592,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     }
                 }
                 
-                // Trauzeuge Badge anhängen falls zutreffend
                 if (invite.is_trauzeuge) {
                     statusHtml += ' <span class="badge" style="background-color: var(--accent); color: var(--primary-dark); margin-left: 5px;"><i class="fa-solid fa-star"></i> TZ</span>';
                 }
                 
                 const row = invitesBody.insertRow();
-                row.setAttribute('style', rowStyle.slice(7, -1)); 
-                
                 row.innerHTML = `
                     <td><strong style="color:var(--primary); font-family: monospace;">${invite.pin}</strong></td>
                     <td>${escapeHtml(invite.names)}</td>
@@ -2680,60 +2609,17 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     </td>
                 `;
             });
-            
-            calculateGlobalStats();
         }
 
         // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN (VERKNÜPFTE RSVP AUCH LÖSCHEN) ---
         window.deleteInvite = async function(pin) {
             if (confirm("Möchtest du diese Einladung unwiderruflich löschen? Der PIN wird ungültig und eine eventuell bereits abgegebene Rückmeldung (Zusage/Absage) wird ebenfalls gelöscht.")) {
-                // 1. RSVP parallel oder zuerst löschen
-                const { error: rsvpError } = await _supabase.from('rsvps').delete().eq('pin', pin);
-                if (rsvpError) {
-                    console.error("Fehler beim Löschen der verknüpften Rückmeldung:", rsvpError.message);
-                }
-                
-                // 2. Einladung aus invitations löschen
-                const { error } = await _supabase.from('invitations').delete().eq('pin', pin);
-                if (error) {
-                    alert("Fehler beim Löschen: " + error.message);
-                } else {
-                    // Beide Datenquellen neu laden
-                    loadSupabaseRsvps();
-                    loadSupabaseInvites();
-                }
+                await _supabase.from('rsvps').delete().eq('pin', pin);
+                await _supabase.from('invitations').delete().eq('pin', pin);
+                loadAdminData(); // Alles neu laden
             }
         };
 
-        // --- GLOBALE STATISTIKEN BERECHNEN ---
-        function calculateGlobalStats() {
-            const rsvps = window.allRsvps || [];
-            const invites = window.allInvites || [];
-            
-            let guestsConfirmed = 0;
-            rsvps.forEach(rsvp => {
-                if (rsvp.status === "Zusage" && rsvp.gaeste) {
-                    guestsConfirmed += rsvp.gaeste.length;
-                }
-            });
-            
-            let guestsExpectedTotal = 0;
-            invites.forEach(inv => {
-                guestsExpectedTotal += (inv.expected_count || 0);
-            });
-            
-            document.getElementById('stat-total-guests').innerText = `${guestsConfirmed} / ${guestsExpectedTotal}`;
-            
-            const totalInvites = invites.length;
-            const answeredInvites = invites.filter(inv => rsvps.some(r => r.pin === inv.pin)).length;
-            
-            let quote = 0;
-            if (totalInvites > 0) {
-                quote = Math.round((answeredInvites / totalInvites) * 100);
-            }
-            
-            document.getElementById('stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
-        }
         // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN ---
         const inviteForm = document.getElementById('admin-invite-form');
         if (inviteForm) {
@@ -2744,9 +2630,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const count = parseInt(document.getElementById('invite-count').value);
                 const isTrauzeuge = document.getElementById('invite-is-trauzeuge').checked;
                 
-                const existingInvites = window.allInvites || [];
-                const existingPins = existingInvites.map(i => i.pin);
-                
+                const existingPins = (window.allInvites || []).map(i => i.pin);
                 let newPin = "";
                 let isUnique = false;
                 while (!isUnique) {
@@ -2769,7 +2653,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     document.getElementById('invite-names').value = '';
                     document.getElementById('invite-count').value = '2';
                     document.getElementById('invite-is-trauzeuge').checked = false;
-                    loadSupabaseInvites(); 
+                    loadAdminData(); 
                 }
             });
         }
