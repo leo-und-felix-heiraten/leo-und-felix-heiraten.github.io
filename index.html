@@ -1120,7 +1120,8 @@
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark);" onclick="window.toggleAdminView('dashboard')" id="btn-toggle-dash">Planer-Dashboard</button>
             <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.toggleAdminView('preview')" id="btn-toggle-preview">Gästeseite anzeigen</button>
-            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.triggerLockImageUpload()"><i class="fa-solid fa-lock" aria-hidden="true"></i> Sperrbild-Hintergrund</button>
+            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: white; color: white;" onclick="window.triggerLockImageUpload()"><i class="fa-solid fa-image"></i> Sperrbild ändern</button>
+            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: transparent; border-color: #ffc107; color: #ffc107;" onclick="window.resetImage('lock_image_url')"><i class="fa-solid fa-rotate-left"></i> Sperrbild zurücksetzen</button>
             <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Abmelden</button>
         </div>
     </div>
@@ -1374,7 +1375,10 @@
         </div>
         <button id="add-to-calendar-btn" class="btn" style="padding: 6px 15px; font-size: 0.85rem; margin-bottom: 30px; background: transparent; border-color: white; color: white;" onclick="window.addToCalendar()"><i class="fa-solid fa-calendar-plus" style="margin-right: 5px;" aria-hidden="true"></i> In den Kalender eintragen</button>
         <a href="#rsvp" class="btn" id="hero-rsvp-btn">Jetzt zusagen</a>
-        <button class="admin-edit-btn" style="position: absolute; bottom: 20px; right: 20px; border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerHeroImageUpload()" aria-label="Hintergrundbild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Hintergrund ändern</button>
+        <div style="position: absolute; bottom: 20px; right: 20px; display: flex; gap: 10px;">
+            <button class="admin-edit-btn" style="border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerHeroImageUpload()" aria-label="Hintergrundbild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Hintergrund ändern</button>
+            <button class="admin-edit-btn" style="border-radius: 50%; width: 44px; height: 44px; background-color: rgba(255,255,255,0.8); color: #2b2d42;" onclick="window.resetImage('hero_image_url')" title="Hintergrundbild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
+        </div>
     </header>
 
     <!-- COUNTDOWN -->
@@ -1570,6 +1574,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 <script>
     // --- GLOBALE VARIABLES FÜR PIN-PAD (Direkt verfügbar) ---
     let enteredPin = "";
+    const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
     
     // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
     window.logout = function() {
@@ -1678,8 +1683,8 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 });
                 window.siteSettings = settings;
                 // 1. Bilder laden / setzen
-                const heroUrl = settings.hero_image_url || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
-                const lockUrl = settings.lock_image_url || 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
+                const heroUrl = settings.hero_image_url || DEFAULT_HERO_IMAGE;
+                const lockUrl = settings.lock_image_url || DEFAULT_HERO_IMAGE;
                 document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${heroUrl}')`;
                 document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${lockUrl}')`;
                 // 2. Dynamische Textinhalte aus Settings laden
@@ -2361,7 +2366,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             buildAdminStatsAndTable(window.allRsvps, window.allInvites);
             buildAdminPlaylistTable(window.allRsvps);
             buildAdminInvitesTable(window.allInvites, window.allRsvps);
-            loadAdminTimelineTable();
+            await loadAdminTimelineTable();
         }
 
         async function loadTrauzeugeData() {
@@ -2971,75 +2976,58 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 console.error("Fehler beim Laden des Admin-Tagesablaufs:", err);
             }
         }
-        // --- ADMIN: BILD-UPLOAD SYSTEM (STORAGE BUCKET) ---
-        window.uploadImage = async function(fileInputId, settingKey, previewImgId) {
+        // --- ADMIN: BILD-UPLOAD & RESET SYSTEM ---
+        window.uploadImage = async function(fileInputId, settingKey) {
             const fileInput = document.getElementById(fileInputId);
             if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
             const file = fileInput.files[0];
             
-            const statusSpan = document.getElementById(fileInputId + '-status');
-            if (statusSpan) {
-                statusSpan.style.color = "var(--primary)";
-                statusSpan.innerText = "Bild wird hochgeladen...";
-            } else {
-                alert("Upload gestartet... Bitte gedulde dich einen kurzen Moment!");
-            }
+            alert("Upload gestartet... Bitte gedulde dich einen kurzen Moment!");
             
             try {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${settingKey}_${Date.now()}.${fileExt}`;
                 
-                const { data, error } = await _supabase.storage
+                const { error } = await _supabase.storage
                     .from('website-images')
                     .upload(fileName, file, { cacheControl: '3600', upsert: true });
-                if (error) {
-                    if (error.message && error.message.includes("violates row-level security")) {
-                        throw new Error("RLS_POLICY_ERROR");
-                    }
-                    throw error;
-                }
-                
-                const { data: publicData } = _supabase.storage
-                    .from('website-images')
-                    .getPublicUrl(fileName);
+                if (error) throw error;
+
+                const { data: publicData } = _supabase.storage.from('website-images').getPublicUrl(fileName);
                 const publicUrl = publicData.publicUrl;
                 
-                const { error: dbError } = await _supabase.from('settings').upsert({ key: settingKey, value: publicUrl });
-                if (dbError) throw dbError;
-                
+                await _supabase.from('settings').upsert({ key: settingKey, value: publicUrl });
                 window.siteSettings[settingKey] = publicUrl;
                 
-                if (previewImgId) {
-                    const previewImg = document.getElementById(previewImgId);
-                    if (previewImg) previewImg.src = publicUrl;
-                }
-                
-                if (settingKey === 'hero_image_url') {
-                    document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${publicUrl}')`;
-                } else if (settingKey === 'lock_image_url') {
-                    document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${publicUrl}')`;
-                }
-                
-                if (statusSpan) {
-                    statusSpan.style.color = "#2e7d32";
-                    statusSpan.innerText = "Erfolgreich hochgeladen & gespeichert!";
-                } else {
-                    alert("Bild erfolgreich hochgeladen und als Hintergrund gespeichert!");
-                }
+                updateImageOnPage(settingKey, publicUrl);
+                alert("Bild erfolgreich hochgeladen und gespeichert!");
+
             } catch (err) {
                 console.error("Upload failed:", err);
-                if (err.message === "RLS_POLICY_ERROR") {
-                    alert("Fehler beim Bilder-Upload!\n\nDas liegt an den Sicherheitsregeln (RLS) in deinem Supabase Storage.\n\nSo behebst du das in 1 Minute:\n1. Gehe in dein Supabase Dashboard.\n2. Klicke links auf 'Storage' und wähle den Bucket 'website-images' aus.\n3. Klicke oben auf 'Policies' (Sicherheitsregeln).\n4. Erstelle eine neue Regel für 'INSERT' (Einfügen) und 'SELECT' (Lesen) für 'public' (Anonym).\n\nAlternativ kannst du diesen SQL-Befehl im Supabase SQL Editor ausführen:\n\nCREATE POLICY \"Public Insert\" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'website-images');\nCREATE POLICY \"Public Select\" ON storage.objects FOR SELECT USING (bucket_id = 'website-images');");
-                } else {
-                    if (statusSpan) {
-                        statusSpan.style.color = "#c62828";
-                        statusSpan.innerText = "Fehler: " + err.message;
-                    } else {
-                        alert("Fehler beim Upload: " + err.message);
-                    }
-                }
+                alert("Fehler beim Upload: " + err.message);
             }
         };
+
+        window.resetImage = async function(settingKey) {
+            if (!confirm("Möchtest du das Bild wirklich auf den Standard zurücksetzen?")) return;
+            try {
+                await _supabase.from('settings').upsert({ key: settingKey, value: null });
+                window.siteSettings[settingKey] = null;
+                updateImageOnPage(settingKey, null);
+                alert("Bild erfolgreich zurückgesetzt.");
+            } catch (err) {
+                alert("Fehler beim Zurücksetzen: " + err.message);
+            }
+        };
+
+        function updateImageOnPage(settingKey, url) {
+            const finalUrl = url || DEFAULT_HERO_IMAGE;
+            if (settingKey === 'hero_image_url') {
+                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${finalUrl}')`;
+            } else if (settingKey === 'lock_image_url') {
+                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${finalUrl}')`;
+            }
+        }
         
         // Globale Freigabe für Inline-Events
         window.pressKey = pressKey; 
