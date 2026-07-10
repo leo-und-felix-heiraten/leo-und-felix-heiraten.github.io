@@ -7,7 +7,7 @@
     <!-- Google Fonts für elegante Typografie -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght=0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Javascript Library -->
@@ -1072,13 +1072,18 @@
 </head>
 <body>
 <div id="error-overlay"></div>
+
 <!-- FLOATING GAST TOP BAR (Wird sichtbar wenn eingeloggt als Gast) -->
 <div id="guest-top-bar">
     <div class="top-bar-content">
         <span id="guest-top-greeting">Hallo Gast!</span>
-        <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Abmelden</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent); border-color: var(--accent); color: var(--primary-dark); display: none;" id="btn-trauzeuge-dashboard" onclick="window.toggleTrauzeugeView()">Trauzeuge-Dashboard 🌟</button>
+            <button class="logout-btn" onclick="window.logout()"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Abmelden</button>
+        </div>
     </div>
 </div>
+
 <!-- FLOATING ADMIN TOP BAR (Wird sichtbar wenn eingeloggt als Admin) -->
 <div id="admin-top-bar">
     <div class="top-bar-content">
@@ -1091,6 +1096,7 @@
         </div>
     </div>
 </div>
+
 <!-- SPERRBILDSCHIRM (PIN PAD) -->
 <div id="lock-screen" style="display: flex;">
     <div class="lock-container">
@@ -1121,6 +1127,7 @@
         <div id="lock-error">Falscher PIN. Bitte versucht es noch einmal.</div>
     </div>
 </div>
+
 <!-- ADMIN DASHBOARD (PIN: 1407) -->
 <div id="admin-dashboard">
     <div class="admin-header">
@@ -1190,6 +1197,10 @@
                     <label for="invite-count">Erwartete Personenanzahl</label>
                     <input type="number" id="invite-count" class="admin-form-control" value="2" min="1" required>
                 </div>
+                <div class="admin-form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="invite-is-trauzeuge" style="width: 18px; height: 18px; accent-color: var(--primary);">
+                    <label for="invite-is-trauzeuge" style="font-weight: 500; font-size: 0.9rem; color: var(--primary-dark); cursor: pointer; margin-bottom:0;">Ist Trauzeuge 🌟 (erhält Lese-Zugriff auf Gästeliste & Playlist)</label>
+                </div>
                 <button type="submit" class="admin-btn">Speichern & PIN generieren</button>
             </form>
             
@@ -1232,6 +1243,78 @@
         </div>
     </div>
 </div>
+
+<!-- TRAUZEUGE DASHBOARD (Spezielle Lese-Ansicht für ausgewählte Gäste) -->
+<div id="trauzeuge-dashboard" style="display: none; padding: 40px 20px; max-width: 1200px; margin: 0 auto;">
+    <div class="admin-header">
+        <div>
+            <h1>Trauzeuge-Dashboard 🌟</h1>
+            <p style="text-align: left; margin: 5px 0 0 0; font-size: 0.95rem; color: #666;">Hallo Trauzeuge! Hier hast du Einblick in die Gästeliste und Musikwünsche. ❤️</p>
+        </div>
+        <button class="btn" onclick="window.toggleTrauzeugeView('preview')" style="background: var(--primary); font-size: 0.85rem; padding: 8px 15px;">Zurück zur Gästeseite</button>
+    </div>
+    
+    <!-- TRAUZEUGE STATS GRID -->
+    <div class="admin-stats-grid">
+        <div class="admin-card">
+            <h3>Gäste Zugesagt</h3>
+            <div class="stat-value" id="tz-stat-total-guests">0 / 0</div>
+        </div>
+        <div class="admin-card accent-card">
+            <h3>Menü: Fleisch</h3>
+            <div class="stat-value" id="tz-stat-meat">0</div>
+        </div>
+        <div class="admin-card accent-card">
+            <h3>Menü: Vegetarisch</h3>
+            <div class="stat-value" id="tz-stat-veggie">0</div>
+        </div>
+        <div class="admin-card">
+            <h3>Rückmeldungs-Quote</h3>
+            <div class="stat-value" id="tz-stat-quote">0%</div>
+        </div>
+    </div>
+
+    <!-- TRAUZEUGE RSVPS -->
+    <div class="admin-panel">
+        <h2>Erhaltene Rückmeldungen (Gästeliste)</h2>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Gruppe / Absender</th>
+                        <th>E-Mail</th>
+                        <th>Status</th>
+                        <th>Personen & Essen / Allergien / Musik</th>
+                        <th>Nachricht</th>
+                    </tr>
+                </thead>
+                <tbody id="trauzeuge-table-body">
+                    <!-- Dynamisch -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TRAUZEUGE PLAYLIST -->
+    <div class="admin-panel" style="margin-top: 20px;">
+        <h2>Die Wunsch-Playlist 🎵</h2>
+        <div style="overflow-x: auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Titel</th>
+                        <th>Interpret</th>
+                        <th>Gewünscht von</th>
+                    </tr>
+                </thead>
+                <tbody id="trauzeuge-playlist-body">
+                    <!-- Dynamisch befüllt -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <!-- HAUPTINHALT -->
 <div id="main-content">
     <!-- HERO SECTION -->
@@ -1389,6 +1472,39 @@
             </div>
         </div>
     </section>
+
+    <!-- TRAUZEUGEN SECTION (NEU) -->
+    <section id="trauzeugen" style="background-color: #f3f5f0;">
+        <i class="fa-solid fa-users" aria-hidden="true" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
+        <h2>Unsere Trauzeugen</h2>
+        <p>Ihr habt Fragen zum Ablauf, wollt Überraschungen planen oder Beiträge abstimmen? Wendet euch gerne an unsere Trauzeugen:</p>
+        
+        <div class="location-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 30px;">
+            <!-- Trauzeuge 1 (Sebastian) -->
+            <div class="location-card" style="text-align: center;">
+                <i class="fa-solid fa-heart" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
+                <h3>Trauzeuge von Leo</h3>
+                <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">Sebastian</p>
+                <p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„Immer für euch da und für jeden Spaß zu haben.“</p>
+                <p style="font-size: 0.95rem; line-height: 1.8;">
+                    <a href="mailto:sebastian@example.com" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> sebastian@example.com</a><br>
+                    <a href="tel:+4917612345678" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> +49 176 12345678</a>
+                </p>
+            </div>
+            <!-- Trauzeugin 2 (Sarah) -->
+            <div class="location-card" style="text-align: center;">
+                <i class="fa-solid fa-heart-pulse" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
+                <h3>Trauzeugin von Felix</h3>
+                <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">Sarah</p>
+                <p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„Planungsprofi und die Ruhe selbst an diesem Tag.“</p>
+                <p style="font-size: 0.95rem; line-height: 1.8;">
+                    <a href="mailto:sarah@example.com" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> sarah@example.com</a><br>
+                    <a href="tel:+491729876543" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> +49 172 9876543</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
     <!-- GESCHENKE -->
     <section id="geschenke">
         <i class="fa-solid fa-gift" aria-hidden="true"></i>
@@ -1396,7 +1512,7 @@
             <span id="gifts-title">Flitterwochen & Geschenke</span>
             <button class="admin-edit-btn" onclick="window.editSettingText('gifts_title', 'gifts-title')" title="Überschrift bearbeiten" aria-label="Überschrift bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
         </h2>
-        <p style="white-space: pre-wrap;"><span id="gifts-text1">Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.
+        <p style="white-space: pre-wrap;"><span id="gifts-text1">Unser Haushalt is komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.
 Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!</span><button class="admin-edit-btn" onclick="window.editSettingText('gifts_text1', 'gifts-text1')" title="Gedicht bearbeiten" aria-label="Gedicht bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button></p>
         <p>
             <span id="gifts-text2">Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.</span>
@@ -1404,15 +1520,21 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         </p>
     </section>
 </div>
+
 <!-- Hidden File Inputs für Direkt-Uploads im Admin-Vorschau-Modus -->
 <input type="file" id="hero-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('hero-img-file', 'hero_image_url')">
 <input type="file" id="lock-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('lock-img-file', 'lock_image_url')">
+
 <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
 <script>
+    // --- GLOBALE VARIABLES FÜR PIN-PAD (Direkt verfügbar) ---
+    let enteredPin = "";
+    
     // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
     window.logout = function() {
         sessionStorage.removeItem('wedding_pin');
         sessionStorage.removeItem('current_guest_name');
+        sessionStorage.removeItem('is_trauzeuge');
         window.location.reload();
     };
     // Helfer zum Escapen von HTML-Tags
@@ -1427,7 +1549,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
     }
     // --- NAMENSERKENNUNG (Zerteilt Gruppen-Strings in Einzelnamen) ---
     function detectGuestNames(groupName) {
-        let names = groupName.split(/\s*(?:,|\bund\b|\band\b|&|;)\s*/i);
+        let names = groupName.split(/\s*(?:,|und|and|&|;)\s*/i);
         names = names.map(n => n.trim()).filter(n => n.length > 0);
         
         // Entferne reine "Familie" oder "Fam." Vorsätze, falls dahinter noch Namen folgen
@@ -1458,6 +1580,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             ? "Bitte füllt das Formular aus, damit wir das Fest perfekt planen können!" 
             : "Bitte fülle das Formular aus, damit wir das Fest perfekt planen können!";
     }
+    
     document.addEventListener('DOMContentLoaded', function() {
         // --- 1. ECHTE SUPABASE SCHLÜSSEL ---
         const SUPABASE_URL = "https://yaqrvughbziobduxjpbp.supabase.co"; 
@@ -1477,7 +1600,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             return;
         }
         // --- Globale Variablen ---
-        let enteredPin = "";
         let guestCount = 1;
         let isExistingRsvp = false;
         window.siteSettings = {};
@@ -1486,6 +1608,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         // --- Elemente des Sperrbildschirms ---
         const lockScreen = document.getElementById("lock-screen");
         const errorDiv = document.getElementById("lock-error");
+        
         // --- Standard-Fallbacks für Tagesablauf ---
         function getDefaultTimeline() {
             return [
@@ -1495,6 +1618,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!" }
             ];
         }
+        
         // --- EINSTELLUNGEN & LOCATIONS & TAGESABLAUF LADEN ---
         async function loadSiteSettings() {
             // Zeige Lade-Indikatoren
@@ -1534,6 +1658,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 console.error("Fehler beim Laden der Einstellungen:", err);
             }
         }
+        
         // --- DYNAMISCHES TEXT-EDITING SYSTEM ---
         window.editSettingText = async function(key, elementId) {
             const el = document.getElementById(elementId);
@@ -1967,18 +2092,42 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.body.classList.add('admin-mode-active');
             }
         };
+
+        // --- TRAUZEUGE VIEW SWITCHER ---
+        window.toggleTrauzeugeView = function(view) {
+            const dashboard = document.getElementById("trauzeuge-dashboard");
+            const mainContent = document.getElementById("main-content");
+            const btnTz = document.getElementById("btn-trauzeuge-dashboard");
+            
+            if (view === 'preview' || (dashboard.style.display === "block" && !view)) {
+                dashboard.style.display = "none";
+                mainContent.style.display = "block";
+                mainContent.style.opacity = "1";
+                btnTz.innerText = "Trauzeuge-Dashboard 🌟";
+                btnTz.style.background = "var(--accent)";
+                btnTz.style.color = "var(--primary-dark)";
+            } else {
+                dashboard.style.display = "block";
+                mainContent.style.display = "none";
+                btnTz.innerText = "Gästeseite anzeigen 📖";
+                btnTz.style.background = "transparent";
+                btnTz.style.color = "white";
+                btnTz.style.borderColor = "white";
+                btnTz.style.border = "1px solid white";
+            }
+        };
+
         // --- HAUPTFUNKTIONEN BEIM LADEN (LOGIN-LOGIK) ---
         async function initializePage() {
             await loadSiteSettings();
             await loadTimeline();
-
             const savedPin = sessionStorage.getItem('wedding_pin');
             if (savedPin) {
                 if (savedPin === "1407") {
                     unlockAdminDashboard();
                 } else {
                     // PIN ist vorhanden, lade den Gastnamen neu aus der DB
-                    const { data: invite, error } = await _supabase.from('invitations').select('names').eq('pin', savedPin).maybeSingle();
+                    const { data: invite, error } = await _supabase.from('invitations').select('*').eq('pin', savedPin).maybeSingle();
                     if (invite && invite.names) {
                         unlockWebsite(savedPin, invite.names);
                     } else {
@@ -2046,6 +2195,19 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             sessionStorage.setItem('wedding_pin', pin);
             sessionStorage.setItem('current_guest_name', dbGuestName);
             
+            // Trauzeuge Status aus der Datenbank prüfen
+            const { data: invite, error: inviteErr } = await _supabase.from('invitations').select('is_trauzeuge').eq('pin', pin).maybeSingle();
+            const isTrauzeuge = invite && invite.is_trauzeuge === true;
+            
+            if (isTrauzeuge) {
+                document.getElementById("btn-trauzeuge-dashboard").style.display = "inline-block";
+                sessionStorage.setItem('is_trauzeuge', 'true');
+                loadTrauzeugeData();
+            } else {
+                document.getElementById("btn-trauzeuge-dashboard").style.display = "none";
+                sessionStorage.removeItem('is_trauzeuge');
+            }
+            
             const guestNames = detectGuestNames(dbGuestName);
             const isPlural = guestNames.length > 1;
             
@@ -2066,7 +2228,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             
             // Lade Song-Vorschläge im Hintergrund
             loadAllSongs();
-
             try {
                 const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
                 if (error) throw error;
@@ -2152,6 +2313,112 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
             buildAdminStatsAndTable(data);
             buildAdminPlaylistTable(data);
+        }
+
+        // --- TRAUZEUGE DATEN: GÄSTELISTE & PLAYLIST LADEN (READ-ONLY) ---
+        async function loadTrauzeugeData() {
+            const { data: rsvps, error: rsvpsErr } = await _supabase.from('rsvps').select('*').order('created_at', { ascending: false });
+            const { data: invites, error: invitesErr } = await _supabase.from('invitations').select('*');
+            
+            if (rsvpsErr || invitesErr) {
+                console.error("Fehler beim Laden der Trauzeuge-Daten:", rsvpsErr || invitesErr);
+                return;
+            }
+            
+            buildTrauzeugeStatsAndTable(rsvps, invites);
+        }
+
+        function buildTrauzeugeStatsAndTable(rsvpsList, invitesList) {
+            let totalGuests = 0, totalMeat = 0, totalVeggie = 0;
+            const tableBody = document.getElementById('trauzeuge-table-body');
+            tableBody.innerHTML = "";
+            
+            rsvpsList.forEach(rsvp => {
+                let rsvpGuestsHtml = "";
+                if (rsvp.status === "Zusage") {
+                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
+                    totalGuests += gaesteListe.length;
+                    gaesteListe.forEach(g => {
+                        if (g.essen === "Fleisch") totalMeat++;
+                        if (g.essen === "Vegetarisch") totalVeggie++;
+                        
+                        let extrasText = "";
+                        if (g.allergien) {
+                            extrasText += `<br><span style="font-size:0.75rem; color:#c0392b;"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Allergie: ${escapeHtml(g.allergien)}</span>`;
+                        }
+                        if (g.song1_title || g.song2_title) {
+                            extrasText += `<br><span style="font-size:0.75rem; color:#606c38;"><i class="fa-solid fa-music" aria-hidden="true"></i> Songwunsch aktiv</span>`;
+                        }
+                        rsvpGuestsHtml += `<span class="food-item"><strong>${escapeHtml(g.name)}</strong> (${escapeHtml(g.essen)})${extrasText}</span>`;
+                    });
+                } else { 
+                    rsvpGuestsHtml = `<i style="color:#777;">Keine Gäste angemeldet</i>`; 
+                }
+                
+                const row = tableBody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(rsvp.name)}</strong></td>
+                    <td><a href="mailto:${escapeHtml(rsvp.email)}" style="color:var(--primary);">${escapeHtml(rsvp.email)}</a></td>
+                    <td><span class="badge badge-${rsvp.status.toLowerCase()}">${rsvp.status}</span></td>
+                    <td><div style="display:flex; flex-direction:column; gap:8px;">${rsvpGuestsHtml}</div></td>
+                    <td><small style="font-size:0.9rem; color:#555;">${escapeHtml(rsvp.nachricht) || '-'}</small></td>
+                `;
+            });
+            
+            document.getElementById('tz-stat-meat').innerText = totalMeat;
+            document.getElementById('tz-stat-veggie').innerText = totalVeggie;
+            
+            // Erwartete Personen insgesamt berechnen
+            let guestsExpectedTotal = 0;
+            invitesList.forEach(inv => {
+                guestsExpectedTotal += (inv.expected_count || 0);
+            });
+            document.getElementById('tz-stat-total-guests').innerText = `${totalGuests} / ${guestsExpectedTotal}`;
+            
+            const totalInvites = invitesList.length;
+            const answeredInvites = invitesList.filter(inv => rsvpsList.some(r => r.pin === inv.pin)).length;
+            
+            let quote = 0;
+            if (totalInvites > 0) {
+                quote = Math.round((answeredInvites / totalInvites) * 100);
+            }
+            document.getElementById('tz-stat-quote').innerText = `${quote}% (${answeredInvites} von ${totalInvites})`;
+            
+            buildTrauzeugePlaylistTable(rsvpsList);
+        }
+
+        function buildTrauzeugePlaylistTable(rsvpsList) {
+            const playlistBody = document.getElementById('trauzeuge-playlist-body');
+            playlistBody.innerHTML = "";
+            let songCount = 0;
+            rsvpsList.forEach(rsvp => {
+                if (rsvp.status === "Zusage" && rsvp.gaeste) {
+                    const gaesteListe = Array.isArray(rsvp.gaeste) ? rsvp.gaeste : (typeof rsvp.gaeste === 'string' ? JSON.parse(rsvp.gaeste) : []);
+                    gaesteListe.forEach(g => {
+                        if (g.song1_title && g.song1_title.trim() !== "") {
+                            songCount++;
+                            const row = playlistBody.insertRow();
+                            row.innerHTML = `
+                                <td><strong>${escapeHtml(g.song1_title)}</strong></td>
+                                <td>${escapeHtml(g.song1_artist || 'Unbekannt')}</td>
+                                <td><small>${escapeHtml(g.name)}</small></td>
+                            `;
+                        }
+                        if (g.song2_title && g.song2_title.trim() !== "") {
+                            songCount++;
+                            const row = playlistBody.insertRow();
+                            row.innerHTML = `
+                                <td><strong>${escapeHtml(g.song2_title)}</strong></td>
+                                <td>${escapeHtml(g.song2_artist || 'Unbekannt')}</td>
+                                <td><small>${escapeHtml(g.name)}</small></td>
+                            `;
+                        }
+                    });
+                }
+            });
+            if (songCount === 0) {
+                playlistBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#777; font-style:italic;">Noch keine Lieder gewünscht</td></tr>`;
+            }
         }
         
         function buildAdminStatsAndTable(rsvpsList) {
@@ -2348,6 +2615,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     }
                 }
                 
+                // Trauzeuge Badge anhängen falls zutreffend
+                if (invite.is_trauzeuge) {
+                    statusHtml += ' <span class="badge" style="background-color: var(--accent); color: var(--primary-dark); margin-left: 5px;"><i class="fa-solid fa-star"></i> TZ</span>';
+                }
+                
                 const row = invitesBody.insertRow();
                 row.setAttribute('style', rowStyle.slice(7, -1)); 
                 
@@ -2413,6 +2685,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 
                 const names = document.getElementById('invite-names').value;
                 const count = parseInt(document.getElementById('invite-count').value);
+                const isTrauzeuge = document.getElementById('invite-is-trauzeuge').checked;
                 
                 const existingInvites = window.allInvites || [];
                 const existingPins = existingInvites.map(i => i.pin);
@@ -2429,7 +2702,8 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const { error } = await _supabase.from('invitations').insert([{
                     pin: newPin,
                     names: names,
-                    expected_count: count
+                    expected_count: count,
+                    is_trauzeuge: isTrauzeuge
                 }]);
                 
                 if (error) {
@@ -2437,6 +2711,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 } else {
                     document.getElementById('invite-names').value = '';
                     document.getElementById('invite-count').value = '2';
+                    document.getElementById('invite-is-trauzeuge').checked = false;
                     loadSupabaseInvites(); 
                 }
             });
@@ -2585,7 +2860,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             });
             window.allSongs = Array.from(songs);
         }
-
         function showSuggestions(inputElement, suggestions) {
             const wrapper = inputElement.closest('.song-input-wrapper');
             const suggestionsContainer = wrapper.querySelector('.autocomplete-suggestions');
@@ -2609,7 +2883,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 suggestionsContainer.style.display = 'none';
             }
         }
-
         function rebuildGuestFields(gaeste) {
             const container = document.getElementById('guest-list-container');
             container.innerHTML = '';
@@ -2678,7 +2951,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 `;
                 container.appendChild(guestBlock);
             });
-
              // Event Listeners für Song-Vorschläge hinzufügen
             document.querySelectorAll('.song-input-wrapper input').forEach(input => {
                 input.addEventListener('input', (e) => {
@@ -2706,7 +2978,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 alert("Du kannst maximal 10 Gäste auf einmal eintragen.");
                 return;
             }
-            rebuildGuestFields(getCurrentGuestData()); // Bestehende Daten neu aufbauen und ein leeres Feld hinzufügen
+            const currentData = getCurrentGuestData();
+            currentData.push({ name: '', essen: 'Fleisch', allergien: '', song1_title: '', song1_artist: '', song2_title: '', song2_artist: '' });
+            rebuildGuestFields(currentData);
         }
         
         function removeGuestField(id) {
@@ -2719,22 +2993,26 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const data = [];
             document.querySelectorAll('.guest-block').forEach((block, index) => {
                 const idx = index + 1;
+                const nameInput = block.querySelector(`input[name="gast_${idx}_name"]`);
+                const essenInput = block.querySelector(`input[name="gast_${idx}_essen"]:checked`);
+                const allergienInput = block.querySelector(`input[name="gast_${idx}_allergien"]`);
+                const s1Title = block.querySelector(`input[name="gast_${idx}_song1_title"]`);
+                const s1Artist = block.querySelector(`input[name="gast_${idx}_song1_artist"]`);
+                const s2Title = block.querySelector(`input[name="gast_${idx}_song2_title"]`);
+                const s2Artist = block.querySelector(`input[name="gast_${idx}_song2_artist"]`);
+                
                 data.push({
-                    name: block.querySelector(`input[name="gast_${idx}_name"]`).value,
-                    essen: block.querySelector(`input[name="gast_${idx}_essen"]:checked`).value,
-                    allergien: block.querySelector(`input[name="gast_${idx}_allergien"]`).value,
-                    song1_title: block.querySelector(`input[name="gast_${idx}_song1_title"]`).value,
-                    song1_artist: block.querySelector(`input[name="gast_${idx}_song1_artist"]`).value,
-                    song2_title: block.querySelector(`input[name="gast_${idx}_song2_title"]`).value,
-                    song2_artist: block.querySelector(`input[name="gast_${idx}_song2_artist"]`).value
+                    name: nameInput ? nameInput.value : '',
+                    essen: essenInput ? essenInput.value : 'Fleisch',
+                    allergien: allergienInput ? allergienInput.value : '',
+                    song1_title: s1Title ? s1Title.value : '',
+                    song1_artist: s1Artist ? s1Artist.value : '',
+                    song2_title: s2Title ? s2Title.value : '',
+                    song2_artist: s2Artist ? s2Artist.value : ''
                 });
             });
-             if (event.type === 'click' && event.target.classList.contains('add-guest-btn')) {
-                data.push({ name: '', essen: 'Fleisch', allergien: '', song1_title: '', song1_artist: '', song2_title: '', song2_artist: '' });
-            }
             return data;
         }
-
         function toggleFormFields(show) {
             const dynamicFields = document.getElementById("dynamic-fields");
             if (!dynamicFields) return;
@@ -2840,7 +3118,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             } catch (err) {
                 console.error("Upload failed:", err);
                 if (err.message === "RLS_POLICY_ERROR") {
-                    alert("Fehler beim Bilder-Upload!\\n\\nDas liegt an den Sicherheitsregeln (RLS) in deinem Supabase Storage.\\n\\nSo behebst du das in 1 Minute:\\n1. Gehe in dein Supabase Dashboard.\\n2. Klicke links auf 'Storage' und wähle den Bucket 'website-images' aus.\\n3. Klicke oben auf 'Policies' (Sicherheitsregeln).\\n4. Erstelle eine neue Regel für 'INSERT' (Einfügen) und 'SELECT' (Lesen) für 'public' (Anonym).\\n\\nAlternativ kannst du diesen SQL-Befehl im Supabase SQL Editor ausführen:\\n\\nCREATE POLICY \\"Public Insert\\" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'website-images');\\nCREATE POLICY \\"Public Select\\" ON storage.objects FOR SELECT USING (bucket_id = 'website-images');");
+                    alert("Fehler beim Bilder-Upload!\n\nDas liegt an den Sicherheitsregeln (RLS) in deinem Supabase Storage.\n\nSo behebst du das in 1 Minute:\n1. Gehe in dein Supabase Dashboard.\n2. Klicke links auf 'Storage' und wähle den Bucket 'website-images' aus.\n3. Klicke oben auf 'Policies' (Sicherheitsregeln).\n4. Erstelle eine neue Regel für 'INSERT' (Einfügen) und 'SELECT' (Lesen) für 'public' (Anonym).\n\nAlternativ kannst du diesen SQL-Befehl im Supabase SQL Editor ausführen:\n\nCREATE POLICY \"Public Insert\" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'website-images');\nCREATE POLICY \"Public Select\" ON storage.objects FOR SELECT USING (bucket_id = 'website-images');");
                 } else {
                     if (statusSpan) {
                         statusSpan.style.color = "#c62828";
