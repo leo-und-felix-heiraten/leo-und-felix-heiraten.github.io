@@ -128,7 +128,7 @@
         /* --- ADMIN INLINE EDIT BUTTONS (KOMPAKT & EDEL) --- */
         .admin-inline-edit-btn {
             background-color: var(--primary);
-            color: white;
+            color: white !important; /* Wichtig, um andere Styles zu überschreiben */
             border: none;
             border-radius: 20px;
             padding: 5px 14px;
@@ -152,6 +152,10 @@
         .admin-inline-edit-btn:active {
             transform: translateY(0);
         }
+        .admin-inline-edit-btn i {
+             color: white !important;
+        }
+
 
         /* --- SPERRBILDSCHIRM (PIN PAD) --- */
         #lock-screen {
@@ -1249,7 +1253,7 @@
             </div>
         </div>
     </div>
-    <!-- TRAUZEUGEN-VERWALTUNG -->
+     <!-- TRAUZEUGEN-VERWALTUNG -->
     <div class="admin-panel">
         <h2>Trauzeugen-Verwaltung 🌟</h2>
         <p style="font-size:0.9rem; margin-bottom:20px; color:#555;">Hier könnt ihr spezielle PINs für eure Trauzeugen generieren. Diese PINs gewähren nur Zugriff auf das Lese-Dashboard mit den Planungs-Infos. Die Trauzeugen müssen sich zum Zusagen zusätzlich als normale Gäste mit einem regulären Einladungs-PIN anmelden.</p>
@@ -1258,6 +1262,18 @@
                 <div class="admin-form-group">
                     <label for="trauzeuge-name">Name des Trauzeugen</label>
                     <input type="text" id="trauzeuge-name" class="admin-form-control" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="trauzeuge-gender">Anrede</label>
+                    <select id="trauzeuge-gender" class="admin-form-control">
+                        <option value="männlich">Trauzeuge</option>
+                        <option value="weiblich">Trauzeugin</option>
+                        <option value="divers">Trauzeug:in</option>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label for="trauzeuge-responsibility">Zuständigkeit (optional)</label>
+                    <input type="text" id="trauzeuge-responsibility" class="admin-form-control" placeholder="z.B. Koordination der Beiträge">
                 </div>
                 <div class="admin-form-group">
                     <label for="trauzeuge-email">E-Mail (optional)</label>
@@ -1550,34 +1566,13 @@
     </section>
 
     <!-- TRAUZEUGEN SECTION -->
-    <section id="trauzeugen" style="background-color: #f3f5f0;">
+    <section id="trauzeugen-section" style="background-color: #f3f5f0;">
         <i class="fa-solid fa-users" aria-hidden="true" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
         <h2>Unsere Trauzeugen</h2>
         <p>Ihr habt Fragen zum Ablauf, wollt Überraschungen planen oder Beiträge abstimmen? Wendet euch gerne an unsere Trauzeugen:</p>
         
-        <div class="location-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 30px;">
-            <!-- Trauzeuge 1 (Sebastian) -->
-            <div class="location-card" style="text-align: center;">
-                <i class="fa-solid fa-heart" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
-                <h3>Trauzeuge von Leo</h3>
-                <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">Sebastian</p>
-                <p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„Immer für euch da und für jeden Spaß zu haben.“</p>
-                <p style="font-size: 0.95rem; line-height: 1.8;">
-                    <a href="mailto:sebastian@example.com" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> sebastian@example.com</a><br>
-                    <a href="tel:+4917612345678" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> +49 176 12345678</a>
-                </p>
-            </div>
-            <!-- Trauzeugin 2 (Sarah) -->
-            <div class="location-card" style="text-align: center;">
-                <i class="fa-solid fa-heart-pulse" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
-                <h3>Trauzeugin von Felix</h3>
-                <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">Sarah</p>
-                <p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„Planungsprofi und die Ruhe selbst an diesem Tag.“</p>
-                <p style="font-size: 0.95rem; line-height: 1.8;">
-                    <a href="mailto:sarah@example.com" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> sarah@example.com</a><br>
-                    <a href="tel:+491729876543" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> +49 172 9876543</a>
-                </p>
-            </div>
+        <div class="location-grid" id="trauzeugen-container" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-top: 30px;">
+            <!-- Wird dynamisch befüllt -->
         </div>
     </section>
 
@@ -2179,15 +2174,20 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 
         // --- HAUPTFUNKTIONEN BEIM LADEN (LOGIN-LOGIK) ---
         async function initializePage() {
+            await loadGlobalData();
             await loadSiteSettings();
             await loadTimeline();
+            renderTrauzeugenSection();
+
             const role = sessionStorage.getItem('user_role');
             const pin = sessionStorage.getItem('wedding_pin');
 
             if (role === 'admin' && pin === '1407') {
                  unlockAdminDashboard();
             } else if (role === 'trauzeuge' && pin) {
-                unlockTrauzeugenDashboard(pin);
+                const tz = window.allTrauzeugen.find(t => t.pin === pin);
+                if(tz) unlockTrauzeugenDashboard(pin, tz.name);
+                else window.logout();
             } else if (role === 'guest' && pin) {
                 const guestName = sessionStorage.getItem('current_guest_name');
                 if (guestName) {
@@ -2642,7 +2642,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         }
 
 
-        // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN (VERKNÜPFTE RSVP AUCH LÖSCHEN) ---
+        // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN ---
         window.deleteInvite = async function(id) {
             const inviteToDelete = window.allInvites.find(inv => inv.id === id);
             if (!inviteToDelete) return;
@@ -2703,6 +2703,8 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const name = document.getElementById('trauzeuge-name').value;
                 const email = document.getElementById('trauzeuge-email').value;
                 const phone = document.getElementById('trauzeuge-phone').value;
+                const gender = document.getElementById('trauzeuge-gender').value;
+                const responsibility = document.getElementById('trauzeuge-responsibility').value;
 
                 const existingPins = [...window.allInvites.map(i => i.pin), ...window.allTrauzeugen.map(t => t.pin)];
                 let newPin = "";
@@ -2714,7 +2716,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     }
                 }
                 
-                const { error } = await _supabase.from('trauzeugen').insert([{ pin: newPin, name, email, phone }]);
+                const { error } = await _supabase.from('trauzeugen').insert([{ pin: newPin, name, email, phone, gender, responsibility }]);
                 
                 if (error) {
                     alert("Fehler beim Erstellen des Trauzeugen-PINs: " + error.message);
@@ -2722,6 +2724,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     document.getElementById('trauzeuge-name').value = '';
                     document.getElementById('trauzeuge-email').value = '';
                     document.getElementById('trauzeuge-phone').value = '';
+                    document.getElementById('trauzeuge-responsibility').value = '';
                     await loadAdminData(); 
                 }
             });
@@ -3053,6 +3056,35 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 console.error("Fehler beim Laden des Admin-Tagesablaufs:", err);
             }
         }
+
+         function renderTrauzeugenSection() {
+            const container = document.getElementById('trauzeugen-container');
+            container.innerHTML = ''; // Leeren
+            
+            if (window.allTrauzeugen && window.allTrauzeugen.length > 0) {
+                 window.allTrauzeugen.forEach(tz => {
+                    let title = "Trauzeug:in";
+                    if(tz.gender === 'männlich') title = 'Trauzeuge';
+                    if(tz.gender === 'weiblich') title = 'Trauzeugin';
+
+                    container.innerHTML += `
+                        <div class="location-card" style="text-align: center;">
+                            <i class="fa-solid fa-heart" aria-hidden="true" style="color: var(--accent); font-size: 2rem; margin-bottom: 15px;"></i>
+                            <h3>${title}</h3>
+                            <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 5px;">${escapeHtml(tz.name)}</p>
+                            ${tz.responsibility ? `<p style="font-style: italic; font-size: 0.95rem; margin-bottom: 15px;">„${escapeHtml(tz.responsibility)}“</p>` : ''}
+                            <p style="font-size: 0.95rem; line-height: 1.8;">
+                                ${tz.email ? `<a href="mailto:${escapeHtml(tz.email)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> ${escapeHtml(tz.email)}</a><br>` : ''}
+                                ${tz.phone ? `<a href="tel:${escapeHtml(tz.phone)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> ${escapeHtml(tz.phone)}</a>` : ''}
+                            </p>
+                        </div>
+                    `;
+                });
+            } else {
+                 document.getElementById('trauzeugen-section').style.display = 'none';
+            }
+        }
+        
         // --- ADMIN: BILD-UPLOAD & RESET SYSTEM ---
         window.uploadImage = async function(fileInputId, settingKey) {
             const fileInput = document.getElementById(fileInputId);
