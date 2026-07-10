@@ -549,7 +549,7 @@
             width: 18px;
             height: 18px;
         }
-        /* Dynamische Gästekarten */
+        /* --- Dynamische Gästekarten & Song-Vorschläge --- */
         .guest-block {
             background: #f4f6f0;
             padding: 20px;
@@ -558,6 +558,27 @@
             border-left: 4px solid var(--accent);
             position: relative;
             animation: fadeIn 0.3s ease;
+        }
+        .song-input-wrapper {
+            position: relative;
+        }
+        .autocomplete-suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-top: none;
+            max-height: 150px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 100;
+            display: none;
+        }
+        .autocomplete-suggestions div {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .autocomplete-suggestions div:hover {
+            background-color: #f0f0f0;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -1460,6 +1481,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         let guestCount = 1;
         let isExistingRsvp = false;
         window.siteSettings = {};
+        window.allSongs = []; // Für Song-Vorschläge
         
         // --- Elemente des Sperrbildschirms ---
         const lockScreen = document.getElementById("lock-screen");
@@ -1945,18 +1967,24 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.body.classList.add('admin-mode-active');
             }
         };
-        // --- HAUPTFUNKTIONEN BEIM LADEN ---
+        // --- HAUPTFUNKTIONEN BEIM LADEN (LOGIN-LOGIK) ---
         async function initializePage() {
             await loadSiteSettings();
             await loadTimeline();
 
             const savedPin = sessionStorage.getItem('wedding_pin');
-            const savedName = sessionStorage.getItem('current_guest_name');
             if (savedPin) {
                 if (savedPin === "1407") {
                     unlockAdminDashboard();
-                } else if (savedName) { // Prüft, ob auch der Name gespeichert ist
-                    unlockWebsite(savedPin, savedName);
+                } else {
+                    // PIN ist vorhanden, lade den Gastnamen neu aus der DB
+                    const { data: invite, error } = await _supabase.from('invitations').select('names').eq('pin', savedPin).maybeSingle();
+                    if (invite && invite.names) {
+                        unlockWebsite(savedPin, invite.names);
+                    } else {
+                        // PIN ist ungültig, also abmelden
+                        window.logout();
+                    }
                 }
             }
         }
@@ -2036,6 +2064,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.getElementById("guest-top-greeting").innerText = `Angemeldet als: ${dbGuestName}`;
             document.body.classList.add('guest-bar-active');
             
+            // Lade Song-Vorschläge im Hintergrund
+            loadAllSongs();
+
             try {
                 const { data, error } = await _supabase.from('rsvps').select('*').eq('pin', pin).maybeSingle();
                 if (error) throw error;
@@ -2532,7 +2563,53 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.getElementById("countdown").innerHTML = "<h3>Der große Tag ist da! 🎉</h3>";
             }
         }, 1000);
-        // --- DYNAMISCHE GÄSTELISTE LOGIK ---
+        // --- DYNAMISCHE GÄSTELISTE & SONG-VORSCHLÄGE LOGIK ---
+        async function loadAllSongs() {
+            const { data, error } = await _supabase.from('rsvps').select('gaeste');
+            if (error) {
+                console.error('Fehler beim Laden der Songliste:', error);
+                return;
+            }
+            const songs = new Set();
+            data.forEach(rsvp => {
+                if (rsvp.gaeste && Array.isArray(rsvp.gaeste)) {
+                    rsvp.gaeste.forEach(guest => {
+                        if (guest.song1_title && guest.song1_artist) {
+                            songs.add(`${guest.song1_title} - ${guest.song1_artist}`);
+                        }
+                        if (guest.song2_title && guest.song2_artist) {
+                            songs.add(`${guest.song2_title} - ${guest.song2_artist}`);
+                        }
+                    });
+                }
+            });
+            window.allSongs = Array.from(songs);
+        }
+
+        function showSuggestions(inputElement, suggestions) {
+            const wrapper = inputElement.closest('.song-input-wrapper');
+            const suggestionsContainer = wrapper.querySelector('.autocomplete-suggestions');
+            suggestionsContainer.innerHTML = '';
+            if (suggestions.length > 0) {
+                suggestions.forEach(song => {
+                    const div = document.createElement('div');
+                    div.textContent = song;
+                    div.onclick = () => {
+                        const [title, artist] = song.split(' - ');
+                        const titleInput = wrapper.parentElement.querySelector('input[placeholder*="Titel"]');
+                        const artistInput = wrapper.parentElement.querySelector('input[placeholder*="Interpret"]');
+                        titleInput.value = title.trim();
+                        artistInput.value = artist.trim();
+                        suggestionsContainer.style.display = 'none';
+                    };
+                    suggestionsContainer.appendChild(div);
+                });
+                suggestionsContainer.style.display = 'block';
+            } else {
+                suggestionsContainer.style.display = 'none';
+            }
+        }
+
         function rebuildGuestFields(gaeste) {
             const container = document.getElementById('guest-list-container');
             container.innerHTML = '';
@@ -2556,7 +2633,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         `}
                     </h4>
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${guest.name || ''}" required>
+                        <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" value="${escapeHtml(guest.name || '')}" required>
                     </div>
                     <div class="form-group" style="margin-bottom: 12px;">
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
@@ -2571,25 +2648,54 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                             </label>
                         </div>
                     </div>
-                    <!-- Extrafeld für Allergien / Unverträglichkeiten -->
                     <div class="form-group" style="margin-bottom: 12px;">
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Allergien / Unverträglichkeiten / Anmerkungen:</label>
-                        <input type="text" name="gast_${guestCount}_allergien" class="form-control" placeholder="z.B. Laktoseintoleranz, kein Fisch..." value="${guest.allergien || ''}">
+                        <input type="text" name="gast_${guestCount}_allergien" class="form-control" placeholder="z.B. Laktoseintoleranz, kein Fisch..." value="${escapeHtml(guest.allergien || '')}">
                     </div>
-                    <!-- Extrafelder für Playlist (Musikwünsche) -->
                     <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; display: block; color: var(--primary-dark);"><i class="fa-solid fa-music" aria-hidden="true"></i> Lieblingslieder für die Playlist (max. 2):</label>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
-                            <input type="text" name="gast_${guestCount}_song1_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Titel" value="${guest.song1_title || ''}">
-                            <input type="text" name="gast_${guestCount}_song1_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Interpret" value="${guest.song1_artist || ''}">
+                            <div class="song-input-wrapper">
+                                <input type="text" name="gast_${guestCount}_song1_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Titel" value="${escapeHtml(guest.song1_title || '')}">
+                                <div class="autocomplete-suggestions"></div>
+                            </div>
+                            <div class="song-input-wrapper">
+                                <input type="text" name="gast_${guestCount}_song1_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Interpret" value="${escapeHtml(guest.song1_artist || '')}">
+                                <div class="autocomplete-suggestions"></div>
+                            </div>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <input type="text" name="gast_${guestCount}_song2_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Titel" value="${guest.song2_title || ''}">
-                            <input type="text" name="gast_${guestCount}_song2_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Interpret" value="${guest.song2_artist || ''}">
+                             <div class="song-input-wrapper">
+                                <input type="text" name="gast_${guestCount}_song2_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Titel" value="${escapeHtml(guest.song2_title || '')}">
+                                <div class="autocomplete-suggestions"></div>
+                            </div>
+                            <div class="song-input-wrapper">
+                                <input type="text" name="gast_${guestCount}_song2_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Interpret" value="${escapeHtml(guest.song2_artist || '')}">
+                                <div class="autocomplete-suggestions"></div>
+                            </div>
                         </div>
                     </div>
                 `;
                 container.appendChild(guestBlock);
+            });
+
+             // Event Listeners für Song-Vorschläge hinzufügen
+            document.querySelectorAll('.song-input-wrapper input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value.toLowerCase();
+                    if (!value) {
+                        showSuggestions(e.target, []);
+                        return;
+                    }
+                    const suggestions = window.allSongs.filter(song => song.toLowerCase().includes(value));
+                    showSuggestions(e.target, suggestions);
+                });
+                 document.addEventListener('click', (event) => {
+                    if (!input.parentElement.contains(event.target)) {
+                        const suggestionsContainer = input.parentElement.querySelector('.autocomplete-suggestions');
+                        if (suggestionsContainer) suggestionsContainer.style.display = 'none';
+                    }
+                });
             });
         }
         function resetGuestFields(defaultName) {
@@ -2600,97 +2706,35 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 alert("Du kannst maximal 10 Gäste auf einmal eintragen.");
                 return;
             }
-            guestCount++;
-            
-            const container = document.getElementById('guest-list-container');
-            const guestBlock = document.createElement('div');
-            guestBlock.className = 'guest-block';
-            guestBlock.id = `guest-block-${guestCount}`;
-            
-            guestBlock.innerHTML = `
-                <h4>
-                    <span>Gast ${guestCount}</span>
-                    <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${guestCount})">
-                        <i class="fa-solid fa-trash" aria-hidden="true"></i> Entfernen
-                    </button>
-                </h4>
-                <div class="form-group" style="margin-bottom: 12px;">
-                    <input type="text" id="gast-${guestCount}-input" name="gast_${guestCount}_name" class="form-control" placeholder="Name von Gast ${guestCount}" required>
-                </div>
-                <div class="form-group" style="margin-bottom: 12px;">
-                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" checked>
-                            Fleisch 🥩
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="gast_${guestCount}_essen" value="Vegetarisch">
-                            Vegetarisch 🥦
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group" style="margin-bottom: 12px;">
-                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Allergien / Unverträglichkeiten / Anmerkungen:</label>
-                    <input type="text" name="gast_${guestCount}_allergien" class="form-control" placeholder="z.B. Laktoseintoleranz, kein Fisch...">
-                </div>
-                <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
-                    <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600; display: block; color: var(--primary-dark);"><i class="fa-solid fa-music" aria-hidden="true"></i> Lieblingslieder für die Playlist (max. 2):</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px;">
-                        <input type="text" name="gast_${guestCount}_song1_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Titel">
-                        <input type="text" name="gast_${guestCount}_song1_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 1: Interpret">
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <input type="text" name="gast_${guestCount}_song2_title" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Titel">
-                        <input type="text" name="gast_${guestCount}_song2_artist" class="form-control" style="font-size: 0.9rem; padding: 8px 10px;" placeholder="Lied 2: Interpret">
-                    </div>
-                </div>
-            `;
-            container.appendChild(guestBlock);
+            rebuildGuestFields(getCurrentGuestData()); // Bestehende Daten neu aufbauen und ein leeres Feld hinzufügen
         }
         
         function removeGuestField(id) {
-            const block = document.getElementById(`guest-block-${id}`);
-            if (block) {
-                block.remove();
-                reindexGuests();
-            }
+            const data = getCurrentGuestData();
+            data.splice(id - 1, 1);
+            rebuildGuestFields(data);
         }
         
-        function reindexGuests() {
-            const container = document.getElementById('guest-list-container');
-            if (!container) return;
-            const blocks = container.getElementsByClassName('guest-block');
-            guestCount = blocks.length;
-            
-            Array.from(blocks).forEach((block, index) => {
-                const currentNum = index + 1;
-                block.id = `guest-block-${currentNum}`;
-                
-                const h4 = block.querySelector('h4');
-                if (currentNum === 1) {
-                    h4.innerHTML = `Gast 1 (Hauptkontakt)`;
-                } else {
-                    h4.innerHTML = `
-                        <span>Gast ${currentNum}</span>
-                        <button type="button" class="remove-guest-btn" onclick="window.removeGuestField(${currentNum})">
-                            <i class="fa-solid fa-trash" aria-hidden="true"></i> Entfernen
-                        </button>
-                    `;
-                }
-                
-                const textInput = block.querySelector('input[type="text"]');
-                textInput.id = `gast-${currentNum}-input`;
-                textInput.name = `gast_${currentNum}_name`;
-                textInput.placeholder = `Name von Gast ${currentNum}`;
-                
-                const radios = block.querySelectorAll('input[type="radio"]');
-                radios.forEach(radio => {
-                    radio.name = `gast_${currentNum}_essen`;
+        function getCurrentGuestData() {
+            const data = [];
+            document.querySelectorAll('.guest-block').forEach((block, index) => {
+                const idx = index + 1;
+                data.push({
+                    name: block.querySelector(`input[name="gast_${idx}_name"]`).value,
+                    essen: block.querySelector(`input[name="gast_${idx}_essen"]:checked`).value,
+                    allergien: block.querySelector(`input[name="gast_${idx}_allergien"]`).value,
+                    song1_title: block.querySelector(`input[name="gast_${idx}_song1_title"]`).value,
+                    song1_artist: block.querySelector(`input[name="gast_${idx}_song1_artist"]`).value,
+                    song2_title: block.querySelector(`input[name="gast_${idx}_song2_title"]`).value,
+                    song2_artist: block.querySelector(`input[name="gast_${idx}_song2_artist"]`).value
                 });
             });
+             if (event.type === 'click' && event.target.classList.contains('add-guest-btn')) {
+                data.push({ name: '', essen: 'Fleisch', allergien: '', song1_title: '', song1_artist: '', song2_title: '', song2_artist: '' });
+            }
+            return data;
         }
-        
+
         function toggleFormFields(show) {
             const dynamicFields = document.getElementById("dynamic-fields");
             if (!dynamicFields) return;
