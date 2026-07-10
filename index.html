@@ -312,8 +312,9 @@
         }
         /* --- PERSÖNLICHE BEGRÜSSUNGS-BOX --- */
         .welcome-badge {
-            background-color: rgba(221, 161, 94, 0.15);
-            border: 1px solid var(--accent);
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
             padding: 15px 30px;
             border-radius: 50px;
             display: inline-block;
@@ -321,10 +322,11 @@
             animation: fadeIn 1s ease;
         }
         .welcome-badge h3 {
-            color: #FFFFFF;
+            color: white;
             font-size: 1.3rem;
             font-family: var(--font-serif);
             font-style: italic;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         }
         /* --- HERO SECTION --- */
         .hero {
@@ -362,6 +364,18 @@
             padding: 10px 30px;
             letter-spacing: 2px;
             margin-bottom: 20px; /* Reduziert für Kalender-Button */
+        }
+        /* --- COUPLE IMAGE --- */
+        .couple-image-wrapper {
+            margin: 20px auto 40px auto;
+            max-width: 450px;
+            position: relative;
+        }
+        .couple-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 8px solid white;
         }
         /* --- COUNTDOWN --- */
         .countdown-container {
@@ -471,6 +485,11 @@
             color: var(--accent);
             display: block;
             margin-bottom: 10px;
+        }
+        .timeline-image {
+            width: 100%;
+            margin-top: 15px;
+            border-radius: 6px;
         }
         body.admin-mode-active .admin-timeline-controls {
             display: flex !important;
@@ -1002,6 +1021,9 @@
             h2 {
                 font-size: 1.8rem;
             }
+            .couple-image-wrapper {
+                max-width: 100%;
+            }
             
             /* Timeline für Smartphones umbauen (Links-bündig) */
             .timeline::after {
@@ -1444,6 +1466,16 @@
             <span id="intro-title">Unsere Hochzeit</span>
             <button class="admin-edit-btn" onclick="window.editSettingText('intro_title', 'intro-title')" title="Überschrift bearbeiten" aria-label="Überschrift bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
         </h2>
+
+        <!-- NEUES BILD VON EUCH -->
+        <div class="couple-image-wrapper">
+            <img src="" id="couple-image" class="couple-image" alt="Leo & Felix" style="display: none;">
+            <div class="admin-edit-btn" style="position: absolute; top: 15px; right: 15px; display: flex; gap: 10px; width: auto; height: auto; background: transparent; border: none; box-shadow: none;">
+                 <button class="admin-edit-btn" style="border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerImageUpload('couple-img-file')" aria-label="Bild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Bild ändern</button>
+                 <button class="admin-edit-btn" style="border-radius: 50%; width: 44px; height: 44px; background-color: rgba(255,255,255,0.8); color: #2b2d42;" onclick="window.resetImage('couple_image_url')" title="Bild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
+        </div>
+
         <p>
             <span id="intro-p1">Liebe Familie, liebe Freunde,</span>
             <button class="admin-edit-btn" onclick="window.editSettingText('intro_p1', 'intro-p1')" title="Textabsatz bearbeiten" aria-label="Textabsatz bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
@@ -1576,6 +1608,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 <!-- Hidden File Inputs für Direkt-Uploads im Admin-Vorschau-Modus -->
 <input type="file" id="hero-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('hero-img-file', 'hero_image_url')">
 <input type="file" id="lock-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('lock-img-file', 'lock_image_url')">
+<input type="file" id="couple-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('couple-img-file', 'couple_image_url')">
+<input type="file" id="timeline-img-upload" accept="image/*" style="display: none;">
+
 <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
 <script>
     // --- GLOBALE VARIABLES FÜR PIN-PAD (Direkt verfügbar) ---
@@ -1667,10 +1702,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         // --- Standard-Fallbacks für Tagesablauf ---
         function getDefaultTimeline() {
             return [
-                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort." },
-                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen." },
-                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal." },
-                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!" }
+                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.", image_url: null },
+                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.", image_url: null },
+                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: null },
+                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!", image_url: null }
             ];
         }
         
@@ -1689,10 +1724,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 });
                 window.siteSettings = settings;
                 // 1. Bilder laden / setzen
-                const heroUrl = settings.hero_image_url || DEFAULT_HERO_IMAGE;
-                const lockUrl = settings.lock_image_url || DEFAULT_HERO_IMAGE;
-                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${heroUrl}')`;
-                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${lockUrl}')`;
+                updateImageOnPage('hero_image_url', settings.hero_image_url);
+                updateImageOnPage('lock_image_url', settings.lock_image_url);
+                updateImageOnPage('couple_image_url', settings.couple_image_url);
+
                 // 2. Dynamische Textinhalte aus Settings laden
                 document.getElementById('hero-title').innerText = settings.hero_title || 'Leo & Felix';
                 document.getElementById('hero-subtitle').innerText = settings.hero_subtitle || 'Wir sagen Ja!';
@@ -1754,12 +1789,18 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
             }
         };
+
+        window.triggerImageUpload = function(fileInputId) {
+            document.getElementById(fileInputId).click();
+        };
+
         window.triggerHeroImageUpload = function() {
-            document.getElementById('hero-img-file').click();
+            window.triggerImageUpload('hero-img-file');
         };
         window.triggerLockImageUpload = function() {
-            document.getElementById('lock-img-file').click();
+            window.triggerImageUpload('lock-img-file');
         };
+
         // --- DYNAMISCH GENERIERTER KALENDER-EINTRAG (.ICS) ---
         window.addToCalendar = function() {
             const title = "Hochzeit von Leo & Felix 💍";
@@ -2052,14 +2093,18 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 timelineContainer.innerHTML = '';
                 data.forEach((item, index) => {
                     const sideClass = index % 2 === 0 ? 'left' : 'right';
+                    const imageUrl = item.image_url ? `<img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.title)}" class="timeline-image">` : '';
+                    
                     timelineContainer.innerHTML += `
                         <div class="container ${sideClass}">
                             <div class="content">
                                 <span class="time">${escapeHtml(item.time_text)}</span>
                                 <h3>${escapeHtml(item.title)}</h3>
                                 <p>${escapeHtml(item.description || '')}</p>
-                                <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px;">
-                                    <button class="admin-inline-edit-btn" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
+                                ${imageUrl}
+                                <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px; flex-wrap: wrap;">
+                                    <button class="admin-inline-edit-btn" onclick="window.editTimelineItemDirect('${item.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text Ändern</button>
+                                    <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('timeline-img-upload', '${item.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild Ändern</button>
                                     <button class="admin-inline-edit-btn danger" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i> Löschen</button>
                                 </div>
                             </div>
@@ -2076,41 +2121,53 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
             if (!title) return;
             const desc = prompt("Beschreibung (optional):");
+            const imageUrl = prompt("Optionale Bild-URL (leer lassen für kein Bild):");
             
             try {
                 const { error } = await _supabase.from('timeline_items').insert([{
                     time_text: time.trim(),
                     title: title.trim(),
-                    description: (desc || "").trim()
+                    description: (desc || "").trim(),
+                    image_url: (imageUrl || null)
                 }]);
                 if (error) throw error;
                 loadTimeline();
-                loadAdminTimelineTable();
             } catch (err) {
                 alert("Fehler beim Hinzufügen: " + err.message);
             }
         };
-        window.editTimelineItemDirect = async function(id, currentTime, currentTitle, currentDesc) {
-            const time = prompt("Uhrzeit bearbeiten:", currentTime);
+
+        window.editTimelineItemDirect = async function(id) {
+            let { data: item, error: fetchError } = await _supabase.from('timeline_items').select('*').eq('id', id).single();
+            if (fetchError || !item) {
+                alert("Fehler: Programmpunkt nicht gefunden.");
+                return;
+            }
+
+            const time = prompt("Uhrzeit bearbeiten:", item.time_text);
             if (time === null) return;
-            const title = prompt("Titel bearbeiten:", currentTitle);
+            const title = prompt("Titel bearbeiten:", item.title);
             if (title === null) return;
-            const desc = prompt("Beschreibung bearbeiten:", currentDesc);
+            const desc = prompt("Beschreibung bearbeiten:", item.description);
             if (desc === null) return;
+            const imageUrl = prompt("Bild-URL bearbeiten (leer lassen zum Entfernen):", item.image_url || '');
+            if (imageUrl === null) return;
             
             try {
                 const { error } = await _supabase.from('timeline_items').update({
                     time_text: time.trim(),
                     title: title.trim(),
-                    description: desc.trim()
+                    description: desc.trim(),
+                    image_url: (imageUrl.trim() || null)
                 }).eq('id', id);
+
                 if (error) throw error;
                 loadTimeline();
-                loadAdminTimelineTable();
             } catch (err) {
                 alert("Fehler beim Speichern: " + err.message);
             }
         };
+
         window.deleteTimelineItemDirect = async function(id) {
             if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
                 const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
@@ -2118,10 +2175,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     alert("Fehler beim Löschen: " + error.message);
                 } else {
                     loadTimeline();
-                    loadAdminTimelineTable();
                 }
             }
         };
+
         window.toggleAdminView = function(view) {
             const dashboard = document.getElementById("admin-dashboard");
             const mainContent = document.getElementById("main-content");
@@ -2239,19 +2296,17 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         
         async function unlockWebsite(pin, dbGuestName) {
             const guestNames = detectGuestNames(dbGuestName);
-            const isPlural = guestNames.length > 1;
+            const isPlural = guestNames.length > 1 || dbGuestName.toLowerCase().includes('familie');
             
             // Grammatik anwenden
             applyGrammarAdaptation(isPlural);
             
-            // Persönliche Begrüßung generieren
+             // Persönliche Begrüßung generieren
             let personalGreeting = "";
-            if (guestNames.length === 1) {
+            if (!isPlural) {
                 personalGreeting = `Hallo ${guestNames[0]}! Schön, dass du da bist.`;
-            } else if (guestNames.length > 1) {
-                personalGreeting = `Hallo ${dbGuestName.replace(/ und /gi, " & ")}! Schön, dass ihr da seid.`;
             } else {
-                 personalGreeting = `Hallo! Schön, dass du da bist.`; // Fallback
+                personalGreeting = `Hallo ${dbGuestName.replace(/ und /gi, " & ")}! Schön, dass ihr da seid.`;
             }
             document.getElementById("personal-greeting").innerText = personalGreeting;
             
@@ -2353,7 +2408,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             buildAdminPlaylistTable(window.allRsvps);
             buildAdminInvitesTable(window.allInvites, window.allRsvps);
             buildTrauzeugenAdminTable(window.allTrauzeugen);
-            await loadAdminTimelineTable();
         }
         async function loadTrauzeugeData() {
             await loadGlobalData();
@@ -2966,38 +3020,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 inputs.forEach(input => input.required = false);
             }
         }
-        // --- SAFE-GUARD FÜR ADMIN-TABELLE ---
-        async function loadAdminTimelineTable() {
-            try {
-                const tbody = document.getElementById('admin-timeline-body');
-                if (!tbody) return; 
-                
-                const { data, error } = await _supabase.from('timeline_items').select('*').order('created_at', { ascending: true });
-                if (error) throw error;
-                tbody.innerHTML = '';
-                const items = (data && data.length > 0) ? data : getDefaultTimeline();
-                items.forEach(item => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = `
-                        <td><strong>${escapeHtml(item.time_text)}</strong></td>
-                        <td>${escapeHtml(item.title)}</td>
-                        <td><small>${escapeHtml(item.description || '-')}</small></td>
-                        <td>
-                            <button class="delete-btn" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
-                                <i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
-                            </button>
-                            ${item.id ? `
-                            <button class="delete-btn" onclick="window.deleteTimelineItemDirect('${item.id}')" title="Löschen">
-                                <i class="fa-solid fa-trash" aria-hidden="true"></i>
-                            </button>
-                            ` : `<small style="color: #999; font-style: italic;">Standard</small>`}
-                        </td>
-                    `;
-                });
-            } catch (err) {
-                console.error("Fehler beim Laden des Admin-Tagesablaufs:", err);
-            }
-        }
+
          function renderTrauzeugenSection() {
             const container = document.getElementById('trauzeugen-container');
             container.innerHTML = ''; // Leeren
@@ -3054,10 +3077,47 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 alert("Fehler beim Upload: " + err.message);
             }
         };
+
+        // Hilfsfunktion zum Upload für Timeline
+        window.uploadAndGetUrl = async function(fileInputId, timelineItemId) {
+            const fileInput = document.getElementById(fileInputId);
+            fileInput.onchange = async () => {
+                 if (!fileInput.files || fileInput.files.length === 0) return;
+                 const file = fileInput.files[0];
+                 alert("Upload für Timeline-Bild gestartet...");
+
+                 try {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `timeline_${timelineItemId}_${Date.now()}.${fileExt}`;
+                    
+                    const { error: uploadError } = await _supabase.storage.from('website-images').upload(fileName, file, { upsert: true });
+                    if (uploadError) throw uploadError;
+
+                    const { data: publicData } = _supabase.storage.from('website-images').getPublicUrl(fileName);
+                    const publicUrl = publicData.publicUrl;
+                    
+                    navigator.clipboard.writeText(publicUrl).then(() => {
+                        alert("Bild-URL wurde in die Zwischenablage kopiert!");
+                        window.editTimelineItemDirect(timelineItemId);
+                    }, () => {
+                        alert("Kopieren in die Zwischenablage ist fehlgeschlagen.");
+                         window.editTimelineItemDirect(timelineItemId);
+                    });
+
+                 } catch(err) {
+                    alert("Fehler beim Timeline-Bild Upload: " + err.message);
+                 }
+            };
+            fileInput.click();
+        }
+
         window.resetImage = async function(settingKey) {
             if (!confirm("Möchtest du das Bild wirklich auf den Standard zurücksetzen?")) return;
             try {
-                await _supabase.from('settings').upsert({ key: settingKey, value: null });
+                // Den Wert auf 'null' setzen, um ihn aus der DB zu entfernen
+                const { error } = await _supabase.from('settings').upsert({ key: settingKey, value: null });
+                if (error) throw error;
+
                 window.siteSettings[settingKey] = null;
                 updateImageOnPage(settingKey, null);
                 alert("Bild erfolgreich zurückgesetzt.");
@@ -3065,12 +3125,20 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 alert("Fehler beim Zurücksetzen: " + err.message);
             }
         };
+        
         function updateImageOnPage(settingKey, url) {
-            const finalUrl = url || DEFAULT_HERO_IMAGE;
             if (settingKey === 'hero_image_url') {
-                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${finalUrl}')`;
+                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${url || DEFAULT_HERO_IMAGE}')`;
             } else if (settingKey === 'lock_image_url') {
-                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${finalUrl}')`;
+                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${url || DEFAULT_HERO_IMAGE}')`;
+            } else if (settingKey === 'couple_image_url') {
+                const img = document.getElementById('couple-image');
+                if (url) {
+                    img.src = url;
+                    img.style.display = 'block';
+                } else {
+                    img.style.display = 'none';
+                }
             }
         }
         
