@@ -7,7 +7,7 @@
     <!-- Google Fonts für elegante Typografie -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght=0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Javascript Library -->
@@ -2046,7 +2046,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const time = prompt("Uhrzeit für den Programmpunkt (z.B. '14:00 Uhr'):");
             if (!time) return;
             const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
-            if (!time) return;
+            if (!title) return;
             const desc = prompt("Beschreibung (optional):");
             
             try {
@@ -2795,26 +2795,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
                 let gaesteArray = [];
                 if (status === "Zusage") {
-                    document.querySelectorAll('.guest-block').forEach((block, index) => {
-                        const idx = index + 1;
-                        const gName = block.querySelector(`input[name="gast_${idx}_name"]`).value;
-                        const gEssen = block.querySelector(`input[name="gast_${idx}_essen"]:checked`).value;
-                        const gAllergien = block.querySelector(`input[name="gast_${idx}_allergien"]`).value;
-                        
-                        const s1_title = block.querySelector(`input[name="gast_${idx}_song1_title"]`).value;
-                        const s1_artist = block.querySelector(`input[name="gast_${idx}_song1_artist"]`).value;
-                        const s2_title = block.querySelector(`input[name="gast_${idx}_song2_title"]`).value;
-                        const s2_artist = block.querySelector(`input[name="gast_${idx}_song2_artist"]`).value;
-                        gaesteArray.push({ 
-                            name: gName, 
-                            essen: gEssen,
-                            allergien: gAllergien,
-                            song1_title: s1_title,
-                            song1_artist: s1_artist,
-                            song2_title: s2_title,
-                            song2_artist: s2_artist
-                        });
-                    });
+                   gaesteArray = getCurrentGuestData();
                 }
                 
                 const savedGuestName = sessionStorage.getItem('current_guest_name') || "Unbekannter Gast";
@@ -2952,7 +2933,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <label style="font-size: 0.85rem; margin-bottom: 5px; font-weight: 600;">Essenswunsch:</label>
                         <div class="radio-group">
                             <label class="radio-option">
-                                <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" ${guest.essen === 'Fleisch' ? 'checked' : ''}>
+                                <input type="radio" name="gast_${guestCount}_essen" value="Fleisch" ${guest.essen === 'Fleisch' || !guest.essen ? 'checked' : ''}>
                                 Fleisch 🥩
                             </label>
                             <label class="radio-option">
