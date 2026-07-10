@@ -1503,7 +1503,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.getElementById('intro-p3').innerText = settings.intro_p3 || 'Hier findet ihr alle wichtigen Details zu unserer Hochzeitsfeier. Bitte gebt uns bis zum 15. April 2028 Bescheid, ob ihr mit uns feiert.';
                 
                 document.getElementById('gifts-title').innerText = settings.gifts_title || 'Flitterwochen & Geschenke';
-                document.getElementById('gifts-text1').innerText = settings.gifts_text1 || "Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.\\nWollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!";
+                document.getElementById('gifts-text1').innerText = settings.gifts_text1 || "Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.\nWollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!";
                 document.getElementById('gifts-text2').innerText = settings.gifts_text2 || 'Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.';
                 // 3. Locations & Unterkünfte im Frontend aufbauen
                 renderLocations(settings);
@@ -1610,7 +1610,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     id: "loc_default",
                     title: settings.location_title || 'Die Trauung & Feier',
                     name: settings.location_name || 'Gutshof Sonnenschein',
-                    address: settings.location_address || 'Musterstraße 42\\n12345 Traumstadt',
+                    address: settings.location_address || 'Musterstraße 42\n12345 Traumstadt',
                     desc: settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
                 }];
             }
@@ -1623,7 +1623,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <i class="fa-solid fa-church" aria-hidden="true"></i>
                         <h3>${escapeHtml(loc.title)}</h3>
                         <p><strong>${escapeHtml(loc.name)}</strong><br>
-                        ${escapeHtml(loc.address).replace(/\\n/g, '<br>')}</p>
+                        ${escapeHtml(loc.address).replace(/\n/g, '<br>')}</p>
                         <p>${escapeHtml(loc.desc)}</p>
                         <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px; justify-content: center;">
                             <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editLocationDirect('${loc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
@@ -1642,7 +1642,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     id: "acc_default",
                     title: settings.accommodation_title || 'Unterkunftstipp',
                     name: settings.accommodation_name || 'Hotel am Stadtpark',
-                    address: settings.accommodation_address || 'Bahnhofstraße 5\\n12345 Traumstadt',
+                    address: settings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
                     desc: settings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
                 }];
             }
@@ -1655,7 +1655,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <i class="fa-solid fa-hotel" aria-hidden="true"></i>
                         <h3>${escapeHtml(acc.title)}</h3>
                         <p><strong>${escapeHtml(acc.name)}</strong><br>
-                        ${escapeHtml(acc.address).replace(/\\n/g, '<br>')}</p>
+                        ${escapeHtml(acc.address).replace(/\n/g, '<br>')}</p>
                         <p>${escapeHtml(acc.desc)}</p>
                         <div class="admin-location-controls" style="display: none; margin-top: 15px; gap: 10px; justify-content: center;">
                             <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editAccommodationDirect('${acc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
@@ -1672,7 +1672,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (!title) return;
             const name = prompt("Name des Ortes (z.B. 'Gutshof Sonnenschein'):");
             if (!name) return;
-            const address = prompt("Adresse (nutze \\\\n für neue Zeilen):");
+            const address = prompt("Adresse (nutze \\n für neue Zeilen):");
             if (!address) return;
             const desc = prompt("Beschreibung / Parkplatzinfo (optional):");
             let locations = [];
@@ -1684,7 +1684,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     id: "loc_default",
                     title: window.siteSettings.location_title || 'Die Trauung & Feier',
                     name: window.siteSettings.location_name || 'Gutshof Sonnenschein',
-                    address: window.siteSettings.location_address || 'Musterstraße 42\\n12345 Traumstadt',
+                    address: window.siteSettings.location_address || 'Musterstraße 42\n12345 Traumstadt',
                     desc: window.siteSettings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.'
                 }];
             }
@@ -1715,7 +1715,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (title === null) return;
             const name = prompt("Name bearbeiten:", loc.name);
             if (name === null) return;
-            const address = prompt("Adresse bearbeiten (nutze \\\\n für neue Zeilen):", loc.address);
+            const address = prompt("Adresse bearbeiten (nutze \\n für neue Zeilen):", loc.address);
             if (address === null) return;
             const desc = prompt("Beschreibung bearbeiten:", loc.desc);
             if (desc === null) return;
@@ -1753,7 +1753,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (!title) return;
             const name = prompt("Name des Hotels (z.B. 'Hotel am Stadtpark'):");
             if (!name) return;
-            const address = prompt("Adresse (nutze \\\\n für neue Zeilen):");
+            const address = prompt("Adresse (nutze \\n für neue Zeilen):");
             if (!address) return;
             const desc = prompt("Beschreibung Zimmerkontingent (optional):");
             let accommodations = [];
@@ -1765,7 +1765,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     id: "acc_default",
                     title: window.siteSettings.accommodation_title || 'Unterkunftstipp',
                     name: window.siteSettings.accommodation_name || 'Hotel am Stadtpark',
-                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\\n12345 Traumstadt',
+                    address: window.siteSettings.accommodation_address || 'Bahnhofstraße 5\n12345 Traumstadt',
                     desc: window.siteSettings.accommodation_desc || 'Wir haben dort ein Zimmerkontingent für unsere Gäste reserviert. Stichwort: "Leo & Felix".'
                 }];
             }
@@ -1796,7 +1796,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (title === null) return;
             const name = prompt("Hotel Name bearbeiten:", acc.name);
             if (name === null) return;
-            const address = prompt("Adresse bearbeiten (nutze \\\\n für neue Zeilen):", acc.address);
+            const address = prompt("Adresse bearbeiten (nutze \\n für neue Zeilen):", acc.address);
             if (address === null) return;
             const desc = prompt("Beschreibung bearbeiten:", acc.desc);
             if (desc === null) return;
@@ -1857,7 +1857,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                                 <h3>${escapeHtml(item.title)}</h3>
                                 <p>${escapeHtml(item.description || '')}</p>
                                 <div class="admin-timeline-controls" style="display: none; margin-top: 10px; gap: 10px;">
-                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\\\'")}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
+                                    <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: var(--primary); border-color: var(--primary);" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Bearbeiten</button>
                                     <button class="btn" style="padding: 4px 10px; font-size: 0.8rem; background: #c0392b; border-color: #c0392b;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i> Löschen</button>
                                 </div>
                             </div>
@@ -1946,13 +1946,22 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         };
         // --- HAUPTFUNKTIONEN BEIM LADEN ---
-        loadSiteSettings();
-        loadTimeline();
-        const savedPin = sessionStorage.getItem('wedding_pin');
-        if (savedPin) {
-            if (savedPin === "1407") unlockAdminDashboard();
-            else unlockWebsite(savedPin);
+        async function initializePage() {
+            await loadSiteSettings();
+            await loadTimeline();
+
+            const savedPin = sessionStorage.getItem('wedding_pin');
+            const savedName = sessionStorage.getItem('current_guest_name');
+            if (savedPin) {
+                if (savedPin === "1407") {
+                    unlockAdminDashboard();
+                } else if (savedName) { // Prüft, ob auch der Name gespeichert ist
+                    unlockWebsite(savedPin, savedName);
+                }
+            }
         }
+        
+        initializePage();
         
         // --- FUNKTIONEN FÜR DAS PIN-PAD ---
         function pressKey(num) { 
@@ -1996,17 +2005,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     errorDiv.style.opacity = "0";
                     unlockWebsite(enteredPin, invite.names);
                 } else {
-                    const fallbackDB = { "1111": "Test-Gast" };
-                    if (fallbackDB[enteredPin]) {
-                        errorDiv.style.opacity = "0";
-                        unlockWebsite(enteredPin, fallbackDB[enteredPin]);
-                    } else {
-                        errorDiv.style.opacity = "1";
-                        const container = lockScreen.querySelector('.lock-container');
-                        container.style.animation = "shake 0.3s ease";
-                        setTimeout(() => { container.style.animation = ""; }, 300);
-                        clearPin();
-                    }
+                    errorDiv.style.opacity = "1";
+                    const container = lockScreen.querySelector('.lock-container');
+                    container.style.animation = "shake 0.3s ease";
+                    setTimeout(() => { container.style.animation = ""; }, 300);
+                    clearPin();
                 }
             }
         }
@@ -2720,7 +2723,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         <td>${escapeHtml(item.title)}</td>
                         <td><small>${escapeHtml(item.description || '-')}</small></td>
                         <td>
-                            <button class="delete-btn" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\\\'")}')" title="Bearbeiten">
+                            <button class="delete-btn" onclick="window.editTimelineItemDirect('${item.id}', '${escapeHtml(item.time_text).replace(/'/g, "\\'")}', '${escapeHtml(item.title).replace(/'/g, "\\'")}', '${escapeHtml(item.description || '').replace(/'/g, "\\'")}')" title="Bearbeiten">
                                 <i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
                             </button>
                             ${item.id ? `
