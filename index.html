@@ -1367,6 +1367,7 @@
         <a href="#rsvp" class="btn" id="hero-rsvp-btn">Jetzt zusagen</a>
         <button class="admin-edit-btn" style="position: absolute; bottom: 20px; right: 20px; border-radius: 30px; width: auto; height: auto; padding: 10px 20px; font-weight: 600;" onclick="window.triggerHeroImageUpload()" aria-label="Hintergrundbild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Hintergrund ändern</button>
     </header>
+
     <!-- COUNTDOWN -->
     <div class="countdown-container">
         <h3>Wir können es kaum erwarten...</h3>
@@ -1389,6 +1390,7 @@
             </div>
         </div>
     </div>
+
     <!-- UNSERE STORY / EINLADUNG -->
     <section id="einladung">
         <h2>
@@ -1408,6 +1410,7 @@
             <button class="admin-edit-btn" onclick="window.editSettingText('intro_p3', 'intro-p3')" title="Textabsatz bearbeiten" aria-label="Textabsatz bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
         </p>
     </section>
+
     <!-- ABLAUFPLAN -->
     <section id="ablauf" style="background-color: #f3f5f0;">
         <h2>Der Ablaufplan</h2>
@@ -1421,6 +1424,7 @@
             <!-- Wird dynamisch aus Supabase geladen -->
         </div>
     </section>
+
     <!-- LOCATION -->
     <section id="location">
         <h2>Die Locations</h2>
@@ -1444,6 +1448,7 @@
             <!-- Wird dynamisch geladen -->
         </div>
     </section>
+
     <!-- RSVP SECTION WITH DYNAMIC FORM -->
     <section id="rsvp" class="rsvp">
         <h2 id="rsvp-main-title">Zusage & Rückmeldung</h2>
@@ -1576,7 +1581,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
     }
     // --- NAMENSERKENNUNG (Zerteilt Gruppen-Strings in Einzelnamen) ---
     function detectGuestNames(groupName) {
-        let names = groupName.split(/\s*(?:,|und|and|&|;)\s*/i);
+        // Ersetzt "und", "&" und ";" durch Kommas, um einen einheitlichen Trenner zu haben
+        const standardizedGroupName = groupName.replace(/\s*(?:und|&|;)\s*/gi, ', ');
+        let names = standardizedGroupName.split(/,\s*/);
         names = names.map(n => n.trim()).filter(n => n.length > 0);
         
         // Entferne reine "Familie" oder "Fam." Vorsätze, falls dahinter noch Namen folgen
@@ -1734,8 +1741,8 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         };
         // --- DYNAMISCH GENERIERTER KALENDER-EINTRAG (.ICS) ---
         window.addToCalendar = function() {
-            const title = "Hochzeit von Leo & Felix";
-            const description = "Wir sagen Ja! Wir freuen uns riesig darauf, diesen Tag mit euch zu feiern.";
+            const title = "Hochzeit von Leo & Felix 💍";
+            const description = "Wir sagen Ja! ❤️ Wir freuen uns riesig darauf, diesen Tag mit euch zu feiern. Kommt und feiert mit uns! 🎉";
             const locationName = window.siteSettings.location_name || "Gutshof Sonnenschein";
             let rawDate = window.siteSettings.wedding_countdown_date || "2028-06-24T14:00:00";
             
@@ -1752,6 +1759,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const minutes = String(dateObj.getMinutes()).padStart(2, '0');
             const seconds = String(dateObj.getSeconds()).padStart(2, '0');
             const endDate = `${year}${month}${day}T${hours}${minutes}${seconds}`;
+
             const icsString = [
                 "BEGIN:VCALENDAR",
                 "VERSION:2.0",
@@ -1759,11 +1767,12 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 `DTSTART:${startDate}`,
                 `DTEND:${endDate}`,
                 `SUMMARY:${title}`,
-                `DESCRIPTION:${description}`,
+                `DESCRIPTION:${description.replace(/\n/g, '\\n')}`, // Zeilenumbrüche für ICS korrekt escapen
                 `LOCATION:${locationName}`,
                 "END:VEVENT",
                 "END:VCALENDAR"
             ].join("\r\n");
+
             const blob = new Blob([icsString], { type: "text/calendar;charset=utf-8" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
@@ -1772,6 +1781,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             link.click();
             document.body.removeChild(link);
         };
+
         // --- LOCATIONS & UNTERKÜNFTE VERWALTUNG (DYNAMISCHES SYSTEM) ---
         function renderLocations(settings) {
             // Locations-Liste laden
@@ -2242,11 +2252,18 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             // Grammatik anwenden
             applyGrammarAdaptation(isPlural);
             
-            if (isPlural) {
-                document.getElementById("personal-greeting").innerText = `Hallo ihr Lieben! Schön, dass ihr da seid.`;
+            // Persönliche Begrüßung generieren
+            let personalGreeting = "";
+            if (guestNames.length === 1) {
+                personalGreeting = `Hallo ${guestNames[0]}! Schön, dass du da bist.`;
+            } else if (guestNames.length > 1) {
+                const lastGuest = guestNames.pop();
+                personalGreeting = `Hallo ${guestNames.join(', ')} und ${lastGuest}! Schön, dass ihr da seid.`;
             } else {
-                document.getElementById("personal-greeting").innerText = `Hallo ${dbGuestName}! Schön, dass du da bist.`;
+                 personalGreeting = `Hallo! Schön, dass du da bist.`; // Fallback
             }
+            document.getElementById("personal-greeting").innerText = personalGreeting;
+
             
             document.getElementById("hidden-guest-pin").value = pin;
             
@@ -2827,11 +2844,12 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     form.style.display = "none"; 
                     document.getElementById('form-status').style.display = "block";
                     
-                    const isPlural = detectGuestNames(savedGuestName).length > 1;
+                    const isPlural = gaesteArray.length > 1;
                     const statusHeader = document.getElementById('form-status-header');
                     const statusText = document.getElementById('form-status-text');
+                    
                     if (status === "Zusage") {
-                        statusHeader.innerText = "Wir freuen uns riesig auf euch! ❤️";
+                        statusHeader.innerText = isPlural ? "Wir freuen uns riesig auf euch! ❤️" : "Wir freuen uns riesig auf dich! ❤️";
                         statusText.innerText = isPlural 
                             ? "Wir haben eure Änderungen erhalten und können es kaum erwarten, mit euch zu feiern!"
                             : "Wir haben deine Änderungen erhalten und können es kaum erwarten, mit dir zu feiern!";
