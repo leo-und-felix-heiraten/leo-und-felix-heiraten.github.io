@@ -7,7 +7,7 @@
     <!-- Google Fonts für elegante Typografie -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Javascript Library -->
@@ -321,7 +321,7 @@
             animation: fadeIn 1s ease;
         }
         .welcome-badge h3 {
-            color: var(--primary-dark);
+            color: #FFFFFF;
             font-size: 1.3rem;
             font-family: var(--font-serif);
             font-style: italic;
@@ -2074,7 +2074,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             const time = prompt("Uhrzeit für den Programmpunkt (z.B. '14:00 Uhr'):");
             if (!time) return;
             const title = prompt("Titel des Programmpunkts (z.B. 'Freie Trauung'):");
-            if (!time) return;
+            if (!title) return;
             const desc = prompt("Beschreibung (optional):");
             
             try {
@@ -2115,7 +2115,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (confirm("Möchtest du diesen Tagesordnungspunkt wirklich löschen?")) {
                 const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
                 if (error) {
-                    alert("Fehler beim Erstellen/Löschen: " + error.message);
+                    alert("Fehler beim Löschen: " + error.message);
                 } else {
                     loadTimeline();
                     loadAdminTimelineTable();
@@ -2249,8 +2249,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (guestNames.length === 1) {
                 personalGreeting = `Hallo ${guestNames[0]}! Schön, dass du da bist.`;
             } else if (guestNames.length > 1) {
-                const lastGuest = guestNames.pop();
-                personalGreeting = `Hallo ${guestNames.join(', ')} und ${lastGuest}! Schön, dass ihr da seid.`;
+                personalGreeting = `Hallo ${dbGuestName.replace(/ und /gi, " & ")}! Schön, dass ihr da seid.`;
             } else {
                  personalGreeting = `Hallo! Schön, dass du da bist.`; // Fallback
             }
@@ -2331,6 +2330,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             document.body.classList.add('admin-bar-active');
             document.getElementById('trauzeuge-dashboard').style.display = 'block';
         }
+        
         
         // --- ZENTRALE DATENLADE- & RENDER-FUNKTIONEN ---
         async function loadGlobalData() {
