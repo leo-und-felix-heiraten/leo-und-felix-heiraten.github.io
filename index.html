@@ -7,7 +7,7 @@
     <!-- Google Fonts für elegante Typografie -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <!-- FontAwesome für Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase Javascript Library -->
@@ -130,8 +130,8 @@
             color: white !important; /* Wichtig, um andere Styles zu überschreiben */
             border: none;
             border-radius: 20px;
-            padding: 0 12px;
-            font-size: 0.75rem;
+            padding: 0 10px;
+            font-size: 0.7rem !important; /* Sehr kompakt für filigrane Optik */
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
@@ -139,10 +139,10 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 4px;
             text-decoration: none;
-            height: 28px !important; /* STRIKTE HÖHE FÜR KONSISTENZ */
-            line-height: 28px !important;
+            height: 24px !important; /* Reduzierte Höhe für absolute Symmetrie */
+            line-height: 24px !important;
             box-sizing: border-box;
         }
         .admin-inline-edit-btn.danger {
@@ -157,6 +157,10 @@
         }
         .admin-inline-edit-btn i {
              color: white !important;
+             font-size: 0.75rem !important; /* Überschreibt störende Vererbungen */
+             margin-bottom: 0 !important;   /* Entfernt den großen Abstand von .location-card i */
+             margin-right: 0 !important;
+             display: inline-block;
         }
         /* --- SPERRBILDSCHIRM (PIN PAD) --- */
         #lock-screen {
@@ -377,6 +381,8 @@
         }
         .couple-image {
             width: 100%;
+            max-height: 450px;
+            object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 8px solid white;
@@ -492,6 +498,8 @@
         }
         .timeline-image {
             width: 100%;
+            height: 200px; /* Einheitliche Höhe für alle Timeline-Bilder */
+            object-fit: cover; /* Verhindert Verzerrungen und schneidet sauber zu */
             margin-top: 15px;
             border-radius: 6px;
         }
@@ -506,6 +514,13 @@
         }
         body.admin-mode-active .admin-location-toggle-bar {
             display: block !important;
+        }
+        /* Macht die Admin-Controls für Paar- und Hintergrundbilder sichtbar */
+        body.admin-mode-active .couple-image-admin-controls {
+            display: flex !important;
+        }
+        body.admin-mode-active .hero-image-admin-controls {
+            display: flex !important;
         }
         /* --- LOCATION CARD --- */
         .location-grid {
@@ -555,7 +570,6 @@
         body.admin-mode-active .admin-location-controls, body.admin-mode-active .admin-timeline-controls {
             display: flex !important;
         }
-
         /* --- RSVP SECTION WITH DYNAMIC GUEST CARDS --- */
         .rsvp {
             background-color: var(--primary-dark);
@@ -1492,16 +1506,14 @@
             <span id="intro-title">Unsere Hochzeit</span>
             <button class="admin-edit-btn" onclick="window.editSettingText('intro_title', 'intro-title')" title="Überschrift bearbeiten" aria-label="Überschrift bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
         </h2>
-
         <!-- NEUES BILD VON EUCH -->
         <div class="couple-image-wrapper">
-            <img src="https://images.unsplash.com/photo-1542042161-d10f4435d7d9?auto=format&fit=crop&q=80&w=800" id="couple-image" class="couple-image" alt="Leo & Felix">
+            <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800" id="couple-image" class="couple-image" alt="Leo & Felix">
             <div class="couple-image-admin-controls" style="position: absolute; top: 15px; right: 15px; display: none; gap: 10px; z-index: 10;">
                  <button class="admin-inline-edit-btn" onclick="window.triggerImageUpload('couple-img-file')" aria-label="Bild ändern"><i class="fa-solid fa-image" style="margin-right: 8px;" aria-hidden="true"></i> Bild ändern</button>
                  <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 32px; height: 32px; padding: 0; justify-content: center;" onclick="window.resetImage('couple_image_url')" title="Bild zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>
             </div>
         </div>
-
         <p>
             <span id="intro-p1">Liebe Familie, liebe Freunde,</span>
             <button class="admin-edit-btn" onclick="window.editSettingText('intro_p1', 'intro-p1')" title="Textabsatz bearbeiten" aria-label="Textabsatz bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
@@ -1636,13 +1648,12 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
 <input type="file" id="lock-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('lock-img-file', 'lock_image_url')">
 <input type="file" id="couple-img-file" accept="image/*" style="display: none;" onchange="window.uploadImage('couple-img-file', 'couple_image_url')">
 <input type="file" id="generic-img-upload" accept="image/*" style="display: none;">
-
 <!-- JAVASCRIPT FÜR DIE INTERAKTIONEN UND CODES -->
 <script>
     // --- GLOBALE VARIABLES FÜR PIN-PAD (Direkt verfügbar) ---
     let enteredPin = "";
     const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920';
-    const DEFAULT_COUPLE_IMAGE = 'https://images.unsplash.com/photo-1542042161-d10f4435d7d9?auto=format&fit=crop&q=80&w=800';
+    const DEFAULT_COUPLE_IMAGE = 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800';
     
     // --- GLOBALE LOGOUT-FUNKTION (Sofort verfügbar) ---
     window.logout = function() {
@@ -1729,10 +1740,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         // --- Standard-Fallbacks für Tagesablauf ---
         function getDefaultTimeline() {
              return [
-                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.", image_url: 'https://images.unsplash.com/photo-1597983726256-11e1b1b49118?auto=format&fit=crop&q=80&w=800' },
-                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.", image_url: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=800' },
-                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&q=80&w=800' },
-                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!", image_url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800' }
+                { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.", image_url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.", image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: 'https://images.unsplash.com/photo-1467453278283-6a714f775105?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!", image_url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800' }
             ];
         }
         
@@ -1753,8 +1764,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 // 1. Bilder laden / setzen
                 updateImageOnPage('hero_image_url', settings.hero_image_url);
                 updateImageOnPage('lock_image_url', settings.lock_image_url);
-                updateImageOnPage('couple_image_url', settings.couple_image_url || DEFAULT_COUPLE_IMAGE); // NEU: Default für Paarbild
-
+                updateImageOnPage('couple_image_url', settings.couple_image_url); // Lädt sicher mit sicherem Fallback
                 // 2. Dynamische Textinhalte aus Settings laden
                 document.getElementById('hero-title').innerText = settings.hero_title || 'Leo & Felix';
                 document.getElementById('hero-subtitle').innerText = settings.hero_subtitle || 'Wir sagen Ja!';
@@ -1816,18 +1826,15 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 }
             }
         };
-
         window.triggerImageUpload = function(fileInputId) {
             document.getElementById(fileInputId).click();
         };
-
         window.triggerHeroImageUpload = function() {
             window.triggerImageUpload('hero-img-file');
         };
         window.triggerLockImageUpload = function() {
             window.triggerImageUpload('lock-img-file');
         };
-
         // --- DYNAMISCH GENERIERTER KALENDER-EINTRAG (.ICS) ---
         window.addToCalendar = function() {
             const title = "Hochzeit von Leo & Felix 💍";
@@ -1890,7 +1897,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             locContainer.innerHTML = '';
             locations.forEach(loc => {
                 // FALLBACK WENN DIE DB KEIN BILD BEINHALTET (Sichert die Live-Darstellung)
-                const locImgUrl = loc.image_url || 'https://images.unsplash.com/photo-1519225495810-7517c2965a7a?auto=format&fit=crop&q=80&w=800';
+                let locImgUrl = loc.image_url;
+                if (!locImgUrl || locImgUrl === "null" || locImgUrl === "undefined" || locImgUrl.trim() === "") {
+                    locImgUrl = 'https://images.unsplash.com/photo-1519225495810-7517c2965a7a?auto=format&fit=crop&q=80&w=800';
+                }
                 const imageUrl = `<img src="${escapeHtml(locImgUrl)}" alt="${escapeHtml(loc.title)}" class="location-card-image">`;
                 locContainer.innerHTML += `
                     <div class="location-card">
@@ -1903,7 +1913,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                             <div class="admin-location-controls">
                                 <button class="admin-inline-edit-btn" onclick="window.editLocationDirect('${loc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
                                 <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'loc', '${loc.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
-                                <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; justify-content: center;" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 24px; height: 24px; padding: 0; justify-content: center; align-items: center;" onclick="window.deleteLocationDirect('${loc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </div>
@@ -1929,7 +1939,10 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             accContainer.innerHTML = '';
             accommodations.forEach(acc => {
                 // FALLBACK WENN DIE DB KEIN BILD BEINHALTET (Sichert die Live-Darstellung)
-                const accImgUrl = acc.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800';
+                let accImgUrl = acc.image_url;
+                if (!accImgUrl || accImgUrl === "null" || accImgUrl === "undefined" || accImgUrl.trim() === "") {
+                    accImgUrl = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800';
+                }
                 const imageUrl = `<img src="${escapeHtml(accImgUrl)}" alt="${escapeHtml(acc.title)}" class="location-card-image">`;
                 accContainer.innerHTML += `
                      <div class="location-card">
@@ -1942,7 +1955,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                             <div class="admin-location-controls">
                                  <button class="admin-inline-edit-btn" onclick="window.editAccommodationDirect('${acc.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
                                  <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'acc', '${acc.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
-                                 <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; justify-content: center;" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                 <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 24px; height: 24px; padding: 0; justify-content: center; align-items: center;" onclick="window.deleteAccommodationDirect('${acc.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                             </div>
                         </div>
                     </div>
@@ -1963,7 +1976,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             
             let locations = JSON.parse(window.siteSettings.locations_list || '[]');
             locations.push({ id: "loc_" + Date.now(), title, name, address, desc, image_url: imageUrl || null });
-
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
@@ -1986,13 +1998,11 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (desc === null) return;
             const imageUrl = prompt("Bild-URL bearbeiten:", loc.image_url || '');
             if (imageUrl === null) return;
-
             loc.title = title.trim();
             loc.name = name.trim();
             loc.address = address.trim();
             loc.desc = desc.trim();
             loc.image_url = imageUrl.trim() || null;
-
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
@@ -2019,7 +2029,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (!address) return;
             const desc = prompt("Beschreibung (optional):");
             const imageUrl = prompt("Optionale Bild-URL:");
-
             let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]');
             accommodations.push({ id: "acc_" + Date.now(), title, name, address, desc, image_url: imageUrl || null });
             
@@ -2034,7 +2043,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]');
             const acc = accommodations.find(a => a.id === id);
             if (!acc) return;
-
             const title = prompt("Titel bearbeiten:", acc.title);
             if (title === null) return;
             const name = prompt("Name bearbeiten:", acc.name);
@@ -2045,7 +2053,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (desc === null) return;
             const imageUrl = prompt("Bild-URL bearbeiten:", acc.image_url || '');
             if (imageUrl === null) return;
-
             acc.title = title.trim();
             acc.name = name.trim();
             acc.address = address.trim();
@@ -2069,7 +2076,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 renderLocations(window.siteSettings);
             } catch (err) { alert("Fehler: " + err.message); }
         };
-
         // --- DYNAMISCHER TAGESABLAUF (EINTRAGUNG ERZWINGEN) ---
         async function loadTimeline() {
             try {
@@ -2084,20 +2090,21 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     const { data: inserted, error: insertErr } = await _supabase.from('timeline_items').insert(defaults).select();
                     data = (!insertErr && inserted) ? inserted : defaults;
                 }
-
                 // DYNAMISCH GENERIERTE STANDARD-BILDER FÜR DEN ABLAUF (Sichert schöne Optik ohne DB-Lücken)
                 const defaultTimelineImages = [
-                    'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800', // Trauung
-                    'https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&q=80&w=800', // Empfang/Torte
-                    'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80&w=800', // Dinner
-                    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&q=80&w=800'  // Party
+                    'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800', // Trauung
+                    'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800', // Empfang/Torte
+                    'https://images.unsplash.com/photo-1467453278283-6a714f775105?auto=format&fit=crop&q=80&w=800', // Dinner
+                    'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800'  // Party
                 ];
-
                 timelineContainer.innerHTML = '';
                 data.forEach((item, index) => {
                     const sideClass = index % 2 === 0 ? 'left' : 'right';
                     const defaultImg = defaultTimelineImages[index % defaultTimelineImages.length] || 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800';
-                    const timelineImgUrl = item.image_url || defaultImg;
+                    let timelineImgUrl = item.image_url;
+                    if (!timelineImgUrl || timelineImgUrl === "null" || timelineImgUrl === "undefined" || timelineImgUrl.trim() === "") {
+                        timelineImgUrl = defaultImg;
+                    }
                     const imageUrl = `<img src="${escapeHtml(timelineImgUrl)}" alt="${escapeHtml(item.title)}" class="timeline-image">`;
                     
                     timelineContainer.innerHTML += `
@@ -2110,7 +2117,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                                 <div class="admin-timeline-controls">
                                     <button class="admin-inline-edit-btn" onclick="window.editTimelineItemDirect('${item.id}')"><i class="fa-solid fa-pen" aria-hidden="true"></i> Text</button>
                                     <button class="admin-inline-edit-btn" onclick="window.uploadAndGetUrl('generic-img-upload', 'timeline', '${item.id}')"><i class="fa-solid fa-image" aria-hidden="true"></i> Bild</button>
-                                    <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 28px; height: 28px; padding: 0; justify-content: center;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
+                                    <button class="admin-inline-edit-btn danger" style="border-radius: 50%; width: 24px; height: 24px; padding: 0; justify-content: center; align-items: center;" onclick="window.deleteTimelineItemDirect('${item.id}')"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -2134,11 +2141,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 loadTimeline();
             } catch (err) { alert("Fehler: " + err.message); }
         };
-
         window.editTimelineItemDirect = async function(id) {
             let { data: item, error: fetchError } = await _supabase.from('timeline_items').select('*').eq('id', id).single();
             if (fetchError || !item) { alert("Fehler: Programmpunkt nicht gefunden."); return; }
-
             const time = prompt("Uhrzeit bearbeiten:", item.time_text);
             if (time === null) return;
             const title = prompt("Titel bearbeiten:", item.title);
@@ -2154,7 +2159,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 loadTimeline();
             } catch (err) { alert("Fehler: " + err.message); }
         };
-
         window.deleteTimelineItemDirect = async function(id) {
             if (confirm("Diesen Tagesordnungspunkt wirklich löschen?")) {
                 const { error } = await _supabase.from('timeline_items').delete().eq('id', id);
@@ -2162,7 +2166,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 else { loadTimeline(); }
             }
         };
-
         window.toggleAdminView = function(view) {
             const dashboard = document.getElementById("admin-dashboard");
             const mainContent = document.getElementById("main-content");
@@ -3004,7 +3007,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 inputs.forEach(input => input.required = false);
             }
         }
-
          function renderTrauzeugenSection() {
             const container = document.getElementById('trauzeugen-container');
             container.innerHTML = ''; // Leeren
@@ -3063,7 +3065,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 alert("Fehler beim Upload: " + err.message);
             }
         };
-
         // Hilfsfunktion zum Upload für Timeline, Locations & Unterkünfte
         window.uploadAndGetUrl = async function(fileInputId, type, itemId) {
             const fileInput = document.getElementById(fileInputId);
@@ -3071,14 +3072,12 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                  if (!fileInput.files || fileInput.files.length === 0) return;
                  const file = fileInput.files[0];
                  alert("Upload gestartet...");
-
                  try {
                     const fileExt = file.name.split('.').pop();
                     const fileName = `${type}_${itemId}_${Date.now()}.${fileExt}`;
                     
                     const { error: uploadError } = await _supabase.storage.from('website-images').upload(fileName, file, { upsert: true });
                     if (uploadError) throw uploadError;
-
                     const { data: publicData } = _supabase.storage.from('website-images').getPublicUrl(fileName);
                     const publicUrl = publicData.publicUrl;
                     
@@ -3088,21 +3087,18 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         if (type === 'loc') window.editLocationDirect(itemId);
                         if (type === 'acc') window.editAccommodationDirect(itemId);
                     });
-
                  } catch(err) {
                     alert("Fehler beim Upload: " + err.message);
                  }
             };
             fileInput.click();
         }
-
         window.resetImage = async function(settingKey) {
             if (!confirm("Möchtest du das Bild wirklich auf den Standard zurücksetzen?")) return;
             try {
                 // Den Wert auf 'null' setzen, um ihn aus der DB zu entfernen
                 const { error } = await _supabase.from('settings').upsert({ key: settingKey, value: null });
                 if (error) throw error;
-
                 window.siteSettings[settingKey] = null;
                 updateImageOnPage(settingKey, null);
                 alert("Bild erfolgreich zurückgesetzt.");
@@ -3112,12 +3108,16 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         };
         
         function updateImageOnPage(settingKey, url) {
+            let safeUrl = url;
+            if (!safeUrl || safeUrl === "null" || safeUrl === "undefined" || safeUrl.trim() === "") {
+                safeUrl = null;
+            }
             if (settingKey === 'hero_image_url') {
-                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${url || DEFAULT_HERO_IMAGE}')`;
+                document.querySelector('.hero').style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${safeUrl || DEFAULT_HERO_IMAGE}')`;
             } else if (settingKey === 'lock_image_url') {
-                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${url || DEFAULT_HERO_IMAGE}')`;
+                document.getElementById('lock-screen').style.backgroundImage = `linear-gradient(rgba(40, 54, 24, 0.92), rgba(40, 54, 24, 0.96)), url('${safeUrl || DEFAULT_HERO_IMAGE}')`;
             } else if (settingKey === 'couple_image_url') {
-                document.getElementById('couple-image').src = url || DEFAULT_COUPLE_IMAGE;
+                document.getElementById('couple-image').src = safeUrl || DEFAULT_COUPLE_IMAGE;
             }
         }
         
@@ -3131,7 +3131,6 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         
         function fadeOut(el) { el.style.opacity = "0"; setTimeout(() => el.style.display = "none", 500); }
         function fadeIn(el) { el.style.display = "block"; setTimeout(() => el.style.opacity = "1", 50); }
-
         // Keyboard-Unterstützung für das PIN-Pad
         document.addEventListener('keydown', function(e) {
             if (lockScreen && lockScreen.style.display !== 'none') {
