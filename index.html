@@ -1563,6 +1563,19 @@
             <!-- Wird dynamisch geladen -->
         </div>
     </section>
+
+    <!-- NEW DJ PLAYLIST SECTION (EXTRA PUNKT AUF DER HAUPTSEITE) -->
+    <section id="playlist-teaser" style="background-color: #f3f5f0;">
+        <i class="fa-solid fa-music" aria-hidden="true" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
+        <h2>Ihr seid unser DJ! 🎵</h2>
+        <p>Wir wollen eine unvergessliche Party mit euch feiern – und das geht nur mit der richtigen Musik! Ob legendärer Dancefloor-Klassiker, herzerwärmender Mitsing-Klassiker oder euer absoluter Lieblings-Beat: Bestimmt den Soundtrack unseres großen Tages aktiv mit!</p>
+        <div class="couple-image-wrapper">
+            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800" class="couple-image" alt="Wedding Dancefloor & Musik">
+        </div>
+        <p>Tragt eure ganz persönlichen Musikwünsche einfach direkt bei eurer Zusage (unten im RSVP-Formular) ein. Wir freuen uns schon darauf, mit euch die Tanzfläche zum Glühen zu bringen!</p>
+        <a href="#rsvp" class="btn"><i class="fa-solid fa-compact-disc"></i> Musikwunsch abgeben</a>
+    </section>
+
     <!-- RSVP SECTION WITH DYNAMIC FORM -->
     <section id="rsvp" class="rsvp">
         <h2 id="rsvp-main-title">Zusage & Rückmeldung</h2>
@@ -1742,7 +1755,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
              return [
                 { time_text: "14:00 Uhr", title: "Freie Trauung", description: "Wir geben uns im Garten der Hochzeitslocation das Ja-Wort.", image_url: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800' },
                 { time_text: "15:30 Uhr", title: "Sektempfang & Torte", description: "Zeit zum Anstoßen, Gratulieren und für leckeren Kuchen.", image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800' },
-                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: 'https://images.unsplash.com/photo-1467453278283-6a714f775105?auto=format&fit=crop&q=80&w=800' },
+                { time_text: "18:30 Uhr", title: "Festliches Dinner", description: "Ein feines Buffet wartet auf uns im großen Saal.", image_url: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80&w=800' },
                 { time_text: "21:00 Uhr", title: "Eröffnung der Tanzfläche", description: "Wir starten die Party und tanzen bis in die frühen Morgenstunden!", image_url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800' }
             ];
         }
@@ -1889,17 +1902,17 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     name: settings.location_name || 'Gutshof Sonnenschein',
                     address: settings.location_address || 'Musterstraße 42\n12345 Traumstadt',
                     desc: settings.location_desc || 'Parkplätze sind direkt vor dem Gutshof in ausreichender Zahl vorhanden.',
-                    image_url: 'https://images.unsplash.com/photo-1519225495810-7517c2965a7a?auto=format&fit=crop&q=80&w=800'
+                    image_url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=800'
                 }];
             }
             // Render Locations
             const locContainer = document.getElementById('locations-container');
             locContainer.innerHTML = '';
             locations.forEach(loc => {
-                // FALLBACK WENN DIE DB KEIN BILD BEINHALTET (Sichert die Live-Darstellung)
+                // FALLBACK WENN DIE DB KEIN BILD BEINHALTET ODER BROKEN URL DETEKTIERT WIRD (Sichert die Live-Darstellung)
                 let locImgUrl = loc.image_url;
-                if (!locImgUrl || locImgUrl === "null" || locImgUrl === "undefined" || locImgUrl.trim() === "") {
-                    locImgUrl = 'https://images.unsplash.com/photo-1519225495810-7517c2965a7a?auto=format&fit=crop&q=80&w=800';
+                if (!locImgUrl || locImgUrl === "null" || locImgUrl === "undefined" || locImgUrl.trim() === "" || locImgUrl.includes('photo-1519225495810-7517c2965a7a')) {
+                    locImgUrl = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&q=80&w=800';
                 }
                 const imageUrl = `<img src="${escapeHtml(locImgUrl)}" alt="${escapeHtml(loc.title)}" class="location-card-image">`;
                 locContainer.innerHTML += `
@@ -1969,7 +1982,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             if (!title) return;
             const name = prompt("Name des Ortes (z.B. 'Gutshof Sonnenschein'):");
             if (!name) return;
-            const address = prompt("Adresse (nutze \\n für neue Zeilen):");
+            const address = prompt("Adresse (nutze \\n for neue Zeilen):");
             if (!address) return;
             const desc = prompt("Beschreibung / Parkplatzinfo (optional):");
             const imageUrl = prompt("Optionale Bild-URL:");
@@ -1985,7 +1998,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         };
         window.editLocationDirect = async function(id) {
             let locations = JSON.parse(window.siteSettings.locations_list || '[]');
-            const loc = locations.find(l => l.id === id);
+            const loc = locations.find(l => l.id == id);
             if (!loc) return;
             
             const title = prompt("Titel bearbeiten:", loc.title);
@@ -2012,7 +2025,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         };
         window.deleteLocationDirect = async function(id) {
             if (!confirm("Diese Location wirklich löschen?")) return;
-            let locations = JSON.parse(window.siteSettings.locations_list || '[]').filter(l => l.id !== id);
+            let locations = JSON.parse(window.siteSettings.locations_list || '[]').filter(l => l.id != id);
             try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'locations_list', value: JSON.stringify(locations) });
                 if (error) throw error;
@@ -2041,7 +2054,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         };
         window.editAccommodationDirect = async function(id) {
             let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]');
-            const acc = accommodations.find(a => a.id === id);
+            const acc = accommodations.find(a => a.id == id);
             if (!acc) return;
             const title = prompt("Titel bearbeiten:", acc.title);
             if (title === null) return;
@@ -2068,7 +2081,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         };
         window.deleteAccommodationDirect = async function(id) {
             if (!confirm("Diesen Unterkunftstipp wirklich löschen?")) return;
-            let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]').filter(a => a.id !== id);
+            let accommodations = JSON.parse(window.siteSettings.accommodations_list || '[]').filter(a => a.id != id);
              try {
                 const { error } = await _supabase.from('settings').upsert({ key: 'accommodations_list', value: JSON.stringify(accommodations) });
                 if (error) throw error;
@@ -2094,7 +2107,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 const defaultTimelineImages = [
                     'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800', // Trauung
                     'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800', // Empfang/Torte
-                    'https://images.unsplash.com/photo-1467453278283-6a714f775105?auto=format&fit=crop&q=80&w=800', // Dinner
+                    'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80&w=800', // Dinner
                     'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=800'  // Party
                 ];
                 timelineContainer.innerHTML = '';
@@ -2102,7 +2115,9 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     const sideClass = index % 2 === 0 ? 'left' : 'right';
                     const defaultImg = defaultTimelineImages[index % defaultTimelineImages.length] || 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800';
                     let timelineImgUrl = item.image_url;
-                    if (!timelineImgUrl || timelineImgUrl === "null" || timelineImgUrl === "undefined" || timelineImgUrl.trim() === "") {
+                    
+                    // FALLBACK: Wenn das Bild das alte Dinner-Bild (broken) ist oder leer, wechsle es aus!
+                    if (!timelineImgUrl || timelineImgUrl === "null" || timelineImgUrl === "undefined" || timelineImgUrl.trim() === "" || timelineImgUrl.includes('photo-1467453278283-6a714f775105')) {
                         timelineImgUrl = defaultImg;
                     }
                     const imageUrl = `<img src="${escapeHtml(timelineImgUrl)}" alt="${escapeHtml(item.title)}" class="timeline-image">`;
@@ -2632,7 +2647,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
         }
         // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN ---
         window.deleteInvite = async function(id) {
-            const inviteToDelete = window.allInvites.find(inv => inv.id === id);
+            const inviteToDelete = window.allInvites.find(inv => inv.id == id); // Loose-Equality korrigiert
             if (!inviteToDelete) return;
             
             if (confirm(`Möchtest du die Einladung für "${inviteToDelete.names}" unwiderruflich löschen? Der PIN wird ungültig und eine eventuell bereits abgegebene Rückmeldung wird ebenfalls gelöscht.`)) {
@@ -2642,7 +2657,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         };
         window.deleteTrauzeuge = async function(id) {
-            const tzToDelete = window.allTrauzeugen.find(tz => tz.id === id);
+            const tzToDelete = window.allTrauzeugen.find(tz => tz.id == id); // Loose-Equality korrigiert
              if (!tzToDelete) return;
             if (confirm(`Möchtest du den Trauzeugen-PIN für "${tzToDelete.name}" wirklich löschen?`)) {
                 await _supabase.from('trauzeugen').delete().eq('id', id);
@@ -2797,7 +2812,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                         statusHeader.innerText = "Schade! 😢";
                         statusText.innerText = isPlural
                             ? "Schade, dass ihr nicht kommen könnt. Wir haben eure Absage vermerkt."
-                            : "Schade, dass du nicht kommen kannst. Wir haben deine Absage vermerkt.";
+                            : "Schade, dass du nicht kannst. Wir haben deine Absage vermerkt.";
                     }
                 }
             });
