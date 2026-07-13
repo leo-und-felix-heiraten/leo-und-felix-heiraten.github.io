@@ -1363,7 +1363,7 @@
     <!-- PLAYLIST REGISTRIERUNG AM UNTEREN RAND DES ADMINBEREICHS -->
     <div class="admin-panel" style="margin-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin:0; padding:0; border:none;">Die Hochzeits-Wunsch-Playlist 🎵</h2>
+            <h2 style="margin:0; padding:0; border:none;">Die Hochzeits-Wunsch-Playlist <i class="fa-solid fa-music" style="color: var(--accent);"></i></h2>
              <button class="btn" onclick="window.exportSongsToCsv()" style="background: var(--primary); font-size: 0.85rem; padding: 8px 15px;"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> Wunschliste exportieren (CSV)</button>
         </div>
         <p style="font-size: 0.9rem; margin-bottom: 15px; color: #555;">Hier seht ihr alle Musikwünsche, die eure Gäste bei der Rückmeldung eingetragen haben:</p>
@@ -1431,7 +1431,7 @@
     <!-- TRAUZEUGE PLAYLIST -->
     <div class="admin-panel" style="margin-top: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-            <h2 style="margin:0; padding:0; border:none;">Die Wunsch-Playlist 🎵</h2>
+            <h2 style="margin:0; padding:0; border:none;">Die Wunsch-Playlist <i class="fa-solid fa-music" style="color: var(--accent);"></i></h2>
             <button class="btn" onclick="window.exportSongsToCsv()" style="background: var(--primary); font-size: 0.85rem; padding: 8px 15px;"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> Wunschliste exportieren (CSV)</button>
         </div>
         <div style="overflow-x: auto;">
@@ -1567,13 +1567,21 @@
     <!-- NEW DJ PLAYLIST SECTION (EXTRA PUNKT AUF DER HAUPTSEITE) -->
     <section id="playlist-teaser" style="background-color: #f3f5f0;">
         <i class="fa-solid fa-music" aria-hidden="true" style="font-size: 3rem; color: var(--accent); margin-bottom: 20px;"></i>
-        <h2>Ihr seid unser DJ! 🎵</h2>
-        <p>Wir wollen eine unvergessliche Party mit euch feiern – und das geht nur mit der richtigen Musik! Ob legendärer Dancefloor-Klassiker, herzerwärmender Mitsing-Klassiker oder euer absoluter Lieblings-Beat: Bestimmt den Soundtrack unseres großen Tages aktiv mit!</p>
+        <h2>
+            <span id="dj-title">Ihr seid unser DJ! <i class="fa-solid fa-music" style="color: var(--accent);"></i></span>
+            <button class="admin-edit-btn" onclick="window.editSettingText('dj_title', 'dj-title')" title="Überschrift bearbeiten" aria-label="Überschrift bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+        </h2>
+        <p>
+            <span id="dj-p1">Wir wollen eine unvergessliche Party mit euch feiern – und das geht nur mit der richtigen Musik! Ob legendärer Dancefloor-Klassiker, herzerwärmender Mitsing-Klassiker oder euer absoluter Lieblings-Beat: Bestimmt den Soundtrack unseres großen Tages aktiv mit!</span>
+            <button class="admin-edit-btn" onclick="window.editSettingText('dj_p1', 'dj-p1')" title="Text bearbeiten" aria-label="Text bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+        </p>
         <div class="couple-image-wrapper">
             <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&q=80&w=800" class="couple-image" alt="Wedding Dancefloor & Musik">
         </div>
-        <p>Tragt eure ganz persönlichen Musikwünsche einfach direkt bei eurer Zusage (unten im RSVP-Formular) ein. Wir freuen uns schon darauf, mit euch die Tanzfläche zum Glühen zu bringen!</p>
-        <a href="#rsvp" class="btn"><i class="fa-solid fa-compact-disc"></i> Musikwunsch abgeben</a>
+        <p>
+            <span id="dj-p2">Tragt eure ganz persönlichen Musikwünsche einfach direkt bei eurer Zusage unten im Rückmeldeformular mit ein. Wir freuen uns schon darauf, mit euch die Tanzfläche zum Glühen zu bringen!</span>
+            <button class="admin-edit-btn" onclick="window.editSettingText('dj_p2', 'dj-p2')" title="Text bearbeiten" aria-label="Text bearbeiten"><i class="fa-solid fa-pen" aria-hidden="true"></i></button>
+        </p>
     </section>
 
     <!-- RSVP SECTION WITH DYNAMIC FORM -->
@@ -1791,6 +1799,12 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 document.getElementById('gifts-title').innerText = settings.gifts_title || 'Flitterwochen & Geschenke';
                 document.getElementById('gifts-text1').innerText = settings.gifts_text1 || "Unser Haushalt ist komplett, vom Teller bis zum Besen, und auch sonst ist alles da gewesen.\nWollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lachen!";
                 document.getElementById('gifts-text2').innerText = settings.gifts_text2 || 'Wir planen nach der Hochzeit eine unvergessliche Reise nach Island.';
+                
+                // 2b. DJ Playlist-Inhalte laden
+                document.getElementById('dj-title').innerHTML = settings.dj_title || 'Ihr seid unser DJ! <i class="fa-solid fa-music" style="color: var(--accent);"></i>';
+                document.getElementById('dj-p1').innerText = settings.dj_p1 || 'Wir wollen eine unvergessliche Party mit euch feiern – und das geht nur mit der richtigen Musik! Ob legendärer Dancefloor-Klassiker, herzerwärmender Mitsing-Klassiker oder euer absoluter Lieblings-Beat: Bestimmt den Soundtrack unseres großen Tages aktiv mit!';
+                document.getElementById('dj-p2').innerText = settings.dj_p2 || 'Tragt eure ganz persönlichen Musikwünsche einfach direkt bei eurer Zusage unten im Rückmeldeformular mit ein. Wir freuen uns schon darauf, mit euch die Tanzfläche zum Glühen zu bringen!';
+
                 // 3. Locations & Unterkünfte im Frontend aufbauen
                 renderLocations(settings);
                 
@@ -1809,7 +1823,13 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                 try {
                     const { error } = await _supabase.from('settings').upsert({ key: key, value: newText.trim() });
                     if (error) throw error;
-                    el.innerText = newText.trim();
+                    
+                    // Spezielle HTML-Behandlung für Musiknoten-Überschriften
+                    if (key === 'dj_title') {
+                        el.innerHTML = newText.trim() + ' <i class="fa-solid fa-music" style="color: var(--accent);"></i>';
+                    } else {
+                        el.innerText = newText.trim();
+                    }
                     window.siteSettings[key] = newText.trim();
                 } catch (err) {
                     alert("Fehler beim Speichern: " + err.message);
@@ -2613,7 +2633,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                     <td>${invite.expected_count}</td>
                     <td>${statusHtml}</td>
                     <td>
-                        <button class="delete-btn" onclick="window.deleteInvite('${invite.id}')" title="Einladung löschen">
+                        <button class="delete-btn" onclick="window.deleteInvite('${invite.id || invite.pin}')" title="Einladung löschen">
                             <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                         </button>
                     </td>
@@ -2635,7 +2655,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                            ${tz.phone ? `<a href="tel:${escapeHtml(tz.phone)}">${escapeHtml(tz.phone)}</a>` : ''}
                         </td>
                         <td>
-                            <button class="delete-btn" onclick="window.deleteTrauzeuge('${tz.id}')" title="Trauzeugen-PIN löschen">
+                            <button class="delete-btn" onclick="window.deleteTrauzeuge('${tz.id || tz.pin}')" title="Trauzeugen-PIN löschen">
                                 <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                             </button>
                         </td>
@@ -2646,22 +2666,59 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
             }
         }
         // --- AUTOMATISCHES KASKADIERENDES LÖSCHEN ---
-        window.deleteInvite = async function(id) {
-            const inviteToDelete = window.allInvites.find(inv => inv.id == id); // Loose-Equality korrigiert
-            if (!inviteToDelete) return;
+        window.deleteInvite = async function(idOrPin) {
+            const inviteToDelete = window.allInvites.find(inv => inv.id == idOrPin || inv.pin == idOrPin);
+            if (!inviteToDelete) {
+                console.error("Einladung nicht gefunden:", idOrPin);
+                return;
+            }
             
             if (confirm(`Möchtest du die Einladung für "${inviteToDelete.names}" unwiderruflich löschen? Der PIN wird ungültig und eine eventuell bereits abgegebene Rückmeldung wird ebenfalls gelöscht.`)) {
-                await _supabase.from('rsvps').delete().eq('pin', inviteToDelete.pin);
-                await _supabase.from('invitations').delete().eq('id', id);
-                await loadAdminData(); // Alles neu laden
+                try {
+                    // 1. Zuerst verknüpfte Rückmeldungen (RSVPs) löschen (über PIN)
+                    const { error: rsvpError } = await _supabase.from('rsvps').delete().eq('pin', inviteToDelete.pin);
+                    if (rsvpError) throw rsvpError;
+                    
+                    // 2. Dann die Einladung selbst löschen (versucht ID, falls vorhanden, sonst über PIN)
+                    let deleteQuery;
+                    if (inviteToDelete.id) {
+                        deleteQuery = _supabase.from('invitations').delete().eq('id', inviteToDelete.id);
+                    } else {
+                        deleteQuery = _supabase.from('invitations').delete().eq('pin', inviteToDelete.pin);
+                    }
+                    
+                    const { error: inviteError } = await deleteQuery;
+                    if (inviteError) throw inviteError;
+                    
+                    // 3. Admin-Daten neu laden
+                    await loadAdminData();
+                    alert("Einladung erfolgreich gelöscht!");
+                } catch (err) {
+                    alert("Fehler beim Löschen: " + err.message);
+                }
             }
         };
-        window.deleteTrauzeuge = async function(id) {
-            const tzToDelete = window.allTrauzeugen.find(tz => tz.id == id); // Loose-Equality korrigiert
-             if (!tzToDelete) return;
+        window.deleteTrauzeuge = async function(idOrPin) {
+            const tzToDelete = window.allTrauzeugen.find(tz => tz.id == idOrPin || tz.pin == idOrPin);
+            if (!tzToDelete) return;
+            
             if (confirm(`Möchtest du den Trauzeugen-PIN für "${tzToDelete.name}" wirklich löschen?`)) {
-                await _supabase.from('trauzeugen').delete().eq('id', id);
-                await loadAdminData();
+                try {
+                    let deleteQuery;
+                    if (tzToDelete.id) {
+                        deleteQuery = _supabase.from('trauzeugen').delete().eq('id', tzToDelete.id);
+                    } else {
+                        deleteQuery = _supabase.from('trauzeugen').delete().eq('pin', tzToDelete.pin);
+                    }
+                    
+                    const { error } = await deleteQuery;
+                    if (error) throw error;
+                    
+                    await loadAdminData();
+                    alert("Trauzeugen-PIN erfolgreich gelöscht!");
+                } catch (err) {
+                    alert("Fehler beim Löschen: " + err.message);
+                }
             }
         };
         // --- ADMIN FORMULAR: NEUE EINLADUNG ANLEGEN ---
@@ -3042,7 +3099,7 @@ Wollt ihr uns eine Freude machen, dann lasst am liebsten unsere Reisekasse lache
                                     ${tz.email ? `<a href="mailto:${escapeHtml(tz.email)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> ${escapeHtml(tz.email)}</a><br>` : ''}
                                     ${tz.phone ? `<a href="tel:${escapeHtml(tz.phone)}" style="color: var(--primary); text-decoration: none; font-weight: 600;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> ${escapeHtml(tz.phone)}</a>` : ''}
                                 </p>
-                            </div>
+                             </div>
                         </div>
                     `;
                 });
